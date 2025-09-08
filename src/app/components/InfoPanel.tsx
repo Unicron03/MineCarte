@@ -6,18 +6,18 @@ import {
     DialogTitle,
     DialogDescription,
     DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/shadcn/ui/dialog";
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/shadcn/ui/accordion"
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
-} from "@/components/ui/avatar"
+} from "@/shadcn/ui/avatar"
 import MarkdownViewer from "./MarkdownViewer";
 import { Info } from "lucide-react"
 

@@ -3,10 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint"
+    "dev": "concurrently -k -n NEXT,WS -c blue,magenta \"next dev\" \"node server.js\"",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",
@@ -19,6 +18,8 @@
     "atropos": "^2.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "lucide-react": "^0.542.0",
     "md-editor-rt": "^5.8.4",
     "next": "15.5.2",
@@ -30,8 +31,11 @@
     "rehype-highlight": "^7.0.2",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
-    "tsparticles": "^3.9.1"
+    "tsparticles": "^3.9.1",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -39,6 +43,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
