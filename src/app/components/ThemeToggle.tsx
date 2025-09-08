@@ -13,7 +13,7 @@ export function ThemeToggle() {
     return (
         <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="p-2 rounded bg-gray-100 dark:bg-[#27272a] hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 flex items-center gap-2"
+            className="p-2 rounded bg-gray-100 dark:bg-[#27272a] hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 flex items-center gap-2 cursor-pointer"
             title="Changer la couleur du thème"
         >
             {isDark ? (

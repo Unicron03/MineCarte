@@ -112,6 +112,59 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+.container {
+    padding: 0px 40px;
+    max-width: 960px;
+    margin: 32px auto;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+}
+.atropos-banner {
+    width: 100%;
+}
+.atropos-banner .atropos-inner {
+    border-radius: 10px;
+}
+.atropos-banner img {
+    position: absolute;
+    left: -5%;
+    top: -5%;
+    width: 110%;
+    height: 110%;
+    object-fit: contain;
+    display: block;
+    z-index: 1;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+.atropos-banner img.atropos-banner-spacer {
+    position: relative;
+    width: 100%;
+    height: auto;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+}
+.atropos-banner .atropos-shadow {
+    filter: blur(50px);
+    opacity: 0.5;
+}
+.atropos-banner .atropos-highlight {
+    z-index: 100;
+}
+
+.atropos-banner-text {
+    position: absolute;
+    color: #fff;
+    font-weight: bold;
+    left: 0%;
+    top: 0%;
+}
+.atropos-active .atropos-banner-text {
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
