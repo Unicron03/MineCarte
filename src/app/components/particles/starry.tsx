@@ -32,7 +32,7 @@ export default function StarryBackground() {
                             color: { value: "#fff" },
                             shape: { type: "circle" },
                             size: {
-                                value: { min: 0.5, max: 1 },
+                                value: { min: 0.5, max: 2 },
                             },
                             move: {
                                 enable: true,
