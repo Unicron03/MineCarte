@@ -1,5 +1,12 @@
-const { createServer } = require("http");
+const { createServer } = require("http"); // <-- change ici
 const { Server } = require("socket.io");
+const fs = require("fs"); // <-- ajoute ceci
+
+// Ajoute ceci pour charger les certificats
+const httpsOptions = {
+  key: fs.readFileSync("./ssl/key.pem"),
+  cert: fs.readFileSync("./ssl/cert.pem"),
+};
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -223,6 +230,11 @@ io.on("connection", (socket) => {
 });
 
 // --- Lancer le serveur ---
+// httpsServer.listen(3001, () => {
+//   console.log(" Serveur WebSocket sur http://localhost:3001");
+// });
+
+// ...existing code...
 httpServer.listen(3001, () => {
   console.log(" Serveur WebSocket sur http://localhost:3001");
 });
