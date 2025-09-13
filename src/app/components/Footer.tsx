@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
 const navItems = [
-    { name: "Accueil", path: "/" },
+    { name: "Accueil", path: "/home" },
     { name: "Collection", path: "/collection" },
     { name: "Combats", path: "/combats" },
 ];
@@ -21,7 +21,7 @@ export default function Footer() {
                     const isActive = pathname === item.path;
                     
                     return (
-                        <div key={item.path} className="relative px-2 py-1">
+                        <div key={item.path} className="relative px-3 py-2">
                             {isActive && (
                                 <motion.div
                                     layoutId="nav-highlight"

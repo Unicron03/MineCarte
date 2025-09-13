@@ -5,7 +5,7 @@ import Welcome from "./pages/Welcome";
 import Collection from "./pages/Collection";
 import Combats from "./pages/Combats";
 import Layout from "./components/Layout";
-import "./globals.css";
+import "./styles/globals.css";
 import "./styles/glass.css"
 import { ThemeProvider } from "./components/ThemeProvider";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";

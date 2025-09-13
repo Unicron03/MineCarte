@@ -7,6 +7,7 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 443
+RUN npm run build
 
-CMD ["node", "server.js"]
+EXPOSE 3000
+CMD ["npm", "run", "start"]

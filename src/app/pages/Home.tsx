@@ -2,14 +2,19 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import InfoPanel from "../components/InfoPanel";
 import "atropos/css";
 import Footer from "../components/Footer";
+import { Video } from "../components/VideoReader";
 
-export default function Welcome() {
+export default function Home() {
     return (
         <main className="p-4 tsparticles">
             <header className="flex justify-end items-center gap-4">
                 <ThemeToggle />
                 <InfoPanel />
             </header>
+
+            <div>
+                <Video />
+            </div>
             
             <Footer />
         </main>
