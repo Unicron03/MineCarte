@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { Home, LibraryBig, HandFist } from "lucide-react";
 
 const navItems = [
-    { name: "Accueil", path: "/home" },
-    { name: "Collection", path: "/collection" },
-    { name: "Combats", path: "/combats" },
+    { name: "Accueil", path: "/home", icon: <Home /> },
+    { name: "Collection", path: "/collection", icon: <LibraryBig /> },
+    { name: "Combats", path: "/combats", icon: <HandFist /> },
 ];
 
 export default function Footer() {
@@ -37,11 +38,14 @@ export default function Footer() {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`relative z-10 mx-4 py-1 rounded-full text-base font-medium transition-all duration-300 cursor-pointer ${
+                                className={`relative z-10 py-1 rounded-full text-base font-medium transition-all duration-300 cursor-pointer ${
                                     isActive ? "nav-link-active" : ""
                                 }`}
                             >
-                                {item.name}
+                                <div className="flex flex-col items-center mx-6 gap-1.5">
+                                    {item.name}
+                                    {item.icon}
+                                </div>
                             </Link>
 
                         </div>
