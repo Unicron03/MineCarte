@@ -1,7 +1,7 @@
-import { ThemeToggle } from "../components/ThemeToggle";
-import InfoPanel from "../components/InfoPanel";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
+import InfoPanel from "@/app/components/InfoPanel";
 import "atropos/css";
-import Footer from "../components/Footer";
+import Footer from "@/app/components/Footer";
 
 export default function Combats() {
     return (

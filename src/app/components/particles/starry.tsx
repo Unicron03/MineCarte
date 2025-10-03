@@ -1,11 +1,11 @@
+"use client";
+
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadFull } from "tsparticles";
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 
 export default function StarryBackground() {
     const [init, setInit] = useState(false);
-    const { theme } = useTheme();
 
     useEffect(() => {
         initParticlesEngine(async (engine) => {

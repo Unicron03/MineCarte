@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
     Dialog,
@@ -22,12 +24,10 @@ import MarkdownViewer from "./MarkdownViewer";
 import { Info } from "lucide-react"
 
 export default function InfoPanel() {
-    const [open, setOpen] = React.useState(false)
-
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <button title="Infos" onClick={() => setOpen(false)}>
+                <button title="Infos">
                     <Info className="hover:opacity-60 cursor-pointer" size={24}/>
                 </button>
             </DialogTrigger>

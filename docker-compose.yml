@@ -1,17 +1,16 @@
-version: "3.8"
-
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: ./src/app/Dockerfile
     container_name: minecarte-app
-    restart: unless-stopped
     environment:
       - DB_HOST=mysql
       - DB_USER=minecarte
       - DB_PASSWORD=minecartepass
       - DB_NAME=minecarte
     ports:
-      - "3000:3000" # 👉 tu ouvres le front sur localhost:3000
+      - "3000:3000" # front sur localhost:3000
     depends_on:
       - mysql
     networks:
@@ -27,13 +26,13 @@ services:
       MYSQL_USER: minecarte
       MYSQL_PASSWORD: minecartepass
     ports:
-      - "3306:3306" # 👉 tu peux te connecter en local avec DBeaver ou autre
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - web
 
-  phpmyadmin: # 👉 interface graphique facultative
+  database: # interface graphique facultative
     image: phpmyadmin/phpmyadmin
     container_name: minecarte-phpmyadmin
     restart: unless-stopped
@@ -42,15 +41,13 @@ services:
       PMA_USER: root
       PMA_PASSWORD: rootpass
     ports:
-      - "8080:80" # 👉 http://localhost:8080
+      - "8080:80" # http://localhost:8080
     depends_on:
       - mysql
     networks:
       - web
+volumes:
+  mysql_data:
 
 networks:
   web:
-    driver: bridge
-
-volumes:
-  mysql_data:

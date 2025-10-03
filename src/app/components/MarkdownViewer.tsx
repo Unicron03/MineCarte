@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { MdPreview } from 'md-editor-rt';
 import 'md-editor-rt/lib/style.css';

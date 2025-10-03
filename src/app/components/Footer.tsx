@@ -1,6 +1,9 @@
-import { Link, useLocation } from "react-router-dom";
+"use client";
+
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 import { Home, LibraryBig, HandFist } from "lucide-react";
 
 const navItems = [
@@ -10,7 +13,7 @@ const navItems = [
 ];
 
 export default function Footer() {
-    const { pathname } = useLocation();
+    const pathname = usePathname();
     
     return (
         <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 m-4 w-full">
@@ -37,7 +40,7 @@ export default function Footer() {
 
                             <Link
                                 key={item.path}
-                                to={item.path}
+                                href={item.path}
                                 className={`relative z-10 py-1 rounded-full text-base font-medium transition-all duration-300 cursor-pointer ${
                                     isActive ? "nav-link-active" : ""
                                 }`}
