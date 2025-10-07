@@ -1,23 +1,21 @@
+"use client";
+
 import { ThemeToggle } from "@/components/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import StarryBackground from "@/components/particles/starry";
 import { ConnectionPanel } from "@/components/ConnectionPanel";
 import Image from "next/image";
-import fs from "fs";
-import path from "path";
+import { useState, useEffect } from "react";
 
-async function getRandomTitle() {
-    const dir = path.join(process.cwd(), "public/titles");
-    const files = fs.readdirSync(dir).filter(f => /\.(png|jpg|jpeg|gif)$/i.test(f));
-    if (files.length === 0) {
-        return null;
-    }
-    const randomIndex = Math.floor(Math.random() * files.length);
-    return `/titles/${files[randomIndex]}`;
-}
+export default function Welcome() {
+    const [title, setTitle] = useState<string | null>(null);
 
-export default async function Welcome() {
-    const title = await getRandomTitle();
+    useEffect(() => {
+        fetch('/api/titles')
+            .then(res => res.json())
+            .then(data => setTitle(data.url))
+            .catch(() => setTitle(null));
+    }, []);
 
     return (
         <main className="flex flex-col h-screen p-4 tsparticles">
