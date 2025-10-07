@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./src/app/Dockerfile
+      dockerfile: Dockerfile
     container_name: minecarte-app
     environment:
       - DB_HOST=mysql
@@ -15,6 +15,7 @@ services:
       - mysql
     networks:
       - web
+    tty: true
 
   mysql:
     image: mysql:8.0

@@ -1,8 +1,7 @@
-import { ThemeToggle } from "./components/ThemeToggle";
-import InfoPanel from "./components/InfoPanel";
-import "atropos/css";
-import StarryBackground from "./components/particles/starry";
-import { ConnectionPanel } from "./components/ConnectionPanel";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import InfoPanel from "@/components/InfoPanel";
+import StarryBackground from "@/components/particles/starry";
+import { ConnectionPanel } from "@/components/ConnectionPanel";
 import Image from "next/image";
 import fs from "fs";
 import path from "path";

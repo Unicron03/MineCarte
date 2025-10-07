@@ -1,6 +1,8 @@
+import "./styles/animations.css";
 import "./styles/globals.css";
 import "./styles/glass.css";
-import { ThemeProvider } from "./components/ThemeProvider";
+import "atropos/css";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function RootLayout({
     children,

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start"
   },
   "dependencies": {
@@ -33,7 +33,6 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.8.2",
     "react-toastify": "^11.0.5",
-    "react-tsparticles": "^2.12.2",
     "rehype-highlight": "^7.0.2",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
