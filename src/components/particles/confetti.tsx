@@ -2,8 +2,7 @@
 
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadFull } from "tsparticles";
-import { useEffect, useState, useRef } from "react";
-import { confettiController } from "./controllers/confettiController";
+import { useEffect, useState } from "react";
 
 export default function Confetti() {
     const [init, setInit] = useState(false);

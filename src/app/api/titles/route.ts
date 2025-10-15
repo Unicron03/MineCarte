@@ -12,3 +12,5 @@ export async function GET() {
     const randomFile = files[randomIndex];
     return NextResponse.json({ url: `/titles/${randomFile}` });
 }
+
+// Voir perf sans fs et tester avec Artillery pour voir les perf entre sans fs et avec

@@ -2,6 +2,7 @@ import "./styles/animations.css";
 import "./styles/globals.css";
 import "./styles/glass.css";
 import "atropos/css";
+import '@smastrom/react-rating/style.css'
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function RootLayout({
