@@ -5,7 +5,7 @@ import { Heart } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 
-export default async function ShowcasePage({ params }: { params: { userSlug: string } }) {
+export default async function ShowcasePage({ params }: { params: Promise<{ userSlug: string }> }) {
     const { userSlug } = await params;
 
     const card: Card = {
