@@ -2,8 +2,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import Footer from "@/components/Footer";
 import { WalletCards } from "lucide-react";
+import Link from "next/link";
 import FightCard from "@/components/combats/FightCard";
-import { Button } from "@/shadcn/ui/button";
 
 export default function Combats() {
     return (
@@ -23,9 +23,9 @@ export default function Combats() {
             </div>
 
             <Footer left={
-                <Button className="glass-nav rounded-full w-fit h-fit">
-                    <WalletCards className="m-2 !w-6 !h-auto" color="white"/>
-                </Button>
+                <Link href="/decks" className="glass-nav">
+                    <WalletCards className="m-2" color="white"/>
+                </Link>
             } />
         </main>
     );

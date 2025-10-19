@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import { Video } from "@/components/VideoReader";
 import Chest from "@/components/Chest";
 import { UserStar, Store, Smile, Key } from "lucide-react";
+import Link from "next/link";
 import fs from "fs";
 import path from "path";
 
@@ -56,18 +57,15 @@ export default async function Home() {
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="flex justify-between items-end">
-                <div className="glass-nav">
+            <Footer left={
+                <Link href="/decks" className="glass-nav">
                     <UserStar className="m-2"/>
-                </div>
-
-                <Footer />
-                
-                <div className="glass-nav">
-                    <Store className="m-2"/>
-                </div>
-            </div>
+                </Link>
+            } right={
+                <Link href="/decks" className="glass-nav">
+                    <Store className="m-2" color="white"/>
+                </Link>
+            } />
         </main>
     );
 }

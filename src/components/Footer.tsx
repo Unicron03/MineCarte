@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Home, LibraryBig, HandFist } from "lucide-react";
+import { cn } from "@/shadcn/lib/utils";
 
 const navItems = [
     { name: "Accueil", path: "/home", icon: <Home /> },
@@ -12,12 +13,12 @@ const navItems = [
     { name: "Combats", path: "/combats", icon: <HandFist /> },
 ];
 
-export default function Footer({ left, right }: { left?: React.ReactNode, right?: React.ReactNode }) {
+export default function Footer({ left, right, className }: { left?: React.ReactNode, right?: React.ReactNode, className?: string }) {
     const pathname = usePathname();
     
     return (
-        <footer className="grid grid-cols-[1fr_auto_1fr] items-end w-full mt-4">
-            <div>{left}</div>
+        <footer className={cn("grid grid-cols-[1fr_auto_1fr] items-end w-full mt-4 z-50", className)}>
+            <div className="flex">{left}</div>
 
             <motion.nav
                 className={`flex gap-4 items-center justify-center m-auto glass-nav`}

@@ -63,16 +63,11 @@ export default function Collection() {
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="flex justify-between items-end">
-                <div className=""></div>
-
-                <Footer />
-
-                <div className="glass-nav">
-                    <Store className="m-2"/>
-                </div>
-            </div>
+            <Footer right={
+                <Link href="/decks" className="glass-nav">
+                    <Store className="m-2" color="white"/>
+                </Link>
+            } />
         </main>
     );
 }
