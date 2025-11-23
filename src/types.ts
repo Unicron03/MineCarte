@@ -317,3 +317,15 @@ export const exampleCollectionCards: Card[] = [
         third_img: "/cards/enderman.png",
     }
 ]
+
+export const exampleDeck: Deck = {
+    id: 1,
+    name: "Deck de démarrage",
+    cards: [
+        exampleCollectionCards[0],
+        exampleCollectionCards[1],
+        exampleCollectionCards[2],
+        exampleCollectionCards[3],
+        exampleCollectionCards[4],
+    ]
+};

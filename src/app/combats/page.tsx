@@ -16,9 +16,9 @@ export default function Combats() {
             </header>
 
             <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4">
-                <FightCard bg="test1" name="1v1" actions={[{ label: '1v1', link: 'one-v-one' }, { label: '1vAI', link: 'one-v-ai'}]} />
-                <FightCard bg="test2" name="Donjon" actions={[{ label: 'Entrer', link: 'donjon'}]} />
-                <FightCard bg="test1" name="Vagues" actions={[{ label: 'Commencer', link: 'vagues'}]} />
+                <FightCard bg="1v1" name="1v1" actions={[{ label: '1v1', link: 'one-v-one', modeName: '1v1' }, { label: '1vAI', link: 'one-v-ai', modeName: '1vAI'}]} />
+                <FightCard bg="donjon" name="Donjon" actions={[{ label: 'Entrer', link: 'donjon', modeName: 'Donjon'}]} />
+                <FightCard bg="1v1" name="Vagues" actions={[{ label: 'Commencer', link: 'vagues', modeName: 'Vagues'}]} />
                 <FightCard isComing />
             </div>
 

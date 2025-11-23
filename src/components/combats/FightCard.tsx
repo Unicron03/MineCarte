@@ -1,8 +1,7 @@
-import { Video } from "../VideoReader";
-import Link from "next/link";
 import Image from "next/image";
+import DialogPreFight from "./DialogPreFight";
 
-export default function FightCard({ bg, name, isComing, actions } : { bg?: string, name?: string, isComing?: boolean, actions?: { label: string, link: string}[] }) {
+export default function FightCard({ bg, name, isComing, actions } : { bg?: string, name?: string, isComing?: boolean, actions?: { label: string, link: string, modeName: string }[] }) {
     return (
         <main className="glass-nav w-full h-full !rounded-2xl after:!rounded-2xl p-4 relative">
             {
@@ -20,9 +19,7 @@ export default function FightCard({ bg, name, isComing, actions } : { bg?: strin
 
                         <footer className="flex justify-around">
                             {actions ? actions.map((action, index) => (
-                                <Link key={index} href={"combats/" + action.link} className="glass-nav h-fit text-black dark:text-white text-2xl font-bold">
-                                    <span className="mx-6 my-2">{action.label}</span>
-                                </Link>
+                                <DialogPreFight key={index} btnName={action.label} modeName={action.modeName} bg={bg} link={action.link} />
                             )) : <></>}
                         </footer>
                     </div>

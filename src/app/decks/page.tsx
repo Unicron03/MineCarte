@@ -106,7 +106,7 @@ export default function DecksPage() {
             </header>
 
             <div className="flex-1 flex flex-col gap-4 mb-4">
-                <span className="text-2xl font-medium self-center">Ici vous pouvez choisir un deck et en construire jusqu'à 5.</span>
+                <span className="text-2xl font-medium self-center">Ici vous pouvez choisir un deck et en construire jusqu&apos;à 5.</span>
 
                 <div className="flex items-center justify-between gap-4">
                     <Button>Créer un nouveau deck</Button>
@@ -122,7 +122,7 @@ export default function DecksPage() {
                                         <Image className="absolute w-full h-full" src={deck.cards[0].background_img} fill alt={deck.cards[0].name}/>
                                         { deck.cards[0].third_img && <Image className="absolute w-full h-full" src={deck.cards[0].third_img} fill alt={deck.cards[0].name}/> }
                                         <Image className="absolute w-full h-full" src={deck.cards[0].main_img} fill alt={deck.cards[0].name}/>
-                                        {deck.id === 2 &&
+                                        {deck.id === idDeckActive &&
                                             <div className="absolute -top-2 -right-2 z-10 bg-green-600 rounded-sm p-1">
                                                 <Check />
                                             </div>

@@ -3,6 +3,7 @@
 import { Deck, exampleCollectionCards } from "@/types"
 import { Separator } from "@/shadcn/ui/separator"
 import { useState } from "react"
+import Image from "next/image";
 
 export default function DeckConstruction({ deck }: { deck: Deck }) {
     const [addCard, setAddCard] = useState<boolean>(false)
@@ -22,9 +23,9 @@ export default function DeckConstruction({ deck }: { deck: Deck }) {
                     <div key={card.id} className="relative w-32 h-44 cursor-pointer"
                         onClick={() => deck.cards = deck.cards.filter((c) => c.id !== card.id)} // Supprime du deck la carte cliqué
                     >
-                        <img src={card.background_img} alt={card.name} className="absolute w-full h-full object-cover" />
-                        {card.third_img && <img src={card.third_img} alt={card.name} className="absolute w-full h-full object-cover" />}
-                        <img src={card.main_img} alt={card.name} className="absolute w-full h-full object-cover" />
+                        <Image src={card.background_img} alt={card.name} className="absolute w-full h-full object-cover" fill />
+                        {card.third_img && <Image src={card.third_img} alt={card.name} className="absolute w-full h-full object-cover" fill />}
+                        <Image src={card.main_img} alt={card.name} className="absolute w-full h-full object-cover" fill />
                     </div>
                 ))}
                 {Array.from({ length: nbCardsInDeck - deck.cards.length }).map((_, index) => (
@@ -43,7 +44,7 @@ export default function DeckConstruction({ deck }: { deck: Deck }) {
 
                     <div className="flex flex-col items-center gap-2">
                         <span className="text-xl font-medium">Cartes de votre collection</span>
-                        <span className="text-base text-gray-500">Cliquez sur une carte pour l'ajouter au deck</span>
+                        <span className="text-base text-gray-500">Cliquez sur une carte pour l&apos;ajouter au deck</span>
                     </div>
 
                     <div>
@@ -56,9 +57,9 @@ export default function DeckConstruction({ deck }: { deck: Deck }) {
                                         setSelectedSlot(null);
                                     }}
                                 >
-                                    <img src={card.background_img} alt={card.name} className="absolute w-full h-full object-cover" />
-                                    {card.third_img && <img src={card.third_img} alt={card.name} className="absolute w-full h-full object-cover" />}
-                                    <img src={card.main_img} alt={card.name} className="absolute w-full h-full object-cover" />
+                                    <Image src={card.background_img} alt={card.name} className="absolute w-full h-full object-cover" fill />
+                                    {card.third_img && <Image src={card.third_img} alt={card.name} className="absolute w-full h-full object-cover" fill />}
+                                    <Image src={card.main_img} alt={card.name} className="absolute w-full h-full object-cover" fill />
                                 </div>
                             ))}
                         </div>
