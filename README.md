@@ -6,3 +6,7 @@ Dans serveur.js des fonctions doivent être implémentées.
 Modifier aussi dans server.js des socket.on si besoin.
 
 Un petit problème: Quand un joueur quitte, l'autre n'est pas expulser, de même quand un joueur fais retour.
+
+
+
+peut retirer la date de connesion du joeur pour empeche la reconnection
