@@ -34,13 +34,29 @@ export type GameState = {
     turnIndex: number;
 };
 
+export const backCard: Card = {
+    id: 0,
+    name: "Dos de carte",
+    description: "Dos de carte par défaut",
+    category: "Dos de carte",
+    rarity: 0,
+    pv_durability: 0,
+    cost: 0,
+    talent: null,
+    attack1: 0,
+    attack2: null,
+    main_img: "/cards/transparent.png",
+    background_img: "/cards/transparent.png",
+    third_img: "/cards/undescovered.png",
+}
+
 export const exampleCollectionCards: Card[] = [
     {
         id: 1,
         name: "Creeper",
         description: "Un monstre vert qui explose",
         category: "Monstre",
-        rarity: 2,
+        rarity: 4,
         pv_durability: 100,
         cost: 50,
         talent: null,
@@ -96,7 +112,7 @@ export const exampleCollectionCards: Card[] = [
         name: "Creeper",
         description: "Un monstre vert qui explose",
         category: "Monstre",
-        rarity: 2,
+        rarity: 4,
         pv_durability: 100,
         cost: 50,
         talent: null,
@@ -152,7 +168,7 @@ export const exampleCollectionCards: Card[] = [
         name: "Creeper",
         description: "Un monstre vert qui explose",
         category: "Monstre",
-        rarity: 2,
+        rarity: 4,
         pv_durability: 100,
         cost: 50,
         talent: null,
@@ -208,7 +224,7 @@ export const exampleCollectionCards: Card[] = [
         name: "Creeper",
         description: "Un monstre vert qui explose",
         category: "Monstre",
-        rarity: 2,
+        rarity: 4,
         pv_durability: 100,
         cost: 50,
         talent: null,
@@ -264,7 +280,7 @@ export const exampleCollectionCards: Card[] = [
         name: "Creeper",
         description: "Un monstre vert qui explose",
         category: "Monstre",
-        rarity: 2,
+        rarity: 4,
         pv_durability: 100,
         cost: 50,
         talent: null,

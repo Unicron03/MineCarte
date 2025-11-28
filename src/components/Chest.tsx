@@ -1,42 +1,54 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { confettiController } from "./particles/controllers/confettiController";
-import Confetti from "@/components/particles/confetti";
+import { useState } from "react";
+import { Card, exampleCollectionCards } from "@/types";
+import CardOpeningDisplay from "./CardOpeningDisplay";
 
 export default function Chest() {
     const [isAnimated, setIsAnimated] = useState(false);
     const [isOpenable, setIsOpenable] = useState(false);
+    const [drawnCards, setDrawnCards] = useState<Card[]>([]);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    useEffect(() => {
-        if (isAnimated === true) {
-            confettiController.spawnWave();
+    const drawCards = () => {
+        const shuffled = exampleCollectionCards.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, 5);
+    };
+
+    const handleChestClick = () => {
+        if (isOpenable) {
+            const newDrawnCards = drawCards();
+            setDrawnCards(newDrawnCards);
+            setIsAnimated(true);
+            setIsDialogOpen(true);
+        } else {
+            setIsOpenable(true);
         }
+    };
 
-        let timer: NodeJS.Timeout;
-
-        if (isAnimated) {
-            timer = setTimeout(() => setIsAnimated(false), 4000);
-        }
-
-        return () => clearTimeout(timer);
-    }, [isAnimated]);
+    const handleCloseCardOpening = () => {
+        setIsDialogOpen(false);
+        setDrawnCards([]);
+        setIsAnimated(false);
+        setIsOpenable(false);
+    };
 
     return (
         <div>
-            { isAnimated && <Confetti/> }
-
             <Image
                 unoptimized
                 src={isAnimated ? "/chest.gif" : "/chest.png"}
                 alt="Coffre"
                 width={400}
                 height={100}
-                className={`mb-8 z-50 drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)] ${isOpenable ? "animate-coffre" : ""}`}
-                onClick={() => { setIsOpenable(!isOpenable); }}
-                onDoubleClick={() => { setIsAnimated(true); }}
+                className={`mb-8 z-9999 drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)] ${isOpenable ? "animate-coffre" : ""}`}
+                onClick={handleChestClick}
             />
+
+            {isDialogOpen && (
+                <CardOpeningDisplay drawnCards={drawnCards} onClose={handleCloseCardOpening} />
+            )}
         </div>
     );
 }

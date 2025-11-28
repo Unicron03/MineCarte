@@ -14,15 +14,14 @@ export default function Confetti() {
     }, []);
 
     return (
-        <>
+        <div className="fixed inset-0 z-[9999] pointer-events-none">
             {init && (
                 <Particles
-                    className="z-40"
                     id="tsparticles-confetti"
                     options={{
                         particles: {
                             number: {
-                                value: 800,
+                                value: 1500,
                                 density: { enable: false },
                             },
                             color: {
@@ -164,6 +163,6 @@ export default function Confetti() {
                     }}
                 />
             )}
-        </>
+        </div>
     );
 }

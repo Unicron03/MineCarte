@@ -8,6 +8,7 @@ import { Rating } from '@smastrom/react-rating'
 import Atropos from "atropos/react";
 import { Separator } from "@/shadcn/ui/separator";
 import { Card } from "@/types";
+import AtroposCard from "./cards/AtroposCard";
 
 const ratingStyle = {
     itemShapes: RoundedStar,
@@ -15,22 +16,25 @@ const ratingStyle = {
     inactiveFillColor: '#fbf1a9'
 }
 
-export default function CardPopupDetails({ undescovered = false, card }: { undescovered?: boolean, card: Card}) {
+export default function CardPopupDetails({ undescovered = true, card }: { undescovered?: boolean, card: Card}) {
     const onclick = () => { console.log("Clicked on favorite") };
 
     return (
         <div className="card self-center w-fit min-w-[230px] max-w-[230px] h-full content-center relative">
-            <Star size={24} className="absolute z-50 card-star cursor-pointer" color="gold" fill="gold" onClick={onclick}/>
+            {undescovered &&
+                <Star size={24} className="absolute z-50 card-star cursor-pointer" color="gold" fill="gold" onClick={onclick}/>
+            }
             
             <Dialog>
                 <DialogTrigger asChild>
-                    <Image
+                    {/* <Image
                         className="w-fit h-auto z-40"
                         src={undescovered ? "/cards/enderman.png" : "/cards/creeper.png"}
                         alt="Creeper card"
                         width={230}
                         height={300}
-                    />
+                    /> */}
+                    <AtroposCard card={card} />
                 </DialogTrigger>
 
                 <DialogContent className="sm:max-w-[800px] h-fit bg-white dark:bg-black">
