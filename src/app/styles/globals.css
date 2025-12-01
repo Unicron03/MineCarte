@@ -184,6 +184,8 @@
     transition: 0.1s ease-in-out;
 }
 
+button { cursor: pointer; }
+
 @layer base {
     * {
         @apply border-border outline-ring/50;

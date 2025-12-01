@@ -3,7 +3,7 @@ import InfoPanel from "@/components/InfoPanel";
 import Footer from "@/components/Footer";
 import { Video } from "@/components/VideoReader";
 import Chest from "@/components/Chest";
-import { UserStar, Store, Smile, Key } from "lucide-react";
+import { UserStar, Store, Smile, Key, Bolt } from "lucide-react";
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
@@ -36,6 +36,9 @@ export default async function Home() {
                 <div className="flex justify-end items-center w-full gap-4">
                     <ThemeToggle />
                     <InfoPanel />
+                    <Link href="/profile" className="glass-nav">
+                        <Bolt className="m-2"/>
+                    </Link>
                 </div>
             </header>
 
