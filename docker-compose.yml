@@ -4,11 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: minecarte-app
-    environment:
-      - DB_HOST=mysql
-      - DB_USER=minecarte
-      - DB_PASSWORD=minecartepass
-      - DB_NAME=minecarte
     ports:
       - "3000:3000" # front sur localhost:3000
     depends_on:
@@ -23,9 +18,9 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: minecarte
-      MYSQL_USER: minecarte
-      MYSQL_PASSWORD: minecartepass
+      MYSQL_DATABASE: ${DB_NAME?}
+      MYSQL_USER: ${DB_USER?}
+      MYSQL_PASSWORD: ${DB_PASSWORD?}
     ports:
       - "3306:3306"
     volumes:
