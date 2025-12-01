@@ -2,21 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { getSocket, closeSocket } from "@/lib/socket";
-import { Card, GameState } from "@/types";
-import { url } from "inspector";
-import Deck from "../../../components/Deck";
-import CardPVP, { actionList } from "../components/CardPVP";
 
-// Je génère un identifiant unique pour l'utilisateur mais quand la base de donné sera prete, il faudra le récupérer depuis la base de donnée
-function getOrCreateUserId(): string {
-    let id = localStorage.getItem("userId");
-    if (!id) {
-        id = crypto.randomUUID(); // identifiant unique aléatoire
-        localStorage.setItem("userId", id);
-    }
-    return id;
-}
+// --- Types et datas ---
+import { InGameCard, GameState} from "@/types"; // J'ai remplacer card par InGameCard au lieu de CollectionCard
+import { actionList } from "@/data";
+
+// --- Composants ---
+import Deck from "../../components/combats/Deck";
+import CardPVP from "@/components/CardPVP";
+
+// --- Lib ---
+import { getSocket, closeSocket } from "@/lib/socket";
+import { getOrCreateUserId} from "@/lib/utilsCombat";
+
+
 
 
 export default function GamePage() {
@@ -174,20 +173,13 @@ export default function GamePage() {
     
 
     // --- Jouer une carte --- (peut être le modifier plus tard car je peut avoir plusieur même carte dans la main)
-    const playCard = (card: Card) => {
+    const playCard = (card: InGameCard) => {
         if (endGameResult) return;
         gameState && socket.emit("playCard", { roomId: gameState.roomId, card });
     };
 
-    
-
-
-
-
-    // ---------------------IN WORK  ----------------------- (en gros je doit récupérer les attaque des carte talent et les envoyer au serveur quand on clique dessus)
-
     // --- Action d'attaque --- 
-    const attack = (card: Card, attackName: string, attackerIndex: number) => {
+    const attack = (card: InGameCard, attackName: string, attackerIndex: number) => {
         if (!gameState) return;
         if (endGameResult) return;
 
@@ -246,11 +238,6 @@ export default function GamePage() {
     };
 
 
-    // -------------------
-
-
-
-
     // --- Fin du tour --- 
     const endTurn = () => {
         if (attackSelection) {
@@ -262,7 +249,6 @@ export default function GamePage() {
     };
 
 
-    
     // --- Quitter la partie ---
     const quitHandler = () => {
         if (gameState?.roomId) {
@@ -421,10 +407,12 @@ export default function GamePage() {
                             }}
                         >
                             <CardPVP
-                            name={card.name}
-                            cost={card.cost}
-                            vie={card.vie}
-                            clickable={false} // on désactive, réservé aux talents
+                                card={card} // card est de type CardCombat
+                                overrides={{
+                                    cost: card.cost,
+                                    pv_durability: card.pv_durability,
+                                }}
+                                clickable={false}
                             />
                             {attackSelection && (
                             <div className="absolute inset-0 rounded-lg border-2 border-yellow-400 animate-pulse pointer-events-none"></div>
@@ -435,11 +423,6 @@ export default function GamePage() {
                         <p className="text-sm text-gray-400">Aucune carte sur le board ennemi</p>
                     )}
                     </div>
-
-
-
-
-
             </div>
         
             {/* Zone joueur (A modifier car je doit je doit récuprer les attaques des carte talent ) */}
@@ -452,12 +435,14 @@ export default function GamePage() {
                     const alreadyAttacked = usedAttacks.includes(i);
                     return (
                     <CardPVP
-                    key={i}
-                    name={card.name}
-                    cost={card.cost}
-                    vie={card.vie}
-                    clickable={yourTurn && !attackSelection && !alreadyAttacked} // désactive si on choisit une cible
-                    onAttackClick={(attackName) => attack(card, attackName, i)} // <-- important
+                        key={i}
+                        card={card}
+                        overrides={{
+                            cost: card.cost,
+                            pv_durability: card.pv_durability,
+                        }}
+                        clickable={yourTurn && !attackSelection && !alreadyAttacked} // désactive si on choisit une cible
+                        onAttackClick={(attackName) => attack(card, attackName, i)} // <-- important
                     />
                     )})
                 ) : (

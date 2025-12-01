@@ -1,0 +1,54 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minecarte-app
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=minecarte
+      - DB_PASSWORD=minecartepass
+      - DB_NAME=minecarte
+    ports:
+      - "3000:3000" # front sur localhost:3000
+    depends_on:
+      - mysql
+    networks:
+      - web
+    tty: true
+
+  mysql:
+    image: mysql:8.0
+    container_name: minecarte-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: minecarte
+      MYSQL_USER: minecarte
+      MYSQL_PASSWORD: minecartepass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - web
+
+  database: # interface graphique facultative
+    image: phpmyadmin/phpmyadmin
+    container_name: minecarte-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: rootpass
+    ports:
+      - "8080:80" # http://localhost:8080
+    depends_on:
+      - mysql
+    networks:
+      - web
+volumes:
+  mysql_data:
+
+networks:
+  web:
