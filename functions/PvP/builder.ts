@@ -1,50 +1,43 @@
-// --- builder.ts ---
+import type { InGameCard, Player} from "../../src/types";
 
-import type { CardInfo } from "../../src/types";
-
-// Étendre CardInfo pour ajouter cost et vie
-export interface Card extends CardInfo {
-  cost: number;
-  vie?: number;
-}
-
-// Créer une carte
 export const createCard = (
   name: string,
   cost: number,
-  talent?: string,
-  attack1?: string,
-  attack2?: string,
-  vie?: number
-): Card => ({
-  name,
-  imageName: name.toLowerCase(), // obligatoire pour CardInfo
-  cost,
-  vie,
-  talent,
-  attack1,
-  attack2,
-});
+  category: string,
+  pv_durability: number | null,
+  talent: string | null,
+  attack1: string | null,
+  attack2: string | null
+): InGameCard => {
 
-// Définir le type complet d'un joueur
-export interface Player {
-  id: string;
-  token: string;
-  userId?: string;
-  energie: number;
-  pv: number;
-  deck: Card[];
-  hand: Card[];
-  board: Card[];
-  discard: Card[];
-  turnCount: number;
-  _disconnectedAt: number | null;
-}
+  const base = {
+    name,
+    imageName: name.toLowerCase(),
+    cost,
+    talent:  talent ?? undefined,
+    attack1: attack1 ?? undefined,
+    attack2: attack2 ?? undefined
+  };
+
+  if (category === "mob") {
+    return {
+      ...base,
+      category: "mob",
+      pv_durability: pv_durability ?? 0
+    };
+  }
+
+  return {
+    ...base,
+    category: category as "equipement" | "artefact",
+  };
+};
+
 
 // Créer un joueur
 export function createPlayer(
   socketId: string,
-  deck: Card[],
+  deck: InGameCard[],
   token: string,
   userId?: string
 ): Player {

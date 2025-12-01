@@ -6,10 +6,8 @@ import crypto from "crypto";
 import { createPlayer, createCard } from "./functions/PvP/builder";
 import { drawCard, playCard, endTurn, sendGameState, handleMatchmaking, applyEnergyGain, checkVictory } from "./functions/PvP/gameLogic";
 
-import { actionList} from "./src/types";
-
+import { CombatState } from "./src/types";
 import { attackList } from "./functions/PvP/attackList";
-import { CombatState } from "./functions/PvP/combatActions";
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -31,16 +29,14 @@ const genToken = (): string => crypto.randomBytes(8).toString("hex");
 
 // <---------------------- Temporaire ---------------------- (je crée les deck au lieu de les récupérer dans la BDD)
 const baseDeck1 = [
-  createCard("Zombie", 1, "", "morsure", "affame", 25),
-  createCard("Zombie", 1, "", "morsure", "affame", 25),
-  createCard("Zombie", 1, "", "morsure", "affame", 25),
-  createCard("Zombie", 1, "", "morsure", "affame", 25),
-  createCard("Zombie", 1, "", "morsure", "affame", 25),
-  createCard("Zombie", 1, "", "morsure", "affame", 25),
+  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
 ];
 const baseDeck2 = [...baseDeck1];
 // <------------------------------------------------------
-
 
 
 

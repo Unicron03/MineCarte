@@ -1,14 +1,10 @@
-import { Card, Player } from "../../src/types";
-
-export interface CombatState {
-  log: string[];
-}
+import { InGameCard, Player, CombatState } from "../../src/types";
 
 export const Actions = {
   dealDamage(
     state: CombatState,
-    attacker: Card,
-    target: Card | null,
+    attacker: InGameCard,
+    target: InGameCard | null,
     amount: number,
     opponent?: Player
   ) {
@@ -24,17 +20,32 @@ export const Actions = {
     // --- Attaque sur carte ---
     if (!target) return;
     
-    target.vie -= amount;
+    if (target.category !== "mob" || target.pv_durability === undefined) {
+      state.log.push(
+        `${attacker.name} ne peut pas attaquer ${target.name} : ce n'est pas une carte mob.`
+      );
+      return { killed: false };
+    }
+
+    // --- Attaque sur mob ---
+    target.pv_durability -= amount;
     state.log.push(`${attacker.name} inflige ${amount} dégâts à ${target.name}`);
 
-    if (target.vie <= 0) return { killed: true };
-    return { killed: false };
+    return { killed: target.pv_durability <= 0 };
   },
 
-  heal(state: CombatState, target: Card, amount: number) {
-    target.vie += amount;
-    state.log.push(`${target.name} récupère ${amount} PV`);
-  },
+  heal(state: CombatState, target: InGameCard, amount: number) {
+    // impossibilité de heal un équipement / artefact
+    if (target.category !== "mob" || target.pv_durability === undefined) {
+      state.log.push(
+        `${target.name} ne peut pas être soigné : ce n'est pas une carte mob.`
+      );
+      return;
+  }
+
+  target.pv_durability += amount;
+  state.log.push(`${target.name} récupère ${amount} PV`);
+    },
 
   drawCard(state: CombatState, player: Player, count: number) {
     for (let i = 0; i < count; i++) {

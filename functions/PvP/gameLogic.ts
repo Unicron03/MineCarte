@@ -1,19 +1,23 @@
 import { Server, Socket } from "socket.io";
-import type { CardInfo, Player } from "../../src/types";
+import type { InGameCard, Player } from "../../src/types";
 
 
 // --- Piocher une carte ---
-export function drawCard(player: any) {
-  if (player.deck.length === 0) return;
+export function drawCard(player: Player) {
   const card = player.deck.shift();
+  if (!card) {
+    console.warn("drawCard: deck vide ou erreur shift()");
+    return;
+  }
   player.hand.push(card);
 }
 
+
 // --- Jouer une carte ---
-export function playCard(player: any, card: CardInfo) {
+export function playCard(player: Player, card: InGameCard) {
   if (!card) return { success: false, msg: "Carte invalide." };
 
-  const found = player.hand.find((c: CardInfo) => c.name === card.name);
+  const found = player.hand.find((c) => c.name === card.name);
   if (!found) return { success: false, msg: "Carte non trouvée en main." };
 
   if (found.cost > player.energie) {
@@ -22,19 +26,34 @@ export function playCard(player: any, card: CardInfo) {
 
   player.energie -= found.cost;
 
-  const cardToPlay = {
-    ...found,
-    vie: found.vie ?? found.baseVie ?? 0,
-    cost: found.cost ?? found.baseCost ?? 1,
-    attack1: found.attack1 ? capitalize(found.attack1) : undefined,
-    attack2: found.attack2 ? capitalize(found.attack2) : undefined,
-  };
+  let cardToPlay: InGameCard;
 
-  player.hand = player.hand.filter((c: CardInfo) => c !== found);
+  // === CAS 1 : MOB ===
+  if (found.category === "mob") {
+    cardToPlay = {
+      ...found,
+      pv_durability: found.pv_durability ?? 0, // obligatoire pour mob
+      attack1: found.attack1 ? capitalize(found.attack1) : "",
+      attack2: found.attack2 ? capitalize(found.attack2) : null,
+    };
+  }
+
+  // === CAS 2 : ARTEFACT / EQUIPEMENT ===
+  else {
+    cardToPlay = {
+      ...found,
+      attack1: found.attack1 ? capitalize(found.attack1) : undefined,
+      attack2: found.attack2 ? capitalize(found.attack2) : undefined,
+    };
+  }
+
+  // Retirer de la main et poser sur le board
+  player.hand = player.hand.filter((c) => c !== found);
   player.board.push(cardToPlay);
 
   return { success: true, msg: `Vous avez joué ${found.name}` };
 }
+
 
 // --- Première lettre en majuscule, le reste en minuscule ---
 function capitalize(str: string) {

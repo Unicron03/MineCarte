@@ -1,17 +1,5 @@
-import { Actions, CombatState, checkEnergy } from "./combatActions";
-import { Card, Player } from "../../src/types";
-
-export interface Attack {
-  cost: number;
-  autoActivate?: boolean;
-  execute: (
-    state: CombatState,
-    attacker: Card,
-    target: Card | null,
-    player: Player,
-    opponent: Player
-  ) => { killed?: boolean } | void;
-}
+import { Actions, checkEnergy } from "./combatActions";
+import { Attack } from "../../src/types";
 
 export const attackList: Record<string, Attack> = {
   morsure: {
