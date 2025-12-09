@@ -97,7 +97,9 @@ export default function DecksPage() {
     const deckLimit = 15;
 
     return (
-        <main className="flex flex-col h-screen p-4 tsparticles">
+        <main className="flex flex-col p-4 tsparticles
+            bg-fixed bg-contain bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('/img/background_black.png')]
+        ">
             <header className="flex justify-end items-center gap-4">
                 <div className="fixed flex right-4 top-4 gap-4 z-50">
                     <ThemeToggle />

@@ -3,12 +3,18 @@
 import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 
+// Construire dynamiquement DATABASE_URL en utilisant DATABASE_HOST
+const databaseHost = process.env.DATABASE_HOST || process.env.DB_HOST || 'localhost'
+const databaseUrl = process.env.DATABASE_URL || 
+  `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${databaseHost}:${process.env.DB_PORT || 5432}/${process.env.DB_NAME}`
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts"
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url: databaseUrl,
   },
 });

@@ -54,7 +54,10 @@ export default function CardOpeningDisplay({ drawnCards, onClose }: CardOpeningD
     };
 
     return (
-        <div className="fixed inset-0 bg-[url('/img/background_black.png')] bg-fixed bg-cover bg-opacity flex flex-col items-center justify-center z-40 p-4">
+        <div className="fixed inset-0
+            bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('/img/background_black.png')]
+            bg-fixed bg-cover flex flex-col items-center justify-center z-40 p-4"
+        >
             {canSpawnConfetti && <Confetti />}
             {showConfetti && <ConfettiSides />}
 

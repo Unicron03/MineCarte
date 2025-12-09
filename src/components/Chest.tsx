@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Card, exampleCollectionCards } from "@/types";
 import CardOpeningDisplay from "./CardOpeningDisplay";
 
-export default function Chest() {
+export default function Chest({ onOpeningChange }: { onOpeningChange: (isOpen: boolean) => void }) {
     const [isAnimated, setIsAnimated] = useState(false);
     const [isOpenable, setIsOpenable] = useState(false);
     const [drawnCards, setDrawnCards] = useState<Card[]>([]);
@@ -22,6 +22,7 @@ export default function Chest() {
             setDrawnCards(newDrawnCards);
             setIsAnimated(true);
             setIsDialogOpen(true);
+            onOpeningChange(true);
         } else {
             setIsOpenable(true);
         }
@@ -32,6 +33,7 @@ export default function Chest() {
         setDrawnCards([]);
         setIsAnimated(false);
         setIsOpenable(false);
+        onOpeningChange(false);
     };
 
     return (

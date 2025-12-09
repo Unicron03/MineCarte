@@ -25,7 +25,9 @@ export default async function ShowcasePage({ params }: { params: Promise<{ userS
     };
 
     return (
-        <main className="flex flex-col items-center h-screen p-4">
+        <main className="flex flex-col items-center h-screen p-4
+            bg-fixed bg-cover bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('/img/background_black.png')]
+        ">
             <header className="flex items-center">
                 <div className="flex gap-4">
                     <span className="text-3xl font-medium">Vitrine de {userSlug}</span>

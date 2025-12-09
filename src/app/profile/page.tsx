@@ -1,14 +1,21 @@
 import Link from "next/link";
-import { ChevronLeft, Bolt, Pencil, Unplug,  } from "lucide-react";
+import { ChevronLeft, Pencil, Unplug,  } from "lucide-react";
 import { Separator } from "@/shadcn/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shadcn/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import { Button } from "@/shadcn/ui/button";
+import { userStats } from "../../../prisma/requests";
 
-export default function Profile() {
+export const dynamic = 'force-dynamic';
+
+export default async function Profile() {
+    const stats = await userStats(1);
+
     return (
-        <main className="flex flex-col h-screen p-4">
+        <main className="flex flex-col h-screen p-4
+            bg-fixed bg-cover bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('/img/background_black.png')]
+        ">
             <header className="flex">
                 <Link href="/home" className="flex items-center">
                     <ChevronLeft className="m-2"/>
@@ -22,7 +29,7 @@ export default function Profile() {
             </header>
 
             <div className="flex flex-col items-center justify-center h-full gap-12">
-                <span className="text-4xl font-bold">Paramètres du profil</span>
+                <span className="text-4xl font-bold">Paramètres du profil ({stats?.pseudo})</span>
 
                 <div className="glass-nav w-120 !py-4 !px-6 after:!rounded-lg !rounded-lg flex justify-between">
                     <div className="flex items-center gap-4">

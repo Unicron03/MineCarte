@@ -5,45 +5,25 @@ services:
       dockerfile: Dockerfile
     container_name: minecarte-app
     ports:
-      - "3000:3000" # front sur localhost:3000
+      - "3000:3000"
+    environment:
+      - DATABASE_HOST=db
+      - DB_USER=${DB_USER?}
+      - DB_PASSWORD=${DB_PASSWORD?}
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME?}
     depends_on:
-      - mysql
-    networks:
-      - web
+      - db
     tty: true
 
-  mysql:
-    image: mysql:8.0
-    container_name: minecarte-mysql
+  db:
+    container_name: minecarte-db
+    hostname: db
+    image: postgres:alpine
     restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: ${DB_NAME?}
-      MYSQL_USER: ${DB_USER?}
-      MYSQL_PASSWORD: ${DB_PASSWORD?}
     ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - web
-
-  database: # interface graphique facultative
-    image: phpmyadmin/phpmyadmin
-    container_name: minecarte-phpmyadmin
-    restart: unless-stopped
+      - 5432:5432
     environment:
-      PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: rootpass
-    ports:
-      - "8080:80" # http://localhost:8080
-    depends_on:
-      - mysql
-    networks:
-      - web
-volumes:
-  mysql_data:
-
-networks:
-  web:
+      POSTGRES_DB: ${DB_NAME?}
+      POSTGRES_USER: ${DB_USER?}
+      POSTGRES_PASSWORD: ${DB_PASSWORD?}
