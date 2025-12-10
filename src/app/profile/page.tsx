@@ -6,11 +6,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import { Button } from "@/shadcn/ui/button";
 import { userStats } from "../../../prisma/requests";
+import { userId } from "@/types";
 
 export const dynamic = 'force-dynamic';
 
 export default async function Profile() {
-    const stats = await userStats(1);
+    const stats = await userStats(userId);
 
     return (
         <main className="flex flex-col h-screen p-4

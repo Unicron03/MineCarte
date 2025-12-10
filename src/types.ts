@@ -1,3 +1,5 @@
+export const userId: number = 2;
+
 export type Card = {
     id: number;
     name: string;

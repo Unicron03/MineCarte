@@ -20,13 +20,14 @@ export async function loadCardImages(cardName: string) {
     const third = await load('mid.png');
     
     if (!main || !background) {
-        throw new Error(`Manque des images obligatoires pour la carte"${cardName}"`);
+        return loadCardImages('default');
+        // throw new Error(`Manque des images obligatoires pour la carte"${cardName}"`);
     }
     
     return {
-        main_img: main,
-        background_img: background,
-        third_img: third,
+        main_img: `/cards/${cardName}/front.png`,
+        background_img: `/cards/${cardName}/back.png`,
+        third_img: third ? `/cards/${cardName}/mid.png` : null,
     };
 }
 
@@ -474,6 +475,7 @@ async function cards(actions: SeedActions) {
         where: { id: 1, name: 'Squelette' },
         update: {},
         create: {
+            id: 1,
             name: 'Squelette',
             description: 'Ses os grincent, mais ses flèches frappent toujours juste.',
             pv_durability: 25,
@@ -488,8 +490,10 @@ async function cards(actions: SeedActions) {
         where: { id: 2, name: 'Ender dragon' },
         update: {},
         create: {
+            id: 2,
             name: 'Ender dragon',
             description: "Né dans les ténèbres de l'end, il tombera devant les plus courageux.",
+            rarity: 3,
             pv_durability: 100,
             cost: 10,
             talent: actions.dragon_talent.id,
@@ -503,8 +507,10 @@ async function cards(actions: SeedActions) {
         where: { id: 3, name: 'Enderman' },
         update: {},
         create: {
+            id: 3,
             name: 'Enderman',
             description: "Oser croiser son regard, et il vous plongera dans un cauchemar infini.",
+            rarity: 2,
             pv_durability: 60,
             cost: 5,
             talent: actions.enderman_talent.id,
@@ -518,8 +524,10 @@ async function cards(actions: SeedActions) {
         where: { id: 4, name: 'Creeper' },
         update: {},
         create: {
+            id: 4,
             name: 'Creeper',
             description: "Mettez-le sous pression et vous en subirez les conséquences.",
+            rarity: 2,
             pv_durability: 35,
             cost: 3,
             talent: actions.creeper_talent.id,
@@ -532,8 +540,10 @@ async function cards(actions: SeedActions) {
         where: { id: 5, name: 'Golem' },
         update: {},
         create: {
+            id: 5,
             name: 'Golem',
             description: "Protecteur des innocents, sa force brute est la terreur des ennemis.",
+            rarity: 2,
             pv_durability: 70,
             cost: 4,
             talent: actions.golem_talent.id,
@@ -547,6 +557,7 @@ async function cards(actions: SeedActions) {
         where: { id: 6, name: 'Villageois' },
         update: {},
         create: {
+            id: 6,
             name: 'Villageois',
             description: "Paisible marchand, il survit en troquant plutôt qu'en combattant.",
             pv_durability: 20,
@@ -561,6 +572,7 @@ async function cards(actions: SeedActions) {
         where: { id: 7, name: 'Zombie' },
         update: {},
         create: {
+            id: 7,
             name: 'Zombie',
             description: "Sans cerveau mais toujours affamé.",
             pv_durability: 25,
@@ -575,6 +587,7 @@ async function cards(actions: SeedActions) {
         where: { id: 8, name: 'Axolotl' },
         update: {},
         create: {
+            id: 8,
             name: 'Axolotl',
             description: "Petit, mignon, mais surprenant dans la bataille.",
             pv_durability: 10,
@@ -589,6 +602,7 @@ async function cards(actions: SeedActions) {
         where: { id: 9, name: 'Tortue' },
         update: {},
         create: {
+            id: 9,
             name: 'Tortue',
             description: "Lente mais résistance, elle endure le temps et les combats.",
             pv_durability: 50,
@@ -603,6 +617,7 @@ async function cards(actions: SeedActions) {
         where: { id: 10, name: 'Blaze' },
         update: {},
         create: {
+            id: 10,
             name: 'Blaze',
             description: "Maître des flammes du Nether, il embrase tout sur son passage.",
             pv_durability: 30,
@@ -617,6 +632,7 @@ async function cards(actions: SeedActions) {
         where: { id: 11, name: 'Spider' },
         update: {},
         create: {
+            id: 11,
             name: 'Spider',
             description: "Elle sort de vos cauchemars pour vous hanter dans la vraie vie.",
             pv_durability: 20,
@@ -631,8 +647,10 @@ async function cards(actions: SeedActions) {
         where: { id: 12, name: 'Warden' },
         update: {},
         create: {
+            id: 12,
             name: 'Warden',
             description: "Même aveugle il ressent chaque mouvement... Ayez le malheur de le réveiller et il vous traquera jusqu'à la mort.",
+            rarity: 3,
             pv_durability: 80,
             cost: 8,
             talent: actions.warden_talent.id,
@@ -646,6 +664,7 @@ async function cards(actions: SeedActions) {
         where: { id: 13, name: 'Guardian' },
         update: {},
         create: {
+            id: 13,
             name: 'Gardien',
             description: "Dans les profondeurs il règne en maître silencieux.",
             pv_durability: 40,
@@ -661,8 +680,10 @@ async function cards(actions: SeedActions) {
         where: { id: 14, name: 'Sorcière' },
         update: {},
         create: {
+            id: 14,
             name: 'Sorcière',
             description: "Ses breuvages sont aussi mortels qu'imprévisibles.",
+            rarity: 2,
             pv_durability: 30,
             cost: 3,
             talent: actions.witch_talent.id,
@@ -676,6 +697,7 @@ async function cards(actions: SeedActions) {
         where: { id: 15, name: 'Ghast' },
         update: {},
         create: {
+            id: 15,
             name: 'Ghast',
             description: "Ses pleurs résonnent dans le Nether, suivis de flammes dévastatrices.",
             pv_durability: 45,
@@ -686,10 +708,28 @@ async function cards(actions: SeedActions) {
         }
     })
 
+    const card_wither = await prisma.cards.upsert({
+        where: { id: 16, name: 'Wither' },
+        update: {},
+        create: {
+            id: 15,
+            name: 'Wither',
+            description: "Né de la mort, il ne vit que pour tout détruire.",
+            rarity: 2,
+            pv_durability: 80,
+            cost: 9,
+            talent: actions.wither_talent.id,
+            attack1: actions.wither_attack1.id,
+            attack2: actions.wither_attack2.id,
+            ...(await loadCardImages('wither'))
+        }
+    })
+
     const card_snowgolem = await prisma.cards.upsert({
         where: { id: 17, name: 'Golem de neige' },
         update: {},
         create: {
+            id: 17,
             name: 'Golem de neige',
             description: "Créé pour défendre avec légèreté, il combat avec un coeur de glace.",
             pv_durability: 20,
@@ -703,6 +743,7 @@ async function cards(actions: SeedActions) {
         where: { id: 18, name: 'Poulpe' },
         update: {},
         create: {
+            id: 18,
             name: 'Poulpe',
             description: "Paisible créature des océans, mais dangereuse quand elle se sent piégée.",
             pv_durability: 20,
@@ -716,6 +757,7 @@ async function cards(actions: SeedActions) {
         where: { id: 19, name: 'Chat' },
         update: {},
         create: {
+            id: 19,
             name: 'Chat',
             description: "Sous ses airs CHATrmants, se glisse un véritable démon ! MIAAAAAOUUUUU, pennez garde à Miche-Miche.",
             pv_durability: 15,
@@ -730,6 +772,7 @@ async function cards(actions: SeedActions) {
         where: { id: 20, name: 'Oeuf de dragon' },
         update: {},
         create: {
+            id: 20,
             name: 'Oeuf de dragon',
             description: "Un oeuf mystique qui, selon la légende, se transformerait en une créature vengeresse.",
             pv_durability: 5,

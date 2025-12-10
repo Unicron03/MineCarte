@@ -9,6 +9,8 @@ import Atropos from "atropos/react";
 import { Separator } from "@/shadcn/ui/separator";
 import { Card } from "@/types";
 import AtroposCard from "./cards/AtroposCard";
+import { getAttackById } from "@/prisma/requests";
+import { get } from "http";
 
 const ratingStyle = {
     itemShapes: RoundedStar,
@@ -16,8 +18,11 @@ const ratingStyle = {
     inactiveFillColor: '#fbf1a9'
 }
 
-export default function CardPopupDetails({ undescovered = true, card }: { undescovered?: boolean, card: Card}) {
+export const dynamic = 'force-dynamic';
+
+export default async function CardPopupDetails({ undescovered = true, card }: { undescovered?: boolean, card: Card}) {
     const onclick = () => { console.log("Clicked on favorite") };
+    const [talent, attack1, attack2] = await getAttackById(card.id);
 
     return (
         <div className="card self-center w-fit min-w-[230px] max-w-[230px] h-full content-center relative">
@@ -56,7 +61,7 @@ export default function CardPopupDetails({ undescovered = true, card }: { undesc
                                     data-atropos-offset="-2"
                                     className="w-fit h-full z-40"
                                     src={card.background_img}
-                                    alt={card.name}
+                                    alt={card.background_img}
                                     width={230}
                                     height={300}
                                 />
@@ -65,7 +70,7 @@ export default function CardPopupDetails({ undescovered = true, card }: { undesc
                                         data-atropos-offset="0"
                                         className="w-fit h-full z-40"
                                         src={card.third_img}
-                                        alt={card.name}
+                                        alt={card.third_img}
                                         width={230}
                                         height={300}
                                     />
@@ -74,7 +79,7 @@ export default function CardPopupDetails({ undescovered = true, card }: { undesc
                                     data-atropos-offset="2"
                                     className="w-fit h-full z-40"
                                     src={card.main_img}
-                                    alt={card.name}
+                                    alt={card.main_img}
                                     width={230}
                                     height={300}
                                 />
@@ -89,17 +94,17 @@ export default function CardPopupDetails({ undescovered = true, card }: { undesc
                         <div className="flex flex-col gap-4 text-base font-medium my-8">
                             <div className="flex items-center gap-4 justify-between">
                                 <span>Rareté :</span>
-                                <Rating style={{maxWidth: 150}} value={card.rarity} readOnly itemStyles={ratingStyle} />
+                                <Rating style={{maxWidth: 100}} items={3} value={card.rarity} readOnly itemStyles={ratingStyle} />
                             </div>
                             
                             <Separator />
 
-                            <span>Talent : /</span>
+                            <span>Talent : {card.talent ? card.talent : "/"}</span>
 
                             <Separator />
 
-                            <span>Attaque 1 : /</span>
-                            <span>Attaque 2 : /</span>
+                            <span>Attaque 1 : {card.attack1 ? card.attack1 : "/"}</span>
+                            <span>Attaque 2 : {card.attack2 ? card.attack2 : "/"}</span>
 
                             <Separator />
 
@@ -110,7 +115,7 @@ export default function CardPopupDetails({ undescovered = true, card }: { undesc
                             
                             <Separator />
 
-                            <span>Ce mob possède une super description qu&apos;il faudra changer pour chacun</span>
+                            <span>{card.description}</span>
                         </div>
                     </div>
                 </DialogContent>

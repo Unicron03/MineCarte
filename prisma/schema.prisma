@@ -46,9 +46,9 @@ model cards {
   talent         Int?
   attack1        Int
   attack2        Int?
-  main_img       Bytes
-  background_img Bytes
-  third_img      Bytes?
+  main_img       String
+  background_img String
+  third_img      String?
 
   // Relations
   talent_action  actions? @relation("cards_talent", fields: [talent], references: [id])

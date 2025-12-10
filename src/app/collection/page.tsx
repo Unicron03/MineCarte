@@ -3,11 +3,16 @@ import InfoPanel from "@/components/InfoPanel";
 import Footer from "@/components/Footer";
 import { Store } from "lucide-react";
 import CardPopupDetails from "@/components/card-popup-details";
-import { Card, exampleCollectionCards } from "@/types";
 import { Star } from "lucide-react";
 import Link from "next/link";
+import { getUserCollection } from "@/prisma/requests";
+import { userId } from "@/types";
 
-export default function Collection() {
+export const dynamic = 'force-dynamic';
+
+export default async function Collection() {
+    const collection = await getUserCollection(userId);
+
     return (
         <main className="flex flex-col h-screen p-4 tsparticles
             bg-fixed bg-cover bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('/img/background_black.png')]
@@ -27,8 +32,9 @@ export default function Collection() {
             <div className="flex-1 flex justify-center items-center glass-nav after:!rounded-3xl !rounded-3xl m-6 !p-6">
                 <div className="glass-highlight w-full h-full rounded-3xl p-4 overflow-x-auto overflow-y-auto min-h-0">
                     <div className="grid grid-flow-col grid-rows-2 auto-rows-fr gap-4 h-full w-fit">
-                        {exampleCollectionCards.map((card: Card) => (
-                            <CardPopupDetails key={card.id} card={card} />
+                        {collection.map((entry) => (
+                            console.log(entry.card),
+                            <CardPopupDetails key={entry.card.id} card={entry.card} />
                         ))}
                     </div>
                 </div>
