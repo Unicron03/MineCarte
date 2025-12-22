@@ -1,4 +1,4 @@
-import { exampleDeck } from "@/types";
+import { exampleDeck } from "@/data";
 import Image from "next/image";
 
 export default function DeckVisualiser() {

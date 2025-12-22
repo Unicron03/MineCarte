@@ -1,63 +1,96 @@
 import { Server, Socket } from "socket.io";
-import type { InGameCard, Player } from "../../src/types";
+import type { InGameCard, Player, Action } from "../../typesPvp";
+import { actionList } from "../../data";
 
 
 // --- Piocher une carte ---
 export function drawCard(player: Player) {
   const card = player.deck.shift();
   if (!card) {
-    console.warn("drawCard: deck vide ou erreur shift()");
+    console.warn("drawCard: deck vide");
     return;
   }
   player.hand.push(card);
 }
 
-
 // --- Jouer une carte ---
-export function playCard(player: Player, card: InGameCard) {
+export function playCard(io: Server, roomId: string, player: Player, card: InGameCard, opponent: Player) {
   if (!card) return { success: false, msg: "Carte invalide." };
 
-  const found = player.hand.find((c) => c.name === card.name);
-  if (!found) return { success: false, msg: "Carte non trouvée en main." };
+  // Utiliser l'index pour trouver et retirer la carte de manière fiable
+  const cardIndex = player.hand.findIndex((c) => c.uuid === card.uuid);
+  if (cardIndex === -1) return { success: false, msg: "Carte non trouvée en main." };
+  
+  const found = player.hand[cardIndex];
 
-  if (found.cost > player.energie) {
-    return { success: false, msg: "Pas assez d’énergie." };
+  let finalCost = found.cost;
+  
+  // On clone la carte pour éviter les problèmes de référence partagée
+  const cardToPlay = JSON.parse(JSON.stringify(found));
+
+  // --- EQUIPEMENT ---
+  if (found.category === "equipement") {
+    // La logique d'équipement est gérée côté serveur avec un état d'attente
+    // Cette fonction ne devrait pas être appelée directement pour un équipement
+    // mais on garde une sécurité.
+    return { success: false, msg: "L'action pour équiper est invalide ici." };
   }
 
-  player.energie -= found.cost;
+  // --- ARTEFACT ---
+  if (found.category === "artefact") {
+    if (player.energie < finalCost) {
+      return { success: false, msg: "Pas assez d'énergie." };
+    }
 
-  let cardToPlay: InGameCard;
+    if (found.effet) {
+      const action = actionList.find(a => a.name === found.effet);
+      if (action) {
+        if (!player.effects) player.effects = [];
+        console.log(`[DEBUG] Avant ajout: player.effects = ${JSON.stringify(player.effects)}`);
+        player.effects.push(action.name);
+        console.log(`[DEBUG] Après ajout: player.effects = ${JSON.stringify(player.effects)}`);
+        io.to(roomId).emit("log", `[Effet] ${player.id} active ${action.name}.`);
+      }
+    }
+    // L'artefact est consommé et va dans la défausse
+    player.discard.push(cardToPlay);
+    // On retire la carte de la main
+    player.hand.splice(cardIndex, 1);
+    // On paie le coût de l'artefact
+    player.energie -= finalCost;
+    return { success: true, msg: `Vous avez joué ${found.name}`, update: true };
+  }
 
-  // === CAS 1 : MOB ===
+  // Pour les autres cartes (mob, equipement), on vérifie d'abord les effets actifs
+  const craftEffectName = "Table de craft";
+  const craftEffectIndex = player.effects?.findIndex(e => e === craftEffectName);
+
+  if (craftEffectIndex !== undefined && craftEffectIndex !== -1) {
+      const effectAction = actionList.find(a => a.name === craftEffectName);
+      const reduction = effectAction?.damage || 0; // 'damage' contient la valeur de la réduction
+      finalCost = Math.max(0, found.cost - reduction);
+      
+      player.effects!.splice(craftEffectIndex, 1); // On retire l'effet après l'avoir utilisé
+      io.to(roomId).emit("log", `[Jeu] Coût de ${found.name} réduit de ${reduction} grâce à la Table de craft.`);
+  }
+
+  if (player.energie < finalCost) {
+    return { success: false, msg: "Pas assez d'énergie." };
+  }
+  player.energie -= finalCost;
+
   if (found.category === "mob") {
-    cardToPlay = {
-      ...found,
-      pv_durability: found.pv_durability ?? 0, // obligatoire pour mob
-      attack1: found.attack1 ? capitalize(found.attack1) : "",
-      attack2: found.attack2 ? capitalize(found.attack2) : null,
-    };
+    player.board.push(cardToPlay);
+  } else if (found.category === "equipement") {
+    // La logique d'équipement est gérée dans playCardSocket, cette partie ne devrait pas être atteinte.
+  } else {
+    return { success: false, msg: `Catégorie de carte non reconnue pour l'action.`};
   }
 
-  // === CAS 2 : ARTEFACT / EQUIPEMENT ===
-  else {
-    cardToPlay = {
-      ...found,
-      attack1: found.attack1 ? capitalize(found.attack1) : undefined,
-      attack2: found.attack2 ? capitalize(found.attack2) : undefined,
-    };
-  }
-
-  // Retirer de la main et poser sur le board
-  player.hand = player.hand.filter((c) => c !== found);
-  player.board.push(cardToPlay);
-
+  // Retirer de la main du joueur
+  player.hand.splice(cardIndex, 1);
+  
   return { success: true, msg: `Vous avez joué ${found.name}` };
-}
-
-
-// --- Première lettre en majuscule, le reste en minuscule ---
-function capitalize(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
 // --- Terminer le tour ---
@@ -101,6 +134,8 @@ export function sendGameState(io: Server, rooms: Map<string, any>, roomId: strin
           board: player.board,
           discard: player.discard,
           pv: player.pv,
+          effects: player.effects,
+          equipment: player.equipment,
         },
         opponent
           ? {
@@ -111,6 +146,8 @@ export function sendGameState(io: Server, rooms: Map<string, any>, roomId: strin
               board: opponent.board,
               discard: opponent.discard,
               pv: opponent.pv,
+              effects: opponent.effects,
+              equipment: opponent.equipment,
             }
           : null,
       ],
@@ -150,7 +187,7 @@ export function handleMatchmaking(
       p1.turnCount = 1; // J1 commence déjà son premier tour
       p2.turnCount = 0;
 
-      // J1 commence → gagne 1 énergie dès le début
+      // J1 commence, il gagne 1 énergie dès le début
       applyEnergyGain(p1, false);
 
 

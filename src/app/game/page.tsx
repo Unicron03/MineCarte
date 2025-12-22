@@ -1,263 +1,78 @@
-"use client"; 
+"use client";
 
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-
-// --- Types et datas ---
-import { InGameCard, GameState} from "@/types"; // J'ai remplacer card par InGameCard au lieu de CollectionCard
-import { actionList } from "@/data";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 // --- Composants ---
 import Deck from "../../components/combats/Deck";
-import CardPVP from "@/components/CardPVP";
+import CardPVP from "@/components/PVP/CardPVP";
+import EffectDisplay from "@/components/PVP/EffectDisplay";
 
 // --- Lib ---
-import { getSocket, closeSocket } from "@/lib/socket";
-import { getOrCreateUserId} from "@/lib/utilsCombat";
+import { getSocket, closeSocket } from "@/client/sockets/socket"; 
 
+// --- Nouveau Hook ---
+import { useGameLogic } from "@/client/functions/useGameLogic";
+import type { InGameCard } from "@/typesPvp";
 
+const EquipmentBadge = ({ equipment }: { equipment?: InGameCard[] }) => {
+    if (!equipment || equipment.length === 0) return null;
 
+    return (
+        <div className="absolute -top-3 -right-3 z-10 flex flex-col gap-1">
+            {equipment.map((eq, idx) => (
+                <div
+                    key={idx}
+                    className="w-8 h-8 rounded-full border-2 border-white bg-gray-800 overflow-hidden shadow-md"
+                    title={eq.name}
+                >
+                    <img
+                        src={`/cards/${eq.imageName}.png`}
+                        alt={eq.name}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+            ))}
+        </div>
+    );
+};
 
 export default function GamePage() {
+    const { endGameResult, gameState, logs, yourTurn, usedAttacks, attackSelection, me, opponent, playCard, attack, endTurn, quitHandler, targetCard } = useGameLogic();
+    
+    const router = useRouter(); 
     const socket = getSocket();
-    const router = useRouter();
-    const pathname = usePathname();
-    const [endGameResult, setEndGameResult] = useState<"win" | "lose" | "draw" | null>(null);
-    const [gameState, setGameState] = useState<GameState | null>(null); // contient (joueurs, cartes, tour, ...)
-    const [myId, setMyId] = useState<string>(""); // stoque Id du joueur
-    const [logs, setLogs] = useState<string[]>([]); // liste des logs
-    const [yourTurn, setYourTurn] = useState(false); // booléen qui dit si le joueur peut jouer 
-    const [usedAttacks, setUsedAttacks] = useState<number[]>([]);
 
-    type AttackSelection = {
-        attackerIndex: number;
-        attackName: string | null;
-    };
-    const [attackSelection, setAttackSelection] = useState<AttackSelection | null>(null);
+    // --- État pour la modale d'équipement ---
+    const [equipmentModal, setEquipmentModal] = useState<{ show: boolean; cardName: string; targets: any[] } | null>(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem("usedAttacks");
-        if (saved) {
-            setUsedAttacks(JSON.parse(saved));
-        }
+        if (!socket) return;
+
+        // Écoute de la demande de sélection de cible
+        socket.on("selectTargetForEquipment", (data: any) => {
+            setEquipmentModal({
+                show: true,
+                cardName: data.cardName,
+                targets: data.targets
+            });
+        });
+
+        return () => {
+            socket.off("selectTargetForEquipment");
+        };
     }, []);
 
-    useEffect(() => {
-        localStorage.setItem("usedAttacks", JSON.stringify(usedAttacks));
-    }, [usedAttacks]);
-
-    
-    // --- Gestion des évènements Socket ---
-    useEffect(() => {
-        // Le client écoute le serveur 
-        socket.on("connect", () => { // Si il entend qu'il est connecté
-            setMyId(socket.id ?? ""); // Il récupère l'id du socket
-            const userId = getOrCreateUserId();
-            socket.emit("registerUser", { userId, socketId: socket.id });
-        });
-        
-        socket.on("waiting", () => { // Si il entend attend
-            setLogs((prev) => [...prev, "En attente d’un adversaire..."]); // Il dit d'attendre
-            setGameState(null);
-        });
-        
-        socket.on("roomInfo", (info: { roomId: string }) => {});
-        
-        socket.on("gameStart", () => { // Si il entend la partie commence
-            setLogs((prev) => [...prev, "La partie commence !"]);
-        });
-        
-        socket.on("yourTurn", () => { // Si il entend c'est à ton tour
-            setYourTurn(true); 
-            setUsedAttacks([]); // reset les attaques utilisées
-            localStorage.setItem("usedAttacks", "[]");  // <-- AJOUT
-            setLogs((prev) => [...prev, "C’est ton tour !"]);
-        });
-
-        socket.on("yourTurnNoAttack", () => { // Si c'était au tour du joueur qui revient en cours de partie
-            setYourTurn(true); 
-            setLogs((prev) => [...prev, "C’est ton tour !"]);
-        });
-        
-        socket.on("opponentTurn", () => { // Si il entend c'est au tour de l'adversaire
-            setYourTurn(false);
-            setLogs((prev) => [...prev, "Tour de l’adversaire"]);
-        });
-        
-        socket.on("log", (msg: string) => { // Si il entend un log
-            setLogs((prev) => [...prev, msg]);
-        });
-
-        socket.on("updateState", (state: GameState) => {
-            setGameState(state);
-        });
-
-        socket.on("victory", () => {
-            setEndGameResult("win");
-            setLogs(prev => [...prev, "Vous avez gagné !"]);
-        });
-
-        socket.on("defeat", () => {
-            setEndGameResult("lose");
-            setLogs(prev => [...prev, "Vous avez perdu..."]);
-        });
-
-        socket.on("draw", () => {
-            setEndGameResult("draw");
-            setLogs(prev => [...prev, "Égalité !"]);
-        });
-
-        socket.on("opponentLeft", () => {
-            setEndGameResult("win");
-            setLogs(prev => [...prev, "Votre adversaire a quitté."]);
-        });
-
-        
-        return () => {
-            // On retire tous les écouteur quand on quitte la page
-            socket.off("connect");
-            socket.off("waiting");
-            socket.off("roomInfo");
-            socket.off("gameStart");
-            socket.off("yourTurn");
-            socket.off("opponentTurn");
-            socket.off("log");
-            socket.off("updateState");
-            socket.off("victory");
-            socket.off("defeat");
-            socket.off("draw");
-            socket.off("opponentLeft");
-        };
-    }, [socket]);
-    
-    // --- Déconnexion si on quitte la page ---
-    useEffect(() => {
-        if (!pathname) return;
-        if (pathname !== "/game") {
-            if (gameState?.roomId) {
-                socket.emit("quit", { roomId: gameState.roomId });
-            }
-            closeSocket();
-        }
-    }, [pathname, gameState?.roomId, socket]);
-    
-    // --- Déconnexion si on ferme la fenêtre ---
-    useEffect(() => {
-        const handler = () => {};
-        window.addEventListener("beforeunload", handler);
-        return () => window.removeEventListener("beforeunload", handler);
-    }, [gameState?.roomId, socket]);
-    
-    // --- Empêcher retour sans confirmation ---
-    useEffect(() => {
-        const onPop = (e: PopStateEvent) => {
-            if (gameState && !endGameResult) {
-                e.preventDefault();
-                const confirmQuit = confirm(
-                    "Vous êtes dans une partie — quitter et abandonner la partie ?"
-                );
-                if (confirmQuit) {
-                    socket.emit("quit", { roomId: gameState.roomId });
-                    closeSocket();
-                    router.push("/");
-                } else {
-                    window.history.pushState(null, "", window.location.href);
-                }
-            }
-        };
-        window.history.pushState(null, "", window.location.href);
-        window.addEventListener("popstate", onPop);
-        return () => window.removeEventListener("popstate", onPop);
-    }, [gameState, endGameResult]);
-
-    
-
-    // --- Jouer une carte --- (peut être le modifier plus tard car je peut avoir plusieur même carte dans la main)
-    const playCard = (card: InGameCard) => {
-        if (endGameResult) return;
-        gameState && socket.emit("playCard", { roomId: gameState.roomId, card });
+    const handleCancelEquipment = () => {
+        socket.emit("cancelEquipment");
+        setEquipmentModal(null);
     };
 
-    // --- Action d'attaque --- 
-    const attack = (card: InGameCard, attackName: string, attackerIndex: number) => {
-        if (!gameState) return;
-        if (endGameResult) return;
-
-
-        const action = actionList.find((a) => a.name === attackName);
-        const opponentBoard = gameState.players.find((p) => p.id !== myId)?.board ?? [];
-
-        if (usedAttacks.includes(attackerIndex)) return; // carte déjà attaqué
-
-
-        // Si aucune carte adverse, attaque directe
-        if (opponentBoard.length === 0) {
-            socket.emit("attack", {
-                roomId: gameState.roomId,
-                attackerIndex,
-                attackName,
-                targetIndex: null,
-            });
-            if (attackerIndex !== undefined) {
-                setUsedAttacks(prev => [...prev, attackerIndex]);
-            }
-            setLogs((prev) => [
-                ...prev,
-                ` ${attackName} de ${card.name} attaque directement l’adversaire !`,
-            ]);
-            setAttackSelection(null);
-            return;
-        }
-
-        // Si attaque multi-cible
-        if (action?.multiTarget) {
-            socket.emit("attack", {
-                roomId: gameState.roomId,
-                attackerIndex,
-                attackName,
-                targetIndex: null,
-            });
-
-            if (attackerIndex !== undefined) {
-                setUsedAttacks(prev => [...prev, attackerIndex]);
-            }
-
-            setLogs((prev) => [
-                ...prev,
-                ` ${attackName} de ${card.name} touche toutes les cibles ennemies !`,
-            ]);
-            return;
-        }
-
-        // Sinon, sélection d'une cible manuelle
-        setAttackSelection({ attackerIndex, attackName });
-        setLogs((prev) => [
-            ...prev,
-            `Choisissez une cible pour ${attackName} de ${card.name}...`,
-        ]);
+    const handleSelectEquipmentTarget = (targetIndex: number) => {
+        socket.emit("selectTargetForEquipment", { targetIndex });
+        setEquipmentModal(null);
     };
 
-
-    // --- Fin du tour --- 
-    const endTurn = () => {
-        if (attackSelection) {
-            setLogs(prev => [...prev, "Vous devez d’abord choisir une cible !"]);
-            return;
-        }
-        if (endGameResult) return;
-        gameState && socket.emit("endTurn", { roomId: gameState.roomId });
-    };
-
-
-    // --- Quitter la partie ---
-    const quitHandler = () => {
-        if (gameState?.roomId) {
-            socket.emit("quit", { roomId: gameState.roomId });
-        }
-        closeSocket();
-        router.push("/");
-    };
-    
     // --- Rendu écran chargement de partie ---
     if (!gameState) {
         return (
@@ -293,25 +108,14 @@ export default function GamePage() {
         );
     }
 
-    const me = gameState.players.find((p) => p.id === myId);
-    const opponent = gameState.players.find((p) => p.id !== me?.id);
     const deckSize = me?.deck?.length || 0;
     const opponentDeckSize = opponent?.deck?.length || 0;
 
     return (
-        <div
-        style={{ backgroundImage: "url('/img/backgrounPVP.jpg')" }}
-        className="relative min-h-screen bg-cover flex flex-row justify-between p-4"
-        >
-            {/* === PANEL GAUCHE === */}
+        <div style={{ backgroundImage: "url('/img/backgrounPVP.jpg')" }} className="relative min-h-screen bg-cover flex flex-row justify-between p-4" > 
+            {/* --- PANEL GAUCHE --- */}
             <div className="w-64 bg-black/70 text-white rounded-lg p-4 text-sm h-[90vh] overflow-y-auto border border-gray-600">
-                <button
-                onClick={quitHandler}
-                className="mb-4 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                >
-                Quitter
-                </button>
-                
+                <button onClick={quitHandler} className="mb-4 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"> Quitter</button>  
                 <h3 className="text-lg font-bold mb-2 text-yellow-400"> Informations</h3>
                 <div className="mb-4">
                     <h4 className="font-semibold text-green-400 mb-1">Vous</h4>
@@ -321,9 +125,8 @@ export default function GamePage() {
                     <p>Cartes dans la défausse : {me?.discard?.length ?? 0}</p>
                     <p>Cartes sur le plateau : {me?.board?.length ?? 0}</p>
                     <p>PV : {me?.pv ?? 0}</p>
-
+                    <p>Effect : {me?.effects && me.effects.length > 0 ? me.effects.join(", ") : "Aucun"}</p>
                 </div>
-        
                 <div>
                     <h4 className="font-semibold text-red-400 mb-1">Adversaire</h4>
                     <p>Énergie : {opponent?.energie ?? 0}</p>
@@ -332,10 +135,11 @@ export default function GamePage() {
                     <p>Cartes dans la défausse : {opponent?.discard?.length ?? 0}</p>
                     <p>Cartes sur le plateau : {opponent?.board?.length ?? 0}</p>
                     <p>PV : {opponent?.pv ?? 0}</p>
+                    <p>Effect : {opponent?.effects && opponent.effects.length > 0 ? opponent.effects.join(", ") : "Aucun"}</p>
                 </div>
             </div>
         
-            {/* === CONTENU PRINCIPAL === */}
+            {/* --- CONTENU PRINCIPAL --- */}
             <div className="flex-1 flex flex-col items-center justify-between">
 
                 {/* Logs en haut à droite */}
@@ -348,12 +152,19 @@ export default function GamePage() {
                 {/* Zone adversaire */}
                 <div className="w-full flex flex-col items-center " style={{ border: "solid 1px red"}}>
                     <h2 className="text-lg font-mono text-white mb-2">Adversaire</h2>
+
+                    {/* Affichage des effets de l'adversaire */}
+                    <EffectDisplay 
+                        title="Effets Subis"
+                        effects={opponent?.effects}
+                        isSelf={false}
+                    />
                     
                     {/* Main adversaire */}
                     <Deck count={opponent?.hand?.length ?? 0} opponent={true} />
 
                     {/* Deck Adversaire */} 
-                    <div style={{ position: 'absolute', left: '300px', top: '20px', width: '120px', height: `${180 + deckSize * 4}px`}}>
+                    <div style={{ position: 'absolute', left: '300px', top: '20px', width: '120px', height: `${180 + opponentDeckSize * 4}px`}}>
                         {Array.from({ length: opponentDeckSize }).map((_, index) => (
                             <img
                             key={index}
@@ -380,40 +191,20 @@ export default function GamePage() {
                             className={`relative ${
                             attackSelection ? "cursor-pointer hover:scale-105 transition-transform" : ""
                             }`}
-                            onClick={() => {
-                            // On clique n’importe où sur la carte pour la cibler
-                            if (attackSelection && gameState) {
-                                const attackerIndex = attackSelection.attackerIndex;
-                                if (attackerIndex === undefined || attackerIndex === -1) return;
-
-                                socket.emit("attack", {
-                                roomId: gameState.roomId,
-                                attackerIndex,
-                                attackName: attackSelection.attackName,
-                                targetIndex: i,
-                                });
-
-                                if (attackerIndex !== undefined) {
-                                    setUsedAttacks(prev => [...prev, attackerIndex]);
-                                }
-
-                                setLogs((prev) => [
-                                ...prev,
-                                ` ${attackSelection.attackName} sur ${card.name} (slot ${i})`,
-                                ]);
-
-                                setAttackSelection(null);
-                            }
-                            }}
+                            // Utilisation du nouveau handler `targetCard`
+                            onClick={() => targetCard(card, i)}
                         >
                             <CardPVP
-                                card={card} // card est de type CardCombat
+                                card={card}
                                 overrides={{
                                     cost: card.cost,
                                     pv_durability: card.pv_durability,
                                 }}
                                 clickable={false}
                             />
+                            {/* Indicateur d'équipement */}
+                            <EquipmentBadge equipment={card.equipment} />
+
                             {attackSelection && (
                             <div className="absolute inset-0 rounded-lg border-2 border-yellow-400 animate-pulse pointer-events-none"></div>
                             )}
@@ -423,83 +214,130 @@ export default function GamePage() {
                         <p className="text-sm text-gray-400">Aucune carte sur le board ennemi</p>
                     )}
                     </div>
-            </div>
-        
-            {/* Zone joueur (A modifier car je doit je doit récuprer les attaques des carte talent ) */}
-            <div className="w-full flex flex-col items-center">
-                <h2 className="text-lg font-mono text-yellow-400 mb-2">Vous</h2>
-                
-                <div className="flex gap-2 mb-4">
-                {me?.board?.length ? (
-                    me.board.map((card, i) => {
-                    const alreadyAttacked = usedAttacks.includes(i);
-                    return (
-                    <CardPVP
-                        key={i}
-                        card={card}
-                        overrides={{
-                            cost: card.cost,
-                            pv_durability: card.pv_durability,
-                        }}
-                        clickable={yourTurn && !attackSelection && !alreadyAttacked} // désactive si on choisit une cible
-                        onAttackClick={(attackName) => attack(card, attackName, i)} // <-- important
+                </div>
+            
+                {/* Zone joueur */}
+                <div className="w-full flex flex-col items-center">
+                    <h2 className="text-lg font-mono text-yellow-400 mb-2">Vous</h2>
+                    
+                    {/* Affichage de vos effets actifs */}
+                    <EffectDisplay 
+                        title="Vos Effets Actifs"
+                        effects={me?.effects}
+                        isSelf={true}
                     />
-                    )})
-                ) : (
-                    <p className="text-sm text-gray-400">Aucune carte sur le board</p>
-                )}
-                </div>
-        
-                {/* Mon Deck */} 
-                <div style={{ position: 'absolute', right: '50px', bottom: '20px', width: '120px', height: `${180 + deckSize * 4}px` }}>
-                    {Array.from({ length: deckSize }).map((_, index) => (
-                        <img
-                        key={index}
-                        src="/card/back-card.png"
-                        alt="Carte du deck"
-                        style={{
-                            position: 'absolute',
-                            top: `${index * 2}px`, // Décalage vertical
-                            right: `${index * 2}px`,
-                            width: '120px',
-                            height: '180px',
-                            zIndex: index,
-                        }}
-                        />
-                    ))}
-                </div>
-        
-                <div className="flex gap-2">
-                    {me?.hand.map((card, i) => (
-                    <div key={i}
-                        className="card bg-[url('/card-front.png')] bg-cover border-2 border-blue-700 w-20 h-28 flex flex-col justify-end text-center text-xs"
-                        >
-                        <div className="bg-black/70 text-white">
-                            <p>{card.name}</p>
-                            <p>COST {card.cost}</p>
-                        </div>
-                        {yourTurn && !attackSelection && (
-                            <button
-                            className="bg-blue-600 text-white text-xs px-1 rounded"
-                            onClick={() => playCard(card)}
-                            >
-                            Jouer
-                            </button>
-                        )}
-                    </div>
-                    ))}
-                </div>
 
-                {yourTurn && (
-                    <button
-                    className="mt-4 bg-gray-800 text-white px-4 py-2 rounded"
-                    onClick={endTurn}
-                    >
-                    Fin du tour
-                    </button>
-                )}
+                    <div className="flex gap-2 mb-4">
+                    {me?.board?.length ? (
+                        me.board.map((card, i) => {
+                        const alreadyAttacked = usedAttacks.includes(i);
+                        return (
+                        <div key={i} className="relative">
+                        <CardPVP
+                            card={card}
+                            overrides={{
+                                cost: card.cost,
+                                pv_durability: card.pv_durability,
+                            }}
+                            clickable={yourTurn && !attackSelection && !alreadyAttacked}
+                            // Appel de la fonction `attack` du hook
+                            onAttackClick={(attackName) => attack(card, attackName, i)}
+                        />
+                        {/* Indicateur d'équipement */}
+                        <EquipmentBadge equipment={card.equipment} />
+                        </div>
+                        )})
+                    ) : (
+                        <p className="text-sm text-gray-400">Aucune carte sur le board</p>
+                    )}
+                    </div>
+            
+                    {/* Mon Deck */} 
+                    <div style={{ position: 'absolute', right: '50px', bottom: '20px', width: '120px', height: `${180 + deckSize * 4}px` }}>
+                        {Array.from({ length: deckSize }).map((_, index) => (
+                            <img
+                            key={index}
+                            src="/card/back-card.png"
+                            alt="Carte du deck"
+                            style={{
+                                position: 'absolute',
+                                top: `${index * 2}px`, // Décalage vertical
+                                right: `${index * 2}px`,
+                                width: '120px',
+                                height: '180px',
+                                zIndex: index,
+                            }}
+                            />
+                        ))}
+                    </div>
+            
+                    <div className="flex gap-2">
+                        {me?.hand.map((card, i) => (
+                        <div key={i}
+                            className="card bg-[url('/card-front.png')] bg-cover border-2 border-blue-700 w-20 h-28 flex flex-col justify-end text-center text-xs"
+                            >
+                            <div className="bg-black/70 text-white">
+                                <p>{card.name}</p>
+                                <p>COST {card.cost}</p>
+                            </div>
+                            {yourTurn && !attackSelection && (
+                                <button
+                                className="bg-blue-600 text-white text-xs px-1 rounded"
+                                // Appel de la fonction `playCard` du hook
+                                onClick={() => playCard(i)}
+                                >
+                                Jouer
+                                </button>
+                            )}
+                        </div>
+                        ))}
+                    </div>
+
+                    {yourTurn && (
+                        <button
+                        className="mt-4 bg-gray-800 text-white px-4 py-2 rounded"
+                        onClick={endTurn}
+                        >
+                        Fin du tour
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {/* --- MODALE DE SÉLECTION D'ÉQUIPEMENT --- */}
+            {equipmentModal && equipmentModal.show && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+                    <div className="bg-gray-900 border-2 border-yellow-500 p-6 rounded-lg text-center max-w-2xl w-full">
+                        <h3 className="text-2xl text-yellow-400 font-bold mb-4">
+                            Équiper {equipmentModal.cardName}
+                        </h3>
+                        <p className="text-white mb-6">Sélectionnez un monstre à équiper :</p>
+                        
+                        <div className="flex flex-wrap justify-center gap-4 mb-6">
+                            {equipmentModal.targets.map((mob: any) => (
+                                <div 
+                                    key={mob.boardIndex}
+                                    onClick={() => handleSelectEquipmentTarget(mob.boardIndex)}
+                                    className="cursor-pointer hover:scale-105 transition-transform border border-gray-500 rounded p-2 bg-black/50 hover:border-yellow-400"
+                                >
+                                    <CardPVP 
+                                        card={mob} 
+                                        overrides={{ cost: mob.cost, pv_durability: mob.pv_durability }}
+                                        clickable={false} 
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        <button 
+                            onClick={handleCancelEquipment}
+                            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-bold"
+                        >
+                            Annuler
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
-    </div>
     );
 }

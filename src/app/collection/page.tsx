@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import { Store } from "lucide-react";
 import CardPopupDetails from "@/components/card-popup-details";
 import { Card } from "@/types";
+import { Card } from "@/data";
 import { Star } from "lucide-react";
 import Link from "next/link";
 

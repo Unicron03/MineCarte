@@ -1,13 +1,20 @@
 
 import { createServer } from "http";
+import { randomUUID } from "crypto";
 import { Server, Socket } from "socket.io";
-import crypto from "crypto";
 
-import { createPlayer, createCard } from "./functions/PvP/builder";
-import { drawCard, playCard, endTurn, sendGameState, handleMatchmaking, applyEnergyGain, checkVictory } from "./functions/PvP/gameLogic";
+import { createPlayer, createCard } from "./src/server/functions/builder"; // createCard est utilisé ici maintenant
+import { sendGameState, handleMatchmaking, applyEnergyGain } from "./src/server/functions/gameLogic";
 
-import { CombatState } from "./src/types";
-import { attackList } from "./functions/PvP/attackList";
+import { attackSocket } from "./src/server/sockets/attack";
+import { playCardSocket } from "./src/server/sockets/playCard";
+import { endTurnSocket } from "./src/server/sockets/endTurn";
+import { quitSocket } from "./src/server/sockets/quit";
+import { disconnectSocket } from "./src/server/sockets/disconnect";
+import { selectTargetForEquipmentSocket } from "./src/server/sockets/selectTargetForEquipment";
+import { cancelEquipmentSocket } from "./src/server/sockets/cancelEquipment";
+import type { GameState, Player } from "./src/typesPvp";
+
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -17,26 +24,24 @@ const io = new Server(httpServer, {
 // --- Configuration ---
 const CHECK_INTERVAL_MS = 3000;
 const GRACE_MS = 5000;
-let waitingPlayer: any = null;
-const rooms: Map<string, any> = new Map();
-const userToRoom: Map<string, any> = new Map();
-
-// --- Fonction utilitaire ---
-const genToken = (): string => crypto.randomBytes(8).toString("hex");
+let waitingPlayer: Player | null = null;
+const rooms: Map<string, GameState> = new Map();
+const userToRoom: Map<string, { roomId: string; playerIndex: number }> = new Map();
 
 
-
-
-// <---------------------- Temporaire ---------------------- (je crée les deck au lieu de les récupérer dans la BDD)
+// --- Définition des decks de base ---
 const baseDeck1 = [
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Table de craft", 1, "artefact", null, "Table de craft", null, null),
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Enclume", 1, "artefact", null, "Enclume", null, null),
+  createCard("Armure", 2, "equipement", 10, null, null, null),
 ];
+
 const baseDeck2 = [...baseDeck1];
-// <------------------------------------------------------
 
 
 
@@ -80,7 +85,8 @@ io.on("connection", (socket: Socket) => {
 
     waitingPlayer = handleMatchmaking(
       io, socket, rooms, waitingPlayer,
-      genToken, createPlayer, 
+      () => randomUUID(), // genToken function
+      createPlayer,
       baseDeck1, baseDeck2,
       sendGameState,
       applyEnergyGain
@@ -88,144 +94,31 @@ io.on("connection", (socket: Socket) => {
 
 
     for (const [roomId, state] of rooms.entries()) {
-      state.players.forEach((p: any, i: number) => {
+      state.players.forEach((p: Player, i: number) => {
         if (p.id === socket.id) {
           userToRoom.set(userId, { roomId, playerIndex: i });
         }
       });
     }
   });
+  playCardSocket(io, socket, rooms);
 
+  // --- Quand le client veut sélectionner une cible pour un équipement ---
+  selectTargetForEquipmentSocket(io, socket, rooms);
+  cancelEquipmentSocket(io, socket, rooms);
 
-
-    // --- Quand un joueur joue une carte ---
-  socket.on("playCard", ({ roomId, card }) => {
-    const state = rooms.get(roomId);
-    if (!state) return;
-
-    const current = state.players[state.turnIndex];
-    if (socket.id !== current.id) {
-      socket.emit("log", "Ce n’est pas ton tour !");
-      return;
-    }
-
-    const result = playCard(current, card);
-    socket.emit("log", result.msg);
-    if (result.success) sendGameState(io, rooms, roomId);
-  });
-
-
-
-  // --- Quand un joueur attaque --- (Modifier pour dirrectement récuprerer la fonction d'attaque)
-  socket.on("attack", ({ roomId, attackerIndex, attackName, targetIndex }) => {
-    const room = rooms.get(roomId);
-    if (!room) return;
-
-    const playerIndex = room.players.findIndex((p: any) => p.id === socket.id);
-    if (playerIndex === -1) {
-      socket.emit("log", "Joueur introuvable dans la room.");
-      return;
-    }
-
-    const opponentIndex = playerIndex === 0 ? 1 : 0;
-    const player = room.players[playerIndex];
-    const opponent = room.players[opponentIndex];
-
-    const attacker = player.board[attackerIndex];
-    if (!attacker) {
-      socket.emit("log", "Carte attaquante invalide.");
-      return;
-    }
-
-    const attack = attackList[attackName.toLowerCase()];
-    if (!attack) {
-      socket.emit("log", ` Attaque inconnue : ${attackName}`);
-      return;
-    }
-
-    const state: CombatState = { log: [] };
-
-    const target =
-      targetIndex !== null &&
-      targetIndex !== undefined &&
-      opponent.board[targetIndex]
-        ? opponent.board[targetIndex]
-        : null;
-
-    // Appel correct avec 5 paramètres
-    const result = attack.execute(state, attacker, target, player, opponent);
-
-    // Si la cible est morte
-    if (result?.killed && target && targetIndex !== null) {
-      opponent.discard.push(target);
-      opponent.board.splice(targetIndex, 1);
-      state.log.push(` ${target.name} est détruite !`);
-    }
-
-    // Log des actions
-    state.log.forEach(msg => io.to(roomId).emit("log", msg));
-
-    sendGameState(io, rooms, roomId);
-
-    // Check victory
-    const victory = checkVictory(io, room, rooms);
-    if (victory) return;
-
-  });
-
-
-  // ------------
-
-
-
-
+  // --- Quand le client envoit attack  ---
+  attackSocket(io, socket, rooms);
 
   // --- Quand un joueur termine son tour ---
-  socket.on("endTurn", ({ roomId }) => {
-    const state = rooms.get(roomId);
-    if (!state) return;
-    endTurn(io, rooms, state);
-
-    const current = state.players[state.turnIndex];
-    const opponent = state.players.find((p: any) => p.id !== current.id);
-
-    io.to(current.id).emit("yourTurn");
-    io.to(opponent.id).emit("opponentTurn");
-  });
+  endTurnSocket(io, socket, rooms);
 
   // --- Quand un joueur veut quitter la partie  ---
-  socket.on("quit", ({ roomId }) => {
-    const state = rooms.get(roomId);
-    if (!state) return;
-    const quitter = state.players.find((p: any) => p.id === socket.id);
-    const opponent = state.players.find((p: any) => p.id !== socket.id);
-    if (opponent) {
-      io.to(opponent.id).emit("victory", { reason: "opponent_quit" });
-      io.to(opponent.id).emit("log", "Votre adversaire a quitté. Vous avez gagné !");
-    }
-    rooms.delete(roomId);
-  });
+  quitSocket(io, socket, rooms);
 
   // --- Gestion de la déconnexion ---
-  socket.on("disconnect", () => {
-    console.log("DISCONNECT:", socket.id);
-    for (const [roomId, state] of rooms.entries()) {
-      const playerIndex = state.players.findIndex((p: any) => p.id === socket.id);
-      if (playerIndex !== -1) {
-        const player = state.players[playerIndex];
-        player._disconnectedAt = Date.now();
-        if (player.userId) {
-          userToRoom.set(player.userId, { roomId, playerIndex });
-        } else if ((socket as any).userId) {
-          userToRoom.set((socket as any).userId, { roomId, playerIndex });
-        }
-        const opponent = state.players.find((p: any) => p.id !== socket.id);
-        if (opponent) io.to(opponent.id).emit("log", "Votre adversaire est déconnecté...");
-        return;
-      }
-    }
-    if (waitingPlayer && waitingPlayer.socketId === socket.id) waitingPlayer = null;
-  });
+  disconnectSocket(io, socket, rooms, userToRoom, waitingPlayer);
+
 });
 
 // --- Vérification des déconnexions prolongées --- (GRACE_MS = 5s)
@@ -235,7 +128,7 @@ setInterval(() => {
     for (const p of state.players) {
       const s = io.sockets.sockets.get(p.id);
       const connected = s && s.connected;
-      if (!connected && p._disconnectedAt && now - p._disconnectedAt > GRACE_MS) {
+      if (!connected && p._disconnectedAt && (now - p._disconnectedAt > GRACE_MS)) {
         const opponent = state.players.find((x: any) => x.id !== p.id);
         if (opponent) {
           io.to(opponent.id).emit("victory", { reason: "opponent_disconnected" });

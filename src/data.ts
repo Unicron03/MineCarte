@@ -1,14 +1,19 @@
-import type { Action, CollectionCard, InGameCard, Deck } from "@/types";
+import type { CollectionCard, Deck } from "./types";
+import type { Action, InGameCard} from "./typesPvp";
 
 // === Liste des actions (exemples) ===
 export const actionList: Action[] = [
-  { id: 1, name: "Morsure", damage: 10, cost: 1, description: "Une morsure violente." },
-  { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Attaque faible mais gratuite." },
+  { id: 1, name: "Morsure", damage: 15, cost: 1, description: "Une morsure violente.", function: "dealDamage" },
+  { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Attaque faible mais gratuite.", function: "dealDamage" },
+  { id: 3, name: "Table de craft", damage: 3, cost: 1, description: "Réduit le coût de la prochaine carte de 3.", function: "applyEffect"},
+  { id: 4, name: "Enclume", damage: 0, cost: 0, description: "Récupère un équipement de la défausse.", function: "anvilEffect" },
+  { id: 5, name: "Armure", damage: 0, cost: 2, description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.", function: "armure" },
 ];
 
 
 // === Liste des cartes de combat (à récupérer de la bdd) ===
 export const cardList: InGameCard[] = [
+  // @ts-ignore
   {
     name: "Zombie",
     imageName: "zombie",
@@ -18,6 +23,7 @@ export const cardList: InGameCard[] = [
     cost: 1,
     category: "mob",
   },
+  // @ts-ignore
   {
     name: "Creeper",
     imageName: "zombie",
@@ -27,7 +33,32 @@ export const cardList: InGameCard[] = [
     cost: 1,
     category: "mob",
   },
+  // @ts-ignore
+  {
+    name: "Table de craft",
+    imageName: "creeper", 
+    effet: "Table de craft", 
+    cost: 1,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Enclume",
+    imageName: "tortue",
+    effet: "Enclume",
+    cost: 1,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Armure",
+    imageName: "armure",
+    effet: "Armure",
+    cost: 2,
+    category: "equipement",
+  },
 ];
+
 
 export const exampleCollectionCards: CollectionCard[] = [
     {
