@@ -6,6 +6,9 @@ export type InGameCard = {
     imageName: string;
     cost: number;
     pv_durability?: number;
+    max_pv?: number;
+    hasAttacked?: boolean;
+    hasUsedTalent?: boolean;
     talent?: string | null;
     attack1?: string | null;
     attack2?:  string | null;
@@ -19,6 +22,9 @@ export type InGameCard = {
       effet?: string;
       equipment?: undefined;
       pv_durability?: undefined;
+      max_pv?: undefined;
+      hasAttacked?: undefined;
+      hasUsedTalent?: undefined;
 };
 
 // Props pour le composant CardPVP (Pvp)

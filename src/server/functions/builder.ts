@@ -22,6 +22,7 @@ export const createCard = (
     const mobCard: InGameCard = {
       ...base,
       category: "mob",
+      max_pv: pv_durability ?? 0,
       pv_durability: pv_durability ?? 0,
       talent: talent,
       attack1: attack1,

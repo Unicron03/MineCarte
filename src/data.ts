@@ -3,11 +3,14 @@ import type { Action, InGameCard} from "./typesPvp";
 
 // === Liste des actions (exemples) ===
 export const actionList: Action[] = [
-  { id: 1, name: "Morsure", damage: 15, cost: 1, description: "Une morsure violente.", function: "dealDamage" },
-  { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Attaque faible mais gratuite.", function: "dealDamage" },
-  { id: 3, name: "Table de craft", damage: 3, cost: 1, description: "Réduit le coût de la prochaine carte de 3.", function: "applyEffect"},
-  { id: 4, name: "Enclume", damage: 0, cost: 0, description: "Récupère un équipement de la défausse.", function: "anvilEffect" },
-  { id: 5, name: "Armure", damage: 0, cost: 2, description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.", function: "armure" },
+   { id: 1, name: "Morsure", damage: 15, cost: 1, description: "Une morsure violente.", function: "AttackOneMob" },
+   { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Attaque faible mais gratuite.", function: "AttackOneMob" },
+   { id: 3, name: "Table de craft", damage: 3, cost: 1, description: "Réduit le coût de la prochaine carte de 3.", function: "applyEffect"},
+   { id: 4, name: "Enclume", damage: 0, cost: 0, description: "Récupère un équipement de la défausse.", function: "anvilEffect" },
+   { id: 5, name: "Armure", damage: 0, cost: 2, description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.", function: "armure" },
+   { id: 6, name: "Coup d'ombre", damage: 10, cost: 2, description: "Inflige 10 PV à chaque mob adverse.", function: "AttackAllMobs" },
+   { id: 7, name: "Soin", damage: 10, cost: 2, description: "Soigne 10 PV à un mob", function: "heal" },
+   { id: 8, name: "Téléportation", damage: 0, cost: 0, description: "Pioche 1 cartes.", function: "drawCard" },
 ];
 
 
@@ -25,10 +28,11 @@ export const cardList: InGameCard[] = [
   },
   // @ts-ignore
   {
-    name: "Creeper",
-    imageName: "zombie",
-    attack1: "Morsure",
-    attack2: "Affamé",
+    name: "Enderman",
+    imageName: "enderman",
+    talent: "Téléportation",
+    attack1: "Coup d'ombre",
+    attack2: "Soin",
     pv_durability: 25,
     cost: 1,
     category: "mob",

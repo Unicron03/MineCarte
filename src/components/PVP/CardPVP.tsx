@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { CardPVPProps } from "../../../src/typesPvp";
 import { actionList } from "../../data";
@@ -21,6 +20,13 @@ const CardPVP: React.FC<CardPVPProps> = ({
   
   // L'effet est dans la propriété effet pour les Artefacts/Équipements, et talent pour les Mobs
   const effetOuTalent = isMob ? card.talent : card.effet;
+
+  // Gestion indépendante des clics (Talent vs Attaque)
+  // Le talent est utilisable si c'est notre tour (clickable), que c'est un mob, et qu'il n'a pas encore servi
+  const canUseTalent = isMob && clickable && !card.hasUsedTalent;
+  
+  // L'attaque est possible si c'est notre tour (clickable) et que le mob n'a pas encore attaqué
+  const canAttack = clickable && !card.hasAttacked;
 
   // Déterminer la couleur de la bordure
   let borderColor = "border-gray-800";
@@ -57,10 +63,13 @@ const CardPVP: React.FC<CardPVPProps> = ({
           {effetOuTalent && (
               <button
                 className={`px-1 py-[1px] bg-purple-600 rounded text-[8px] text-left mb-1 w-full ${
-                  isMob && clickable ? "hover:bg-purple-800" : "cursor-default opacity-80"
+                  canUseTalent ? "hover:bg-purple-800" : "cursor-default opacity-80"
                 }`}
-                disabled={!isMob || !clickable} // Seuls les Mobs sont cliquables pour le talent
-                onClick={isMob ? onTalentClick : undefined}
+                disabled={!canUseTalent} // Seuls les Mobs sont cliquables pour le talent, et si pas déjà utilisé
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isMob && onTalentClick) onTalentClick();
+                }}
               >
                 {isMob ? `Talent: ${effetOuTalent}` : `Effet: ${effetOuTalent}`}
               </button>
@@ -72,10 +81,13 @@ const CardPVP: React.FC<CardPVPProps> = ({
               {attack1 && (
                 <button
                   className={`px-1 py-[1px] bg-red-600 rounded text-[8px] text-left ${
-                    clickable ? "hover:bg-red-800" : "cursor-default opacity-80"
+                    canAttack ? "hover:bg-red-800" : "cursor-default opacity-80"
                   }`}
-                  disabled={!clickable}
-                  onClick={() => clickable && onAttackClick?.(attack1.name)}
+                  disabled={!canAttack}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (canAttack) onAttackClick?.(attack1.name);
+                  }}
                 >
                   {attack1.name} ({attack1.damage} dmg / coût: {attack1.cost})
                   <br />
@@ -85,10 +97,13 @@ const CardPVP: React.FC<CardPVPProps> = ({
               {attack2 && (
                 <button
                   className={`px-1 py-[1px] bg-blue-600 rounded text-[8px] text-left ${
-                    clickable ? "hover:bg-blue-800" : "cursor-default opacity-80"
+                    canAttack ? "hover:bg-blue-800" : "cursor-default opacity-80"
                   }`}
-                  disabled={!clickable}
-                  onClick={() => clickable && onAttackClick?.(attack2.name)}
+                  disabled={!canAttack}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (canAttack) onAttackClick?.(attack2.name);
+                  }}
                 >
                   {attack2.name} ({attack2.damage} dmg / coût: {attack2.cost})
                   <br />

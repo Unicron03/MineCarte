@@ -13,6 +13,7 @@ import { quitSocket } from "./src/server/sockets/quit";
 import { disconnectSocket } from "./src/server/sockets/disconnect";
 import { selectTargetForEquipmentSocket } from "./src/server/sockets/selectTargetForEquipment";
 import { cancelEquipmentSocket } from "./src/server/sockets/cancelEquipment";
+import { useTalentSocket } from "./src/server/sockets/useTalent";
 import type { GameState, Player } from "./src/typesPvp";
 
 
@@ -34,10 +35,10 @@ const baseDeck1 = [
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Table de craft", 1, "artefact", null, "Table de craft", null, null),
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
-  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
-  createCard("Enclume", 1, "artefact", null, "Enclume", null, null),
+  createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
   createCard("Armure", 2, "equipement", 10, null, null, null),
 ];
 
@@ -106,6 +107,9 @@ io.on("connection", (socket: Socket) => {
   // --- Quand le client veut sélectionner une cible pour un équipement ---
   selectTargetForEquipmentSocket(io, socket, rooms);
   cancelEquipmentSocket(io, socket, rooms);
+
+  // --- Quand le client veut utiliser un talent ---
+  useTalentSocket(io, socket, rooms);
 
   // --- Quand le client envoit attack  ---
   attackSocket(io, socket, rooms);

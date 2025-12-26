@@ -16,13 +16,16 @@ import { useGameLogic } from "@/client/functions/useGameLogic";
 
 import { EquipmentBadge } from "@/components/PVP/EquipmentBadge";
 
-
-
 export default function GamePage() {
-    const { endGameResult, gameState, logs, yourTurn, usedAttacks, attackSelection, me, opponent, playCard, attack, endTurn, quitHandler, targetCard } = useGameLogic();
+    // On récupère les infos de base, mais on va surcharger la logique d'attaque
+    const { endGameResult, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic();
     
     const router = useRouter(); 
     const socket = getSocket();
+
+    // --- États locaux pour gérer la sélection de cible demandée par le serveur ---
+    const [selectionMode, setSelectionMode] = useState<'none' | 'ally' | 'enemy'>('none');
+    const [pendingAttack, setPendingAttack] = useState<{ attackerIndex: number; attackName: string } | null>(null);
 
     // --- État pour la modale d'équipement ---
     const [equipmentModal, setEquipmentModal] = useState<{ show: boolean; cardName: string; targets: any[] } | null>(null);
@@ -30,7 +33,7 @@ export default function GamePage() {
     useEffect(() => {
         if (!socket) return;
 
-        // Écoute de la demande de sélection de cible
+        // Écoute de la demande de sélection de cible pour équipement
         socket.on("selectTargetForEquipment", (data: any) => {
             setEquipmentModal({
                 show: true,
@@ -39,10 +42,25 @@ export default function GamePage() {
             });
         });
 
+        // --- Nouveaux écouteurs pour l'attaque ---
+        socket.on("selectAllyTarget", (data: { attackerIndex: number; attackName: string }) => {
+            setSelectionMode('ally');
+            setPendingAttack(data);
+        });
+
+        socket.on("selectEnemyTarget", (data: { attackerIndex: number; attackName: string }) => {
+            setSelectionMode('enemy');
+            setPendingAttack(data);
+        });
+
         return () => {
             socket.off("selectTargetForEquipment");
+            socket.off("selectAllyTarget");
+            socket.off("selectEnemyTarget");
         };
-    }, []);
+    }, [socket]);
+
+    // --- Handlers ---
 
     const handleCancelEquipment = () => {
         socket.emit("cancelEquipment");
@@ -52,6 +70,50 @@ export default function GamePage() {
     const handleSelectEquipmentTarget = (targetIndex: number) => {
         socket.emit("selectTargetForEquipment", { targetIndex });
         setEquipmentModal(null);
+    };
+
+    // Nouvelle fonction pour initier l'attaque
+    const handleRequestAttack = (attackerIndex: number, attackName: string) => {
+        if (!gameState) return;
+        socket.emit("requestAttack", { 
+            roomId: gameState.roomId, 
+            attackerIndex, 
+            attackName 
+        });
+    };
+
+    // Nouvelle fonction pour utiliser le talent
+    const handleUseTalent = (cardUuid: string) => {
+        if (!gameState) return;
+        socket.emit("useTalent", { cardUuid });
+    };
+
+    // Nouvelle fonction pour gérer le clic sur une cible potentielle
+    const handleTargetClick = (targetIndex: number, isOpponent: boolean) => {
+        if (!pendingAttack || !gameState) return;
+
+        // Si on doit choisir un allié et qu'on clique sur un allié (pas opponent)
+        if (selectionMode === 'ally' && !isOpponent) {
+            socket.emit("attack", {
+                roomId: gameState.roomId,
+                attackerIndex: pendingAttack.attackerIndex,
+                attackName: pendingAttack.attackName,
+                targetIndex: targetIndex
+            });
+            setSelectionMode('none');
+            setPendingAttack(null);
+        }
+        // Si on doit choisir un ennemi et qu'on clique sur un ennemi
+        else if (selectionMode === 'enemy' && isOpponent) {
+            socket.emit("attack", {
+                roomId: gameState.roomId,
+                attackerIndex: pendingAttack.attackerIndex,
+                attackName: pendingAttack.attackName,
+                targetIndex: targetIndex
+            });
+            setSelectionMode('none');
+            setPendingAttack(null);
+        }
     };
 
     // --- Rendu écran chargement de partie ---
@@ -170,10 +232,11 @@ export default function GamePage() {
                         <div
                             key={i}
                             className={`relative ${
-                            attackSelection ? "cursor-pointer hover:scale-105 transition-transform" : ""
+                                // On met en évidence si on doit choisir un ennemi
+                                selectionMode === 'enemy' ? "cursor-pointer hover:scale-105 transition-transform border-2 border-red-500 rounded-lg animate-pulse" : ""
                             }`}
-                            // Utilisation du nouveau handler `targetCard`
-                            onClick={() => targetCard(card, i)}
+                            // Clic pour valider la cible ennemie
+                            onClick={() => handleTargetClick(i, true)}
                         >
                             <CardPVP
                                 card={card}
@@ -185,10 +248,6 @@ export default function GamePage() {
                             />
                             {/* Indicateur d'équipement */}
                             <EquipmentBadge equipment={card.equipment} />
-
-                            {attackSelection && (
-                            <div className="absolute inset-0 rounded-lg border-2 border-yellow-400 animate-pulse pointer-events-none"></div>
-                            )}
                         </div>
                         ))
                     ) : (
@@ -211,18 +270,28 @@ export default function GamePage() {
                     <div className="flex gap-2 mb-4">
                     {me?.board?.length ? (
                         me.board.map((card, i) => {
-                        const alreadyAttacked = usedAttacks.includes(i);
+                        const alreadyAttacked = card.hasAttacked ?? false;
                         return (
-                        <div key={i} className="relative">
+                        <div 
+                            key={i} 
+                            className={`relative ${
+                                // On met en évidence si on doit choisir un allié (soin)
+                                selectionMode === 'ally' ? "cursor-pointer hover:scale-105 transition-transform border-2 border-green-500 rounded-lg animate-pulse" : ""
+                            }`}
+                            // Clic pour valider la cible alliée
+                            onClick={() => handleTargetClick(i, false)}
+                        >
                         <CardPVP
                             card={card}
                             overrides={{
                                 cost: card.cost,
                                 pv_durability: card.pv_durability,
                             }}
-                            clickable={yourTurn && !attackSelection && !alreadyAttacked}
-                            // Appel de la fonction `attack` du hook
-                            onAttackClick={(attackName) => attack(card, attackName, i)}
+                            // On active le clic si c'est notre tour (la gestion fine attaque/talent est faite dans CardPVP)
+                            clickable={yourTurn && selectionMode === 'none'}
+                            // Appel de la demande d'attaque
+                            onAttackClick={(attackName) => handleRequestAttack(i, attackName)}
+                            onTalentClick={() => handleUseTalent(card.uuid)}
                         />
                         {/* Indicateur d'équipement */}
                         <EquipmentBadge equipment={card.equipment} />
@@ -261,10 +330,9 @@ export default function GamePage() {
                                 <p>{card.name}</p>
                                 <p>COST {card.cost}</p>
                             </div>
-                            {yourTurn && !attackSelection && (
+                            {yourTurn && selectionMode === 'none' && (
                                 <button
                                 className="bg-blue-600 text-white text-xs px-1 rounded"
-                                // Appel de la fonction `playCard` du hook
                                 onClick={() => playCard(i)}
                                 >
                                 Jouer

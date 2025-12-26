@@ -1,5 +1,5 @@
 import type { Server, Socket } from "socket.io";
-import { sendGameState } from "../functions/gameLogic";
+import { sendGameState, playEquipment } from "../functions/gameLogic";
 
 export function selectTargetForEquipmentSocket(io: Server, socket: Socket, rooms: Map<string, any>) {
   socket.on("selectTargetForEquipment", ({ targetIndex }) => {
@@ -21,23 +21,15 @@ export function selectTargetForEquipmentSocket(io: Server, socket: Socket, rooms
         return;
     }
 
-    // --- Application de l'équipement ---
-    if (!targetMob.equipment) targetMob.equipment = [];
-    targetMob.equipment.push(card);
-    
-    // Exemple : Si l'équipement donne des PV
-    if (card.pv_durability) {
-        targetMob.pv_durability = (targetMob.pv_durability || 0) + card.pv_durability;
+    // Utilisation de la fonction centralisée qui gère les effets (Table de craft, etc.)
+    const result = playEquipment(io, roomId, player, card, targetMob);
+
+    if (result.success) {
+        player.pendingEquipment = null;
+        sendGameState(io, rooms, roomId);
+    } else {
+        // En cas d'erreur (pas assez d'énergie, etc.), on annule juste l'état d'attente
+        player.pendingEquipment = null;
     }
-    // Vous pouvez ajouter ici d'autres effets (attaque, etc.)
-
-    // --- Finalisation ---
-    // Retirer la carte de la main et consommer l'énergie
-    player.hand.splice(cardIndex, 1);
-    player.energie -= card.cost;
-    player.pendingEquipment = null;
-
-    io.to(roomId).emit("log", `${player.username || "Joueur"} a équipé ${targetMob.name} avec ${card.name}.`);
-    sendGameState(io, rooms, roomId);
   });
 }

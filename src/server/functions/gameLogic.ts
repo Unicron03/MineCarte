@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
+import { applyCraftTableEffect } from "./testEffectFonctions";
 
 
 // --- Piocher une carte ---
@@ -30,17 +31,18 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
 
   // --- EQUIPEMENT ---
   if (found.category === "equipement") {
-    // La logique d'équipement est gérée côté serveur avec un état d'attente
-    // Cette fonction ne devrait pas être appelée directement pour un équipement
-    // mais on garde une sécurité.
     return { success: false, msg: "L'action pour équiper est invalide ici." };
   }
 
   // --- ARTEFACT ---
   if (found.category === "artefact") {
+    finalCost = applyCraftTableEffect(player, found, io, roomId, false); // Simulation
+
     if (player.energie < finalCost) {
       return { success: false, msg: "Pas assez d'énergie." };
     }
+    // Application réelle de l'effet (consommation)
+    applyCraftTableEffect(player, found, io, roomId, true);
 
     if (found.effet) {
       const action = actionList.find(a => a.name === found.effet);
@@ -61,22 +63,14 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
     return { success: true, msg: `Vous avez joué ${found.name}`, update: true };
   }
 
-  // Pour les autres cartes (mob, equipement), on vérifie d'abord les effets actifs
-  const craftEffectName = "Table de craft";
-  const craftEffectIndex = player.effects?.findIndex(e => e === craftEffectName);
-
-  if (craftEffectIndex !== undefined && craftEffectIndex !== -1) {
-      const effectAction = actionList.find(a => a.name === craftEffectName);
-      const reduction = effectAction?.damage || 0; // 'damage' contient la valeur de la réduction
-      finalCost = Math.max(0, found.cost - reduction);
-      
-      player.effects!.splice(craftEffectIndex, 1); // On retire l'effet après l'avoir utilisé
-      io.to(roomId).emit("log", `[Jeu] Coût de ${found.name} réduit de ${reduction} grâce à la Table de craft.`);
-  }
+  // Pour les mobs, on vérifie d'abord les effets actifs
+  finalCost = applyCraftTableEffect(player, found, io, roomId, false); // Simulation
 
   if (player.energie < finalCost) {
     return { success: false, msg: "Pas assez d'énergie." };
   }
+  // Application réelle de l'effet (consommation)
+  applyCraftTableEffect(player, found, io, roomId, true);
   player.energie -= finalCost;
 
   if (found.category === "mob") {
@@ -93,10 +87,57 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
   return { success: true, msg: `Vous avez joué ${found.name}` };
 }
 
+// --- Jouer un équipement (Nouvelle fonction centralisée) ---
+export function playEquipment(
+  io: Server,
+  roomId: string,
+  player: Player,
+  card: InGameCard,
+  targetMob: InGameCard
+) {
+  // Validation de base
+  const cardIndex = player.hand.findIndex((c) => c.uuid === card.uuid);
+  if (cardIndex === -1) return { success: false, msg: "Carte non trouvée en main." };
+  
+  const found = player.hand[cardIndex];
+  if (found.category !== "equipement") return { success: false, msg: "Ce n'est pas un équipement." };
+  if (targetMob.category !== "mob") return { success: false, msg: "Cible invalide." };
+
+  // 1. Calcul du coût (Simulation)
+  const finalCost = applyCraftTableEffect(player, found, io, roomId, false);
+
+  // 2. Vérification énergie
+  if (player.energie < finalCost) {
+    return { success: false, msg: "Pas assez d'énergie." };
+  }
+
+  // 3. Paiement et Consommation de l'effet
+  applyCraftTableEffect(player, found, io, roomId, true);
+  player.energie -= finalCost;
+
+  // 4. Application de l'équipement
+  const equipmentCard = JSON.parse(JSON.stringify(found));
+  if (!targetMob.equipment) targetMob.equipment = [];
+  targetMob.equipment.push(equipmentCard);
+
+  // 5. Retrait de la main
+  player.hand.splice(cardIndex, 1);
+
+  io.to(roomId).emit("log", `${player.id} équipe ${found.name} sur ${targetMob.name}`);
+  return { success: true, msg: `Équipement placé`, update: true };
+}
+
 // --- Terminer le tour ---
 export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
   state.turnIndex = (state.turnIndex + 1) % 2;
   const current = state.players[state.turnIndex];
+
+  // Réinitialiser le statut d'attaque des mobs du joueur qui commence son tour
+  current.board.forEach((card: InGameCard) => {
+    card.hasAttacked = false;
+    card.hasUsedTalent = false;
+  });
+
   // on incrémente ici pour indiquer que le joueur "commence" un nouveau tour
   if (current.turnCount === undefined) current.turnCount = 0;
   current.turnCount++;

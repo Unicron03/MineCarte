@@ -1,9 +1,23 @@
 import { InGameCard, Player, CombatState, Action } from "../../typesPvp";
+import { applyArmorEffect } from "./testEffectFonctions";
 
-/**
- * Inflige des dégâts à une carte ou directement au joueur
- */
-export function dealDamage(
+// Transfère les dégâts excédentaires au joueur adverse
+export function transfertDamageToPlayer(
+  state: CombatState,
+  amount: number,
+  opponent: Player,
+  sourceName: string
+): void {
+  if (amount <= 0) return;
+
+  opponent.pv -= amount;
+  state.log.push(
+    `Dégâts perforants ! ${sourceName} inflige ${amount} dégâts excédentaires au joueur.`
+  );
+}
+
+// Inflige des dégâts à une carte ou directement au joueur
+export function AttackOneMob(
   state: CombatState,
   attacker: InGameCard,
   target: InGameCard | null,
@@ -32,21 +46,19 @@ export function dealDamage(
     return { killed: false };
   }
 
-  // --- GESTION ARMURE / ÉQUIPEMENT ---
-  let finalDamage = amount;
-  if (target.equipment && target.equipment.length > 0) {
-    const hasArmor = target.equipment.some((eq) => eq.name === "Armure");
-    if (hasArmor) {
-      finalDamage = Math.max(0, finalDamage - 10);
-      state.log.push(`🛡️ L'armure de ${target.name} absorbe 10 dégâts !`);
-    }
-  }
+
+  const finalDamage = applyArmorEffect(target, amount, state);
 
   // --- Attaque sur mob ---
   target.pv_durability -= finalDamage;
   state.log.push(
     `${attacker.name} inflige ${finalDamage} dégâts à ${target.name}`
   );
+
+  // --- Transfert de dégâts (Trample) ---
+  if (target.pv_durability < 0 && opponent) {
+    transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
+  }
 
   return { killed: target.pv_durability <= 0 };
 }
@@ -67,10 +79,19 @@ export function heal(
     return;
   }
 
-  target.pv_durability += amount;
-  state.log.push(
-    `${target.name} récupère ${amount} PV`
-  );
+  const max = target.max_pv ?? target.pv_durability;
+  
+  if (target.pv_durability >= max) {
+    state.log.push(`${target.name} est déjà au max de ses PV.`);
+    return;
+  }
+
+  const healAmount = Math.min(amount, max - target.pv_durability);
+
+  target.pv_durability += healAmount;
+   state.log.push(
+    `${target.name} récupère ${healAmount} PV`
+   );
 }
 
 /**
@@ -94,6 +115,60 @@ export function drawCard(
     `${player.id} pioche ${drawn} carte(s)`
   );
 }
+
+//Attaque tous les mobs adverses.
+export function AttackAllMobs(
+  state: CombatState,
+  attacker: InGameCard,
+  amount: number,
+  opponent: Player
+): { killed: boolean } | void {
+
+  // Vérifier s'il y a des mobs sur le plateau adverse
+  const hasMobs = opponent.board.some((c) => c.category === "mob");
+
+  if (!hasMobs) {
+    // Attaque directe sur le joueur
+    opponent.pv -= amount;
+    state.log.push(
+      `${attacker.name} inflige ${amount} dégâts au joueur (aucun mob adverse) !`
+    );
+    return { killed: opponent.pv <= 0 };
+  }
+
+  // Attaque de zone sur les mobs
+  // On parcourt à l'envers pour pouvoir supprimer sans décaler les index des éléments suivants
+  for (let i = opponent.board.length - 1; i >= 0; i--) {
+    const target = opponent.board[i];
+    if (target.category === "mob" && target.pv_durability !== undefined) {
+      const finalDamage = applyArmorEffect(target, amount, state);
+      target.pv_durability -= finalDamage;
+      state.log.push(
+        `${attacker.name} inflige ${finalDamage} dégâts à ${target.name}`
+      );
+
+      if (target.pv_durability <= 0) {
+        // --- Transfert de dégâts (Trample) ---
+        if (target.pv_durability < 0) {
+           transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
+        }
+
+        opponent.discard.push(target);
+        opponent.board.splice(i, 1);
+        state.log.push(`${target.name} est détruite !`);
+      }
+    }
+  }
+
+  return { killed: false };
+}
+
+
+
+
+
+
+// --------------------- Je suis pas sûr d'en avoir vraiment besoin ---------------------
 
 /**
  * Applique un effet à un joueur pour une certaine durée.
