@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
-import { applyCraftTableEffect } from "./testEffectFonctions";
+import { applyCraftTableEffect, checkVillageGuardian } from "./testEffectFonctions";
 
 
 // --- Piocher une carte ---
@@ -75,6 +75,9 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
 
   if (found.category === "mob") {
     player.board.push(cardToPlay);
+    
+    // Vérification des synergies passives (ex: Golem + Villageois)
+    checkVillageGuardian(player, io, roomId);
   } else if (found.category === "equipement") {
     // La logique d'équipement est gérée dans playCardSocket, cette partie ne devrait pas être atteinte.
   } else {

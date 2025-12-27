@@ -57,3 +57,40 @@ export function hasEsquive(target: InGameCard, state: CombatState): boolean {
   }
   return false;
 }
+
+// Vérifie la synergie Golem <-> Villageois
+// À appeler quand une carte est jouée ou quand une carte meurt
+export function checkVillageGuardian(player: Player, io: Server, roomId: string): void {
+  // 1. Vérifier la présence d'un Villageois
+  const hasVillager = player.board.some((c) => c.name === "Villageois");
+  
+  // 2. Récupérer tous les Golems
+  const golems = player.board.filter((c) => c.name === "Golem");
+
+  golems.forEach((golem) => {
+    if (!golem.effects) golem.effects = [];
+    const hasBuff = golem.effects.includes("DoubleDamage");
+
+    if (hasVillager && !hasBuff) {
+      // Activation de l'effet
+      golem.effects.push("DoubleDamage");
+      io.to(roomId).emit("log", `${golem.name} s'enrage grâce à la présence d'un Villageois ! (Dégâts x2)`);
+    } else if (!hasVillager && hasBuff) {
+      // Désactivation de l'effet
+      golem.effects = golem.effects.filter((e) => e !== "DoubleDamage");
+      io.to(roomId).emit("log", `${golem.name} se calme (Plus de Villageois à protéger).`);
+    }
+  });
+}
+
+// Calcule les dégâts sortants en fonction des effets de l'attaquant (ex: DoubleDamage)
+export function getModifiedDamage(attacker: InGameCard, baseDamage: number): number {
+  let finalDamage = baseDamage;
+
+  // Application du DoubleDamage (Gardien du Village)
+  if (attacker.effects?.includes("DoubleDamage")) {
+    finalDamage *= 2;
+  }
+
+  return finalDamage;
+}

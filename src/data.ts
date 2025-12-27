@@ -12,7 +12,8 @@ export const actionList: Action[] = [
    { id: 7, name: "Soin", damage: 10, cost: 2, description: "Soigne 10 PV à un mob", function: "heal", requiresTarget: true },
    { id: 8, name: "Téléportation", damage: 0, cost: 0, description: "Pioche 1 cartes.", function: "drawCard" },
    { id: 9, name: "Téléportation Furtive", damage: 30, cost: 3, description: "Inflige 30 PV à un mob de l'adversaire & A une chance d'esquiver tous les dégâts d'une attaque lors du prochain tour", function: "attackEsquive", requiresTarget: true },
-   { id: 10, name: "Explosion", damage: 60, cost: 0, description: "Inflige 60 PV et meurt instantanément ensuite.", function: "damageAndDie", requiresTarget: true }
+   { id: 10, name: "Explosion", damage: 60, cost: 0, description: "Inflige 60 PV et meurt instantanément ensuite.", function: "damageAndDie", requiresTarget: true },
+   { id: 11, name: "Gardien du Village", damage: 0, cost: 0, description: "Passif: Si un Villageois est présent, les dégâts sont doublés.", function: "passive", autoActivate: true }
 ];
 
 
@@ -70,6 +71,26 @@ export const cardList: InGameCard[] = [
     attack1: "Téléportation Furtive",
     attack2: "Explosion",
     pv_durability: 25,
+    cost: 1,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Golem",
+    imageName: "golem",
+    talent: "Gardien du Village",
+    attack1: "Morsure", // Réutilisation d'une attaque basique pour l'exemple
+    attack2: "Affamé",
+    pv_durability: 100,
+    cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Villageois",
+    imageName: "villageois",
+    talent: "Soin",
+    pv_durability: 20,
     cost: 1,
     category: "mob",
   },

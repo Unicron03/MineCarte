@@ -1,5 +1,5 @@
 import { InGameCard, Player, CombatState, Action } from "../../typesPvp";
-import { applyArmorEffect, hasEsquive } from "./testEffectFonctions";
+import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./testEffectFonctions";
 
 // Transfère les dégâts excédentaires au joueur adverse
 export function transfertDamageToPlayer(
@@ -25,11 +25,14 @@ export function AttackOneMob(
   opponent?: Player
 ): { killed: boolean } | void {
 
+  // Calcul des dégâts réels (prise en compte du x2 Golem etc.)
+  const realDamage = getModifiedDamage(attacker, amount);
+
   // --- Attaque directe sur joueur ---
   if (!target && opponent) {
-    opponent.pv -= amount;
+    opponent.pv -= realDamage;
     state.log.push(
-      `${attacker.name} inflige ${amount} dégâts au joueur !`
+      `${attacker.name} inflige ${realDamage} dégâts au joueur !`
     );
 
     return { killed: opponent.pv <= 0 };
@@ -51,7 +54,7 @@ export function AttackOneMob(
     return { killed: false };
   }
 
-  const finalDamage = applyArmorEffect(target, amount, state);
+  const finalDamage = applyArmorEffect(target, realDamage, state);
 
   // --- Attaque sur mob ---
   target.pv_durability -= finalDamage;
@@ -124,14 +127,17 @@ export function AttackAllMobs(
   opponent: Player
 ): { killed: boolean } | void {
 
+  // Calcul des dégâts réels (prise en compte du x2 Golem etc.)
+  const realDamage = getModifiedDamage(attacker, amount);
+
   // Vérifier s'il y a des mobs sur le plateau adverse
   const hasMobs = opponent.board.some((c) => c.category === "mob");
 
   if (!hasMobs) {
     // Attaque directe sur le joueur
-    opponent.pv -= amount;
+    opponent.pv -= realDamage;
     state.log.push(
-      `${attacker.name} inflige ${amount} dégâts au joueur (aucun mob adverse) !`
+      `${attacker.name} inflige ${realDamage} dégâts au joueur (aucun mob adverse) !`
     );
     return { killed: opponent.pv <= 0 };
   }
@@ -147,7 +153,7 @@ export function AttackAllMobs(
         continue;
       }
 
-      const finalDamage = applyArmorEffect(target, amount, state);
+      const finalDamage = applyArmorEffect(target, realDamage, state);
       target.pv_durability -= finalDamage;
       state.log.push(
         `${attacker.name} inflige ${finalDamage} dégâts à ${target.name}`
@@ -178,6 +184,9 @@ export function attackEsquive(
   opponent?: Player
 ): { killed: boolean } | void {
 
+  // Calcul des dégâts réels (prise en compte du x2 Golem etc.)
+  const realDamage = getModifiedDamage(attacker, amount);
+
   // 1. Appliquer l'effet Esquive au lanceur (dans tous les cas)
   if (attacker.category === "mob") {
     if (!attacker.effects) attacker.effects = [];
@@ -191,8 +200,8 @@ export function attackEsquive(
 
   // 2. Attaque directe sur joueur (si pas de cible)
   if (!target && opponent) {
-    opponent.pv -= amount;
-    state.log.push(`${attacker.name} inflige ${amount} dégâts au joueur !`);
+    opponent.pv -= realDamage;
+    state.log.push(`${attacker.name} inflige ${realDamage} dégâts au joueur !`);
     return { killed: opponent.pv <= 0 };
   }
 
@@ -209,7 +218,7 @@ export function attackEsquive(
     return { killed: false };
   }
 
-  const finalDamage = applyArmorEffect(target, amount, state);
+  const finalDamage = applyArmorEffect(target, realDamage, state);
   target.pv_durability -= finalDamage;
   state.log.push(`${attacker.name} inflige ${finalDamage} dégâts à ${target.name}`);
 

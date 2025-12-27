@@ -37,8 +37,8 @@ const baseDeck1 = [
   createCard("Table de craft", 1, "artefact", null, "Table de craft", null, null),
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
-  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
-  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Villageois", 1, "mob", 25, null, "Soin", null),
+  createCard("Golem", 3, "mob", 55, "Gardien du Village", "Morsure", "Affamé"),
   createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
   createCard("Armure", 2, "equipement", 10, null, null, null),
 ];

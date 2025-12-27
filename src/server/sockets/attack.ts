@@ -3,6 +3,7 @@ import { CombatState, Player, Action, InGameCard } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState, checkVictory, drawCard as drawCardLogic } from "../functions/gameLogic";
 import { AttackOneMob, heal, drawCard, applyEffect, AttackAllMobs, attackEsquive, damageAndDie } from "../functions/attackFunctions";
+import { checkVillageGuardian } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
 function getActionByName(name: string): Action | undefined {
@@ -77,6 +78,10 @@ function finalizeAttack(
     opponent.discard.push(target);
     opponent.board.splice(targetIndex, 1);
     state.log.push(`${target.name} est détruite !`);
+
+    // Vérification des synergies passives (ex: Si le Villageois meurt, le Golem perd son buff)
+    // Note: On vérifie pour les deux joueurs car la mort d'un mob peut affecter l'autre (si on implémente des effets inverses)
+    checkVillageGuardian(opponent, io, roomId);
   }
 
   // Gestion de la défaite du joueur (qui peut arriver sur une attaque directe ou AOE si pas de mobs)

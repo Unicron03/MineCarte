@@ -20,10 +20,14 @@ const CardPVP: React.FC<CardPVPProps> = ({
   
   // L'effet est dans la propriété effet pour les Artefacts/Équipements, et talent pour les Mobs
   const effetOuTalent = isMob ? card.talent : card.effet;
+  
+  // Récupérer la définition du talent pour vérifier s'il est autoActivate
+  const talentAction = isMob && card.talent ? actionList.find((a: { name: string }) => a.name === card.talent) : undefined;
+  const isAutoActivate = talentAction?.autoActivate === true;
 
   // Gestion indépendante des clics (Talent vs Attaque)
-  // Le talent est utilisable si c'est notre tour (clickable), que c'est un mob, et qu'il n'a pas encore servi
-  const canUseTalent = isMob && clickable && !card.hasUsedTalent;
+  // Le talent est utilisable si c'est notre tour, que c'est un mob, qu'il n'a pas servi ET qu'il n'est pas automatique
+  const canUseTalent = isMob && clickable && !card.hasUsedTalent && !isAutoActivate;
   
   // L'attaque est possible si c'est notre tour (clickable) et que le mob n'a pas encore attaqué
   const canAttack = clickable && !card.hasAttacked;
@@ -87,14 +91,14 @@ const CardPVP: React.FC<CardPVPProps> = ({
               <button
                 className={`px-1 py-[1px] bg-purple-600 rounded text-[8px] text-left mb-1 w-full ${
                   canUseTalent ? "hover:bg-purple-800" : "cursor-default opacity-80"
-                }`}
+                } ${isAutoActivate ? "italic border border-purple-300" : ""}`}
                 disabled={!canUseTalent} // Seuls les Mobs sont cliquables pour le talent, et si pas déjà utilisé
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isMob && onTalentClick) onTalentClick();
                 }}
               >
-                {isMob ? `Talent: ${effetOuTalent}` : `Effet: ${effetOuTalent}`}
+                {isMob ? `${isAutoActivate ? "Passif" : "Talent"}: ${effetOuTalent}` : `Effet: ${effetOuTalent}`}
               </button>
           )}
 
