@@ -277,6 +277,23 @@ export function voleEnergie(
   return result;
 }
 
+// Attaque directe sur le joueur (ignore les mobs)
+export function attackDirectPlayer(
+  state: CombatState,
+  attacker: InGameCard,
+  amount: number,
+  opponent: Player
+): { killed: boolean } | void {
+  // Calcul des dégâts réels (prise en compte du x2 Golem etc.)
+  const realDamage = getModifiedDamage(attacker, amount);
+
+  opponent.pv -= realDamage;
+  state.log.push(
+    `${attacker.name} inflige ${realDamage} dégâts directement au joueur !`
+  );
+
+  return { killed: opponent.pv <= 0 };
+}
 
 
 // --------------------- Je suis pas sûr d'en avoir vraiment besoin ---------------------

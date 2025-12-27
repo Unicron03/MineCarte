@@ -14,6 +14,7 @@ export const actionList: Action[] = [
    { id: 9, name: "Téléportation Furtive", damage: 30, cost: 3, description: "Inflige 30 PV à un mob de l'adversaire & A une chance d'esquiver tous les dégâts d'une attaque lors du prochain tour", function: "attackEsquive", requiresTarget: true },
    { id: 10, name: "Explosion", damage: 60, cost: 0, description: "Inflige 60 PV et meurt instantanément ensuite.", function: "damageAndDie", requiresTarget: true },
    { id: 11, name: "Gardien du Village", damage: 0, cost: 0, description: "Passif: Si un Villageois est présent, les dégâts sont doublés.", function: "passive", autoActivate: true },
+   { id: 12, name: "Tir de précision", damage: 8, cost: 0, description: "Inflige 8 PV à l'adversaire.", function: "attackDirectPlayer"},
 ];
 
 

@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import { CombatState, Player, Action, InGameCard } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState, checkVictory, drawCard as drawCardLogic } from "../functions/gameLogic";
-import { AttackOneMob, heal, drawCard, applyEffect, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie } from "../functions/attackFunctions";
+import { AttackOneMob, heal, drawCard, applyEffect, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer } from "../functions/attackFunctions";
 import { checkVillageGuardian } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
@@ -40,6 +40,10 @@ function executeAction( state: CombatState, action: Action, attacker: InGameCard
     case "voleEnergie":
       if (!action.damage) return;
       return voleEnergie(state, attacker, target, action.damage, opponent);
+
+    case "attackDirectPlayer":
+      if (!action.damage) return;
+      return attackDirectPlayer(state, attacker, action.damage, opponent);
 
     case "AttackAllMobs":
       if (!action.damage) return;
