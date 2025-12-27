@@ -2,7 +2,8 @@ import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, checkVillageGuardian } from "./testEffectFonctions";
-import { applyPotionRegen } from "./attackFunctions";
+import { applyPotionRegen } from "./cartes/attackFunction";
+import { healPlayer } from "./cartes/artefactFunction";
 
 
 // --- Piocher une carte ---
@@ -48,11 +49,15 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
     if (found.effet) {
       const action = actionList.find(a => a.name === found.effet);
       if (action) {
-        if (!player.effects) player.effects = [];
-        console.log(`[DEBUG] Avant ajout: player.effects = ${JSON.stringify(player.effects)}`);
-        player.effects.push(action.name);
-        console.log(`[DEBUG] Après ajout: player.effects = ${JSON.stringify(player.effects)}`);
-        io.to(roomId).emit("log", `[Effet] ${player.id} active ${action.name}.`);
+        if (action.function === "healPlayer") {
+          const combatState = { log: [] as string[] };
+          healPlayer(combatState, player, action.damage);
+          combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+        } else {
+          if (!player.effects) player.effects = [];
+          player.effects.push(action.name);
+          io.to(roomId).emit("log", `[Effet] ${player.id} active ${action.name}.`);
+        }
       }
     }
     // L'artefact est consommé et va dans la défausse

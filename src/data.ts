@@ -16,6 +16,7 @@ export const actionList: Action[] = [
    { id: 11, name: "Gardien du Village", damage: 0, cost: 0, description: "Passif: Si un Villageois est présent, les dégâts sont doublés.", function: "passive", autoActivate: true },
    { id: 12, name: "Tir de précision", damage: 8, cost: 0, description: "Inflige 8 PV à l'adversaire.", function: "attackDirectPlayer"},
    { id: 13, name: "Potion", damage: 10, cost: 2, description: "Soigne le mob rattaché de 10 PV à chaque tour.", function: "potionRegen" },
+   { id: 14, name: "Lit", damage: 25, cost: 2, description: "Soigne votre joueur de 25 dégâts.", function: "healPlayer" },
 ];
 
 
@@ -103,6 +104,14 @@ export const cardList: InGameCard[] = [
     effet: "Potion",
     cost: 2,
     category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Lit",
+    imageName: "lit",
+    effet: "Lit",
+    cost: 2,
+    category: "artefact",
   },
 ];
 

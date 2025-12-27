@@ -2,7 +2,8 @@ import { Server, Socket } from "socket.io";
 import { CombatState, Player, Action, InGameCard } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState, checkVictory, drawCard as drawCardLogic } from "../functions/gameLogic";
-import { AttackOneMob, heal, drawCard, applyEffect, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer } from "../functions/attackFunctions";
+import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer } from "../functions/cartes/attackFunction";
+import { drawCard} from "../functions/cartes/talentFunction";
 import { checkVillageGuardian } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
