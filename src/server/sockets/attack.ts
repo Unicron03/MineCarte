@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import { CombatState, Player, Action, InGameCard } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState, checkVictory, drawCard as drawCardLogic } from "../functions/gameLogic";
-import { AttackOneMob, heal, drawCard, applyEffect, AttackAllMobs, attackEsquive, damageAndDie } from "../functions/attackFunctions";
+import { AttackOneMob, heal, drawCard, applyEffect, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie } from "../functions/attackFunctions";
 import { checkVillageGuardian } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
@@ -36,6 +36,10 @@ function executeAction( state: CombatState, action: Action, attacker: InGameCard
     case "damageAndDie":
       if (!action.damage) return;
       return damageAndDie(state, attacker, target, action.damage, player, opponent);
+
+    case "voleEnergie":
+      if (!action.damage) return;
+      return voleEnergie(state, attacker, target, action.damage, opponent);
 
     case "AttackAllMobs":
       if (!action.damage) return;
@@ -129,7 +133,7 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
     }
 
     // Cas 2 : Attaque ciblée -> Demander une cible ennemie
-    if (action.function === "AttackOneMob" || action.function === "attackEsquive" || action.function === "damageAndDie") {
+    if (action.function === "AttackOneMob" || action.function === "attackEsquive" || action.function === "damageAndDie" || action.function === "voleEnergie") {
       // On ne demande de cibler que s'il y a des mobs en face
       const hasMobs = opponent.board.some((c: InGameCard) => c.category === "mob");
 

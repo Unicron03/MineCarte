@@ -4,7 +4,7 @@ import type { Action, InGameCard} from "./typesPvp";
 // === Liste des actions (exemples) ===
 export const actionList: Action[] = [
    { id: 1, name: "Morsure", damage: 15, cost: 1, description: "Une morsure violente.", function: "AttackOneMob", requiresTarget: true },
-   { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Attaque faible mais gratuite.", function: "AttackOneMob", requiresTarget: true },
+   { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Inflige 5 PV à un mob adverse et retire une énergie à l'adversaire.", function: "voleEnergie", requiresTarget: true },
    { id: 3, name: "Table de craft", damage: 3, cost: 1, description: "Réduit le coût de la prochaine carte de 3.", function: "applyEffect"},
    { id: 4, name: "Enclume", damage: 0, cost: 0, description: "Récupère un équipement de la défausse.", function: "anvilEffect" },
    { id: 5, name: "Armure", damage: 0, cost: 2, description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.", function: "armure" },
@@ -13,7 +13,7 @@ export const actionList: Action[] = [
    { id: 8, name: "Téléportation", damage: 0, cost: 0, description: "Pioche 1 cartes.", function: "drawCard" },
    { id: 9, name: "Téléportation Furtive", damage: 30, cost: 3, description: "Inflige 30 PV à un mob de l'adversaire & A une chance d'esquiver tous les dégâts d'une attaque lors du prochain tour", function: "attackEsquive", requiresTarget: true },
    { id: 10, name: "Explosion", damage: 60, cost: 0, description: "Inflige 60 PV et meurt instantanément ensuite.", function: "damageAndDie", requiresTarget: true },
-   { id: 11, name: "Gardien du Village", damage: 0, cost: 0, description: "Passif: Si un Villageois est présent, les dégâts sont doublés.", function: "passive", autoActivate: true }
+   { id: 11, name: "Gardien du Village", damage: 0, cost: 0, description: "Passif: Si un Villageois est présent, les dégâts sont doublés.", function: "passive", autoActivate: true },
 ];
 
 

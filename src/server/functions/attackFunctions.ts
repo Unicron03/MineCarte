@@ -252,6 +252,30 @@ export function damageAndDie(
   return result;
 }
 
+// Inflige des dégâts et vole de l'énergie à l'adversaire
+export function voleEnergie(
+  state: CombatState,
+  attacker: InGameCard,
+  target: InGameCard | null,
+  amount: number,
+  opponent: Player
+): { killed: boolean } | void {
+  // 1. Infliger les dégâts (réutilisation de la logique standard)
+  const result = AttackOneMob(state, attacker, target, amount, opponent);
+
+  // Si l'attaque n'a pas été exécutée (ex: cible invalide), on arrête ici
+  if (result === undefined) return;
+
+  // 2. Retirer de l'énergie à l'adversaire
+  if (opponent && opponent.energie > 0) {
+    opponent.energie -= 1;
+    state.log.push(`L'adversaire se fait voler 1 énergie !`);
+  } else {
+    state.log.push(`L'adversaire n'a plus d'énergie à voler.`);
+  }
+
+  return result;
+}
 
 
 
