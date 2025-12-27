@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, checkVillageGuardian } from "./testEffectFonctions";
+import { applyPotionRegen } from "./attackFunctions";
 
 
 // --- Piocher une carte ---
@@ -135,11 +136,15 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
   state.turnIndex = (state.turnIndex + 1) % 2;
   const current = state.players[state.turnIndex];
 
+  // --- Début du tour : Effets passifs (Potion, etc.) ---
+  const combatState = { log: [] as string[] };
+  applyPotionRegen(combatState, current);
+  combatState.log.forEach((msg) => io.to(state.roomId).emit("log", msg));
+
   // Réinitialiser le statut d'attaque des mobs du joueur qui commence son tour
   current.board.forEach((card: InGameCard) => {
     card.hasAttacked = false;
     card.hasUsedTalent = false;
-
     // Retirer l'effet Esquive au début du tour du propriétaire (fin de l'effet temporaire)
     if (card.category === "mob" && card.effects) {
       const index = card.effects.indexOf("Esquive");

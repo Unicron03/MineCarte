@@ -41,6 +41,7 @@ const baseDeck1 = [
   createCard("Golem", 3, "mob", 55, "Gardien du Village", "Morsure", "Affamé"),
   createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
   createCard("Armure", 2, "equipement", 10, null, null, null),
+  createCard("Potion", 2, "equipement", 10, "Potion", null, null),
 ];
 
 const baseDeck2 = [...baseDeck1];

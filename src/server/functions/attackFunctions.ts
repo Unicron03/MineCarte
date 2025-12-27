@@ -295,6 +295,25 @@ export function attackDirectPlayer(
   return { killed: opponent.pv <= 0 };
 }
 
+// Applique l'effet de régénération de la Potion (équipement)
+// À appeler au début du tour
+export function applyPotionRegen(
+  state: CombatState,
+  player: Player
+): void {
+  player.board.forEach((card) => {
+    if (card.category === "mob" && card.equipment) {
+      const hasPotion = card.equipment.some((eq) => eq.name === "Potion");
+      if (hasPotion) {
+        state.log.push(`[Potion] La potion s'active sur ${card.name}.`);
+        // La potion soigne de 10 PV (défini par la carte, mais on force 10 ici pour la logique)
+        heal(state, card, 10);
+      }
+    }
+  });
+}
+
+
 
 // --------------------- Je suis pas sûr d'en avoir vraiment besoin ---------------------
 
