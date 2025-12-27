@@ -38,6 +38,29 @@ const CardPVP: React.FC<CardPVPProps> = ({
   
   return (
     <div className={`relative w-[120px] h-[180px] bg-yellow-100 border-2 ${borderColor} rounded-lg shadow-lg flex flex-col overflow-hidden`}>
+      {/* --- Affichage des Effets (En bas à gauche) --- */}
+      {card.effects && card.effects.length > 0 && (
+        <div className="absolute bottom-2 left-2 z-20 flex flex-row flex-wrap gap-1 max-w-[80%]">
+          {card.effects.map((effect, index) => (
+            <div 
+              key={index}
+              title={effect}
+              className="w-8 h-8 rounded-full border-2 border-white bg-gray-800 overflow-hidden shadow-md"
+            >
+              <img 
+                src={`/card/${effect}.png`} 
+                alt={effect}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).parentElement!.style.backgroundColor = effect === "Esquive" ? "#bdc3c7" : "#e74c3c";
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Image */}
       <img
         src={imgSrc}

@@ -3,14 +3,16 @@ import type { Action, InGameCard} from "./typesPvp";
 
 // === Liste des actions (exemples) ===
 export const actionList: Action[] = [
-   { id: 1, name: "Morsure", damage: 15, cost: 1, description: "Une morsure violente.", function: "AttackOneMob" },
-   { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Attaque faible mais gratuite.", function: "AttackOneMob" },
+   { id: 1, name: "Morsure", damage: 15, cost: 1, description: "Une morsure violente.", function: "AttackOneMob", requiresTarget: true },
+   { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Attaque faible mais gratuite.", function: "AttackOneMob", requiresTarget: true },
    { id: 3, name: "Table de craft", damage: 3, cost: 1, description: "Réduit le coût de la prochaine carte de 3.", function: "applyEffect"},
    { id: 4, name: "Enclume", damage: 0, cost: 0, description: "Récupère un équipement de la défausse.", function: "anvilEffect" },
    { id: 5, name: "Armure", damage: 0, cost: 2, description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.", function: "armure" },
    { id: 6, name: "Coup d'ombre", damage: 10, cost: 2, description: "Inflige 10 PV à chaque mob adverse.", function: "AttackAllMobs" },
-   { id: 7, name: "Soin", damage: 10, cost: 2, description: "Soigne 10 PV à un mob", function: "heal" },
+   { id: 7, name: "Soin", damage: 10, cost: 2, description: "Soigne 10 PV à un mob", function: "heal", requiresTarget: true },
    { id: 8, name: "Téléportation", damage: 0, cost: 0, description: "Pioche 1 cartes.", function: "drawCard" },
+   { id: 9, name: "Téléportation Furtive", damage: 30, cost: 3, description: "Inflige 30 PV à un mob de l'adversaire & A une chance d'esquiver tous les dégâts d'une attaque lors du prochain tour", function: "attackEsquive", requiresTarget: true },
+   { id: 10, name: "Explosion", damage: 60, cost: 0, description: "Inflige 60 PV et meurt instantanément ensuite.", function: "damageAndDie", requiresTarget: true }
 ];
 
 
@@ -60,6 +62,16 @@ export const cardList: InGameCard[] = [
     effet: "Armure",
     cost: 2,
     category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Gast",
+    imageName: "Gast",
+    attack1: "Téléportation Furtive",
+    attack2: "Explosion",
+    pv_durability: 25,
+    cost: 1,
+    category: "mob",
   },
 ];
 

@@ -46,3 +46,14 @@ export function applyCraftTableEffect(
 
   return finalCost;
 }
+
+// Vérifie si une cible esquive l'attaque (45% de chance)
+export function hasEsquive(target: InGameCard, state: CombatState): boolean {
+  if (target.effects?.includes("Esquive")) {
+    if (Math.random() < 0.45) {
+      state.log.push(`${target.name} esquive l'attaque grâce à sa furtivité !`);
+      return true;
+    }
+  }
+  return false;
+}

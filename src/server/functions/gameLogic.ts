@@ -136,6 +136,14 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
   current.board.forEach((card: InGameCard) => {
     card.hasAttacked = false;
     card.hasUsedTalent = false;
+
+    // Retirer l'effet Esquive au début du tour du propriétaire (fin de l'effet temporaire)
+    if (card.category === "mob" && card.effects) {
+      const index = card.effects.indexOf("Esquive");
+      if (index !== -1) {
+        card.effects.splice(index, 1);
+      }
+    }
   });
 
   // on incrémente ici pour indiquer que le joueur "commence" un nouveau tour

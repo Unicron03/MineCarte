@@ -13,6 +13,7 @@ export type InGameCard = {
     attack1?: string | null;
     attack2?:  string | null;
     equipment?: InGameCard[];
+    effects?: string[];
 } | {
       uuid: string;
       category: "equipement" | "artefact";
@@ -20,6 +21,7 @@ export type InGameCard = {
       cost: number;
       imageName: string;
       effet?: string;
+      effects?: undefined;
       equipment?: undefined;
       pv_durability?: undefined;
       max_pv?: undefined;
@@ -71,6 +73,7 @@ export type Action = {
     damage: number;
     cost: number;
     multiTarget?: boolean;
+    requiresTarget?: boolean;
     autoActivate?: boolean;
     function?: string;
 };
