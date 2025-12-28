@@ -18,7 +18,7 @@ import { EquipmentBadge } from "@/components/PVP/EquipmentBadge";
 
 export default function GamePage() {
     // On récupère les infos de base, mais on va surcharger la logique d'attaque
-    const { endGameResult, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic();
+    const { endGameResult, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler, cancelOffensiveArtifact } = useGameLogic();
     
     const router = useRouter(); 
     const socket = getSocket();
@@ -30,12 +30,24 @@ export default function GamePage() {
     // --- État pour la modale d'équipement ---
     const [equipmentModal, setEquipmentModal] = useState<{ show: boolean; cardName: string; targets: any[] } | null>(null);
 
+    // --- État pour la modale d'artefact offensif (TNT) ---
+    const [offensiveArtifactModal, setOffensiveArtifactModal] = useState<{ show: boolean; cardName: string; targets: any[] } | null>(null);
+
     useEffect(() => {
         if (!socket) return;
 
         // Écoute de la demande de sélection de cible pour équipement
         socket.on("selectTargetForEquipment", (data: any) => {
             setEquipmentModal({
+                show: true,
+                cardName: data.cardName,
+                targets: data.targets
+            });
+        });
+
+        // Écoute de la demande de sélection de cible pour artefact offensif (TNT)
+        socket.on("selectTargetForOffensiveArtifact", (data: any) => {
+            setOffensiveArtifactModal({
                 show: true,
                 cardName: data.cardName,
                 targets: data.targets
@@ -55,6 +67,7 @@ export default function GamePage() {
 
         return () => {
             socket.off("selectTargetForEquipment");
+            socket.off("selectTargetForOffensiveArtifact");
             socket.off("selectAllyTarget");
             socket.off("selectEnemyTarget");
         };
@@ -70,6 +83,16 @@ export default function GamePage() {
     const handleSelectEquipmentTarget = (targetIndex: number) => {
         socket.emit("selectTargetForEquipment", { targetIndex });
         setEquipmentModal(null);
+    };
+
+    const handleCancelOffensiveArtifact = () => {
+        cancelOffensiveArtifact(); // Utilise la fonction du hook pour nettoyer l'état global et émettre l'annulation
+        setOffensiveArtifactModal(null);
+    };
+
+    const handleSelectOffensiveArtifactTarget = (targetIndex: number) => {
+        socket.emit("selectTargetForOffensiveArtifact", { targetIndex });
+        setOffensiveArtifactModal(null);
     };
 
     // Nouvelle fonction pour initier l'attaque
@@ -381,6 +404,41 @@ export default function GamePage() {
                         <button 
                             onClick={handleCancelEquipment}
                             className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-bold"
+                        >
+                            Annuler
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* --- MODALE DE SÉLECTION D'ARTEFACT OFFENSIF (TNT) --- */}
+            {offensiveArtifactModal && offensiveArtifactModal.show && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+                    <div className="bg-gray-900 border-2 border-red-500 p-6 rounded-lg text-center max-w-2xl w-full">
+                        <h3 className="text-2xl text-red-400 font-bold mb-4">
+                            Utiliser {offensiveArtifactModal.cardName}
+                        </h3>
+                        <p className="text-white mb-6">Sélectionnez une cible ennemie :</p>
+                        
+                        <div className="flex flex-wrap justify-center gap-4 mb-6">
+                            {offensiveArtifactModal.targets.map((mob: any) => (
+                                <div 
+                                    key={mob.boardIndex}
+                                    onClick={() => handleSelectOffensiveArtifactTarget(mob.boardIndex)}
+                                    className="cursor-pointer hover:scale-105 transition-transform border border-gray-500 rounded p-2 bg-black/50 hover:border-red-400"
+                                >
+                                    <CardPVP 
+                                        card={mob} 
+                                        overrides={{ cost: mob.cost, pv_durability: mob.pv_durability }}
+                                        clickable={false} 
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        <button 
+                            onClick={handleCancelOffensiveArtifact}
+                            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded font-bold"
                         >
                             Annuler
                         </button>

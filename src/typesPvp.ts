@@ -39,6 +39,7 @@ export type CardPVPProps = {
     };
     onTalentClick?: () => void;
     onAttackClick?: (attackName: string) => void;
+    onClick?: () => void;
 };
 
 // Joueur (utilisé pour le pvp)
@@ -55,6 +56,7 @@ export type Player = {
     userId?: string; 
     effects?: string[];
     pendingEquipment?: { cardIndex: number };
+    pendingOffensiveArtifact?: { cardIndex: number };
     _disconnectedAt: number | null; 
 };
 
@@ -76,6 +78,7 @@ export type Action = {
     requiresTarget?: boolean;
     autoActivate?: boolean;
     function?: string;
+    targetType?: "ally" | "enemy";
 };
 
 

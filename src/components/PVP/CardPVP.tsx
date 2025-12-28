@@ -8,6 +8,7 @@ const CardPVP: React.FC<CardPVPProps> = ({
   overrides,
   onTalentClick,
   onAttackClick,
+  onClick,
 }) => {
   const finalCost = overrides?.cost ?? card.cost ?? 0;
   
@@ -41,7 +42,10 @@ const CardPVP: React.FC<CardPVPProps> = ({
   const imgSrc = `/card/${card.imageName}.png`;
   
   return (
-    <div className={`relative w-[120px] h-[180px] bg-yellow-100 border-2 ${borderColor} rounded-lg shadow-lg flex flex-col overflow-hidden`}>
+    <div 
+      className={`relative w-[120px] h-[180px] bg-yellow-100 border-2 ${borderColor} rounded-lg shadow-lg flex flex-col overflow-hidden ${clickable && onClick ? "cursor-pointer hover:scale-105 transition-transform" : ""}`}
+      onClick={clickable && onClick ? onClick : undefined}
+    >
       {/* --- Affichage des Effets (En bas à gauche) --- */}
       {card.effects && card.effects.length > 0 && (
         <div className="absolute bottom-2 left-2 z-20 flex flex-row flex-wrap gap-1 max-w-[80%]">

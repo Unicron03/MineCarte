@@ -1,6 +1,7 @@
 import type { Server, Socket } from "socket.io";
 import { playCard } from "../functions/gameLogic";
 import { sendGameState } from "../functions/gameLogic";
+import { actionList } from "../../data";
 
 export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, any>) {
   socket.on("playCard", ({ cardIndex }) => {
@@ -37,6 +38,32 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, an
       });
       io.to(socket.id).emit("log", `Veuillez sélectionner un monstre à équiper avec ${card.name}.`);
       return;
+    }
+
+    // Gérer les artefacts offensifs qui nécessitent une cible ennemie (ex: TNT)
+    if (card.category === "artefact") {
+      const actionName = card.effet || card.name;
+      const actionDef = actionList.find((a) => a.name === actionName || a.function === "tntEffect");
+
+      if (actionDef && actionDef.requiresTarget && actionDef.targetType === "enemy") {
+        const opponent = state.players.find((p: any) => p.id !== player.id);
+        const availableTargets = opponent.board
+          .map((c: any, index: number) => ({ ...c, boardIndex: index }))
+          .filter((c: any) => c.category === "mob");
+
+        if (availableTargets.length === 0) {
+          io.to(socket.id).emit("log", "Aucune cible ennemie disponible.");
+          return;
+        }
+
+        player.pendingOffensiveArtifact = { cardIndex };
+        io.to(socket.id).emit("selectTargetForOffensiveArtifact", {
+          cardName: card.name,
+          targets: availableTargets,
+        });
+        io.to(socket.id).emit("log", `Sélectionnez une cible ennemie pour ${card.name}.`);
+        return;
+      }
     }
 
     const opponent = state.players.find((p: any) => p.id !== player.id);

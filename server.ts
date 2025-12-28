@@ -13,6 +13,8 @@ import { quitSocket } from "./src/server/sockets/quit";
 import { disconnectSocket } from "./src/server/sockets/disconnect";
 import { selectTargetForEquipmentSocket } from "./src/server/sockets/selectTargetForEquipment";
 import { cancelEquipmentSocket } from "./src/server/sockets/cancelEquipment";
+import { selectTargetForOffensiveArtifactSocket } from "./src/server/sockets/selectTargetForOffensiveArtifact";
+import { cancelOffensiveArtifactSocket } from "./src/server/sockets/cancelOffensiveArtifact";
 import { useTalentSocket } from "./src/server/sockets/useTalent";
 import type { GameState, Player } from "./src/typesPvp";
 
@@ -43,6 +45,8 @@ const baseDeck1 = [
   createCard("Armure", 2, "equipement", 10, null, null, null),
   createCard("Potion", 2, "equipement", 10, "Potion", null, null),
   createCard("Lit", 2, "artefact", null, "Lit", null, null),
+  createCard("Livre", 1, "artefact", null, "Livre", null, null),
+  createCard("TNT", 2, "artefact", null, "TNT", null, null),
 ];
 
 const baseDeck2 = [...baseDeck1];
@@ -110,6 +114,10 @@ io.on("connection", (socket: Socket) => {
   // --- Quand le client veut sélectionner une cible pour un équipement ---
   selectTargetForEquipmentSocket(io, socket, rooms);
   cancelEquipmentSocket(io, socket, rooms);
+
+  // --- Quand le client veut sélectionner une cible pour un artefact offensif (TNT) ---
+  selectTargetForOffensiveArtifactSocket(io, socket, rooms);
+  cancelOffensiveArtifactSocket(io, socket, rooms);
 
   // --- Quand le client veut utiliser un talent ---
   useTalentSocket(io, socket, rooms);

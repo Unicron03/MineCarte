@@ -276,6 +276,10 @@ export const useGameLogic = () => {
         router.push("/");
     }, [gameState?.roomId, socket, router]);
 
+    const cancelOffensiveArtifact = useCallback(() => {
+        socket.emit("cancelOffensiveArtifact");
+    }, [socket]);
+
 
     const me = gameState?.players.find((p) => p.id === myId);
     const opponent = gameState?.players.find((p) => p.id !== me?.id);
@@ -296,6 +300,7 @@ export const useGameLogic = () => {
         playCard,
         attack,
         targetCard,
+        cancelOffensiveArtifact,
         endTurn,
         quitHandler,
     };

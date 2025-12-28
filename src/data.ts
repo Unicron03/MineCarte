@@ -17,6 +17,8 @@ export const actionList: Action[] = [
    { id: 12, name: "Tir de précision", damage: 8, cost: 0, description: "Inflige 8 PV à l'adversaire.", function: "attackDirectPlayer"},
    { id: 13, name: "Potion", damage: 10, cost: 2, description: "Soigne le mob rattaché de 10 PV à chaque tour.", function: "potionRegen" },
    { id: 14, name: "Lit", damage: 25, cost: 2, description: "Soigne votre joueur de 25 dégâts.", function: "healPlayer" },
+   { id: 15, name: "Livre", damage: 2, cost: 1, description: "Pioche 2 cartes.", function: "drawCardsEffect" },
+   { id: 16, name: "TNT", damage: 30, cost: 2, description: "Inflige 30 dégâts à une carte ennemie.", function: "tntEffect", requiresTarget: true, targetType: "enemy" },
 ];
 
 
