@@ -45,6 +45,7 @@ const baseDeck1 = [
   createCard("Livre", 1, "artefact", null, "Livre", null, null),
   createCard("TNT", 2, "artefact", null, "TNT", null, null),
   createCard("Lingot de fer", 1, "artefact", null, "Lingot de fer", null, null),
+  createCard("End Crystal", 2, "artefact", null, "End Crystal", null, null),
 ];
 
 const baseDeck2 = [...baseDeck1];

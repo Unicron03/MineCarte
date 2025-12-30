@@ -4,7 +4,7 @@ import { Server, Socket } from "socket.io";
 import { GameState, Player, CombatState } from "../../typesPvp";
 import { sendGameState } from "../functions/gameLogic";
 import { actionList } from "../../data";
-import { applyArtifactDamage, healGolem } from "../functions/cartes/artefactFunction";
+import { applyArtifactDamage, healGolem, halveLifeEffect } from "../functions/cartes/artefactFunction";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 
 export const targetSelectionSocket = (
@@ -90,6 +90,15 @@ export const targetSelectionSocket = (
             combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
 
             // La carte jouée est consommée (mise au cimetière)
+            player.discard.push(sourceCard);
+            player.hand.splice(pending.sourceHandIndex, 1);
+        } else if (actionDef && actionDef.function === "halveLifeEffect") {
+            const combatState: CombatState = { log: [] };
+            
+            halveLifeEffect(io, roomId, combatState, opponent, targetIndex, sourceCard.name);
+
+            combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+            
             player.discard.push(sourceCard);
             player.hand.splice(pending.sourceHandIndex, 1);
         } else {

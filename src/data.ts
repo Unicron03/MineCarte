@@ -20,6 +20,7 @@ export const actionList: Action[] = [
    { id: 15, name: "Livre", damage: 2, cost: 1, description: "Pioche 2 cartes.", function: "drawCardsEffect" },
    { id: 16, name: "TNT", damage: 30, cost: 2, description: "Inflige 30 dégâts à une carte ennemie.", function: "applyArtifactDamage", requiresTarget: true, targetType: "enemy" },
    { id: 17, name: "Lingot de fer", damage: 20, cost: 1, description: "Soigne 20 PV d'un Golem allié.", function: "healGolem", requiresTarget: true, targetType: "ally" },
+   { id: 18, name: "End Crystal", damage: 0, cost: 2, description: "Réduit de moitié la vie d'un mob adverse. (L'armure ne fonctionne pas)", function: "halveLifeEffect", requiresTarget: true, targetType: "enemy" },
 ];
 
 
@@ -122,6 +123,14 @@ export const cardList: InGameCard[] = [
     imageName: "lingot_fer", // Assurez-vous d'avoir une image ou mettez un placeholder
     effet: "Lingot de fer",
     cost: 1,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "End Crystal",
+    imageName: "end_crystal", // Assurez-vous d'avoir l'image ou un placeholder
+    effet: "End Crystal",
+    cost: 2,
     category: "artefact",
   },
 ];

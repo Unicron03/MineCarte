@@ -96,3 +96,31 @@ export function healGolem(
     state.log.push(`${sourceName} répare ${targetCard.name} de ${healAmount} PV.`);
   }
 }
+
+// Effet End Crystal : Divise la vie par 2
+export function halveLifeEffect(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  opponent: Player,
+  targetIndex: number,
+  sourceName: string
+): void {
+  const targetCard = opponent.board[targetIndex];
+
+  if (!targetCard || targetCard.pv_durability === undefined) {
+    state.log.push(`Cible invalide pour ${sourceName}.`);
+    return;
+  }
+
+  const damage = Math.ceil(targetCard.pv_durability / 2);
+  targetCard.pv_durability -= damage;
+  state.log.push(`${sourceName} réduit la vie de ${targetCard.name} de moitié (-${damage} PV) !`);
+
+  if (targetCard.pv_durability <= 0) {
+    state.log.push(`${targetCard.name} est détruit !`);
+    opponent.board.splice(targetIndex, 1);
+    opponent.discard.push(targetCard);
+    checkVillageGuardian(opponent, io, roomId);
+  }
+}
