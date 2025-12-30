@@ -29,32 +29,32 @@ export function drawCardsEffect(
   drawCard(state, player, amount);
 }
 
-// Effet TNT : Inflige des dégâts à un mob ennemi
-export function tntEffect(
+// Effet générique pour les artefacts offensifs (ex: TNT, Boule de feu...)
+export function applyArtifactDamage(
   io: Server,
   roomId: string,
   state: CombatState,
-  player: Player,
   opponent: Player,
   targetIndex: number,
-  damage: number
+  damage: number,
+  sourceName: string
 ): void {
   const targetCard = opponent.board[targetIndex];
 
   if (!targetCard) {
-    state.log.push(`${player.id} a essayé d'utiliser TNT sur une cible inexistante.`);
+    state.log.push(`Cible inexistante pour ${sourceName}.`);
     return;
   }
 
   if (targetCard.pv_durability !== undefined) {
     const finalDamage = applyArmorEffect(targetCard, damage, state);
     targetCard.pv_durability -= finalDamage;
-    state.log.push(`${player.id} lance une TNT sur ${targetCard.name} et inflige ${finalDamage} dégâts !`);
+    state.log.push(`${sourceName} inflige ${finalDamage} dégâts à ${targetCard.name} !`);
 
     if (targetCard.pv_durability <= 0) {
       // Gestion des dégâts excédentaires (Trample)
       if (targetCard.pv_durability < 0) {
-        transfertDamageToPlayer(state, Math.abs(targetCard.pv_durability), opponent, "TNT");
+        transfertDamageToPlayer(state, Math.abs(targetCard.pv_durability), opponent, sourceName);
       }
 
       state.log.push(`${targetCard.name} a explosé et est détruit !`);
@@ -64,5 +64,35 @@ export function tntEffect(
       // On vérifie les synergies (ex: Golem perd son buff si Villageois meurt)
       checkVillageGuardian(opponent, io, roomId);
     }
+  }
+}
+
+// Effet spécifique : Soigne un Golem allié
+export function healGolem(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  player: Player, // Le joueur propriétaire du Golem
+  targetIndex: number,
+  amount: number,
+  sourceName: string
+): void {
+  const targetCard = player.board[targetIndex];
+
+  if (!targetCard) return;
+
+  // Vérification de sécurité supplémentaire (normalement filtré en amont)
+  if (targetCard.name !== "Golem") {
+    state.log.push(`${sourceName} ne peut être utilisé que sur un Golem.`);
+    return;
+  }
+
+  if (targetCard.pv_durability !== undefined) {
+    const max = targetCard.max_pv ?? targetCard.pv_durability;
+    // On ne soigne pas au-delà du max
+    const healAmount = Math.min(amount, max - targetCard.pv_durability);
+    
+    targetCard.pv_durability += healAmount;
+    state.log.push(`${sourceName} répare ${targetCard.name} de ${healAmount} PV.`);
   }
 }

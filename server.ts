@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { randomUUID } from "crypto";
 import { Server, Socket } from "socket.io";
 
-import { createPlayer, createCard } from "./src/server/functions/builder"; // createCard est utilisé ici maintenant
+import { createPlayer, createCard } from "./src/server/functions/builder";
 import { sendGameState, handleMatchmaking, applyEnergyGain } from "./src/server/functions/gameLogic";
 
 import { attackSocket } from "./src/server/sockets/attack";
@@ -11,10 +11,7 @@ import { playCardSocket } from "./src/server/sockets/playCard";
 import { endTurnSocket } from "./src/server/sockets/endTurn";
 import { quitSocket } from "./src/server/sockets/quit";
 import { disconnectSocket } from "./src/server/sockets/disconnect";
-import { selectTargetForEquipmentSocket } from "./src/server/sockets/selectTargetForEquipment";
-import { cancelEquipmentSocket } from "./src/server/sockets/cancelEquipment";
-import { selectTargetForOffensiveArtifactSocket } from "./src/server/sockets/selectTargetForOffensiveArtifact";
-import { cancelOffensiveArtifactSocket } from "./src/server/sockets/cancelOffensiveArtifact";
+import { targetSelectionSocket } from "./src/server/sockets/targetSelection";
 import { useTalentSocket } from "./src/server/sockets/useTalent";
 import type { GameState, Player } from "./src/typesPvp";
 
@@ -47,6 +44,7 @@ const baseDeck1 = [
   createCard("Lit", 2, "artefact", null, "Lit", null, null),
   createCard("Livre", 1, "artefact", null, "Livre", null, null),
   createCard("TNT", 2, "artefact", null, "TNT", null, null),
+  createCard("Lingot de fer", 1, "artefact", null, "Lingot de fer", null, null),
 ];
 
 const baseDeck2 = [...baseDeck1];
@@ -111,13 +109,8 @@ io.on("connection", (socket: Socket) => {
   });
   playCardSocket(io, socket, rooms);
 
-  // --- Quand le client veut sélectionner une cible pour un équipement ---
-  selectTargetForEquipmentSocket(io, socket, rooms);
-  cancelEquipmentSocket(io, socket, rooms);
-
-  // --- Quand le client veut sélectionner une cible pour un artefact offensif (TNT) ---
-  selectTargetForOffensiveArtifactSocket(io, socket, rooms);
-  cancelOffensiveArtifactSocket(io, socket, rooms);
+  // --- Gestion générique de la sélection de cible ---
+  targetSelectionSocket(io, socket, rooms);
 
   // --- Quand le client veut utiliser un talent ---
   useTalentSocket(io, socket, rooms);

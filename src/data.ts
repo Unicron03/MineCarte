@@ -18,7 +18,8 @@ export const actionList: Action[] = [
    { id: 13, name: "Potion", damage: 10, cost: 2, description: "Soigne le mob rattaché de 10 PV à chaque tour.", function: "potionRegen" },
    { id: 14, name: "Lit", damage: 25, cost: 2, description: "Soigne votre joueur de 25 dégâts.", function: "healPlayer" },
    { id: 15, name: "Livre", damage: 2, cost: 1, description: "Pioche 2 cartes.", function: "drawCardsEffect" },
-   { id: 16, name: "TNT", damage: 30, cost: 2, description: "Inflige 30 dégâts à une carte ennemie.", function: "tntEffect", requiresTarget: true, targetType: "enemy" },
+   { id: 16, name: "TNT", damage: 30, cost: 2, description: "Inflige 30 dégâts à une carte ennemie.", function: "applyArtifactDamage", requiresTarget: true, targetType: "enemy" },
+   { id: 17, name: "Lingot de fer", damage: 20, cost: 1, description: "Soigne 20 PV d'un Golem allié.", function: "healGolem", requiresTarget: true, targetType: "ally" },
 ];
 
 
@@ -113,6 +114,14 @@ export const cardList: InGameCard[] = [
     imageName: "lit",
     effet: "Lit",
     cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Lingot de fer",
+    imageName: "lingot_fer", // Assurez-vous d'avoir une image ou mettez un placeholder
+    effet: "Lingot de fer",
+    cost: 1,
     category: "artefact",
   },
 ];

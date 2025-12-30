@@ -93,6 +93,11 @@ function finalizeAttack(
     checkVillageGuardian(opponent, io, roomId);
   }
 
+  // Si c'est une attaque de zone (AttackAllMobs), des mobs ont pu mourir sans déclencher le bloc ci-dessus.
+  if (action.function === "AttackAllMobs") {
+    checkVillageGuardian(opponent, io, roomId);
+  }
+
   // Gestion de la défaite du joueur (qui peut arriver sur une attaque directe ou AOE si pas de mobs)
   if (result?.killed && !target && action.function !== "heal") { 
     state.log.push(`Le joueur est vaincu !`);

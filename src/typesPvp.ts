@@ -42,6 +42,15 @@ export type CardPVPProps = {
     onClick?: () => void;
 };
 
+// Type pour une action en attente de sélection de cible
+export type PendingAction = {
+    type: "EQUIPMENT" | "OFFENSIVE_ARTIFACT" | "SUPPORT_ARTIFACT" | "SPELL" | "ATTACK";
+    sourceHandIndex: number; // L'index de la carte jouée dans la main
+    validTargetIndices: number[]; // Les index valides sur le plateau cible
+    targetPlayerId: string; // L'ID du joueur ciblé (soi-même ou adversaire)
+    actionData?: any; // Données supplémentaires (ex: montant dégâts)
+};
+
 // Joueur (utilisé pour le pvp)
 export type Player = {
     id: string;
@@ -55,8 +64,7 @@ export type Player = {
     token: string;  // jeton d'authentification
     userId?: string; 
     effects?: string[];
-    pendingEquipment?: { cardIndex: number };
-    pendingOffensiveArtifact?: { cardIndex: number };
+    pendingAction: PendingAction | null;
     _disconnectedAt: number | null; 
 };
 

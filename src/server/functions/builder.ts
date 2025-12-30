@@ -53,5 +53,6 @@ export function createPlayer( socketId: string, deck: InGameCard[], token: strin
     turnCount: 0,
     effects: [],
     _disconnectedAt: null,
+    pendingAction: null,
   };
 }
