@@ -32,10 +32,14 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
     if (card.category === "equipement") {
       const availableTargets = player.board
         .map((c, index) => ({ ...c, boardIndex: index }))
-        .filter((c) => c.category === "mob");
+        .filter((c) => c.category === "mob" && (!c.equipment || c.equipment.length === 0));
 
       if (availableTargets.length === 0) {
-        io.to(socket.id).emit("log", "Vous devez avoir un monstre sur le terrain pour jouer un équipement.");
+        const hasMobs = player.board.some((c) => c.category === "mob");
+        const msg = hasMobs 
+          ? "Tous vos monstres sont déjà équipés (max 1 équipement par monstre)." 
+          : "Vous devez avoir un monstre sur le terrain pour jouer un équipement.";
+        io.to(socket.id).emit("log", msg);
         return;
       }
       
