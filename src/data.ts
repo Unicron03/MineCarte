@@ -21,6 +21,7 @@ export const actionList: Action[] = [
    { id: 16, name: "TNT", damage: 30, cost: 2, description: "Inflige 30 dégâts à une carte ennemie.", function: "applyArtifactDamage", requiresTarget: true, targetType: "enemy" },
    { id: 17, name: "Lingot de fer", damage: 20, cost: 1, description: "Soigne 20 PV d'un Golem allié.", function: "healGolem", requiresTarget: true, targetType: "ally" },
    { id: 18, name: "End Crystal", damage: 0, cost: 2, description: "Réduit de moitié la vie d'un mob adverse. (L'armure ne fonctionne pas)", function: "halveLifeEffect", requiresTarget: true, targetType: "enemy" },
+   { id: 19, name: "Ender Pearl", damage: 0, cost: 2, description: "Défausse une carte de votre plateau.", function: "discardOwnCard", requiresTarget: true, targetType: "ally" },
 ];
 
 
@@ -130,6 +131,14 @@ export const cardList: InGameCard[] = [
     name: "End Crystal",
     imageName: "end_crystal", // Assurez-vous d'avoir l'image ou un placeholder
     effet: "End Crystal",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Ender Pearl",
+    imageName: "ender_pearl", // Assurez-vous d'avoir l'image ou un placeholder
+    effet: "Ender Pearl",
     cost: 2,
     category: "artefact",
   },

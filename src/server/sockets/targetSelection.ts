@@ -4,7 +4,7 @@ import { Server, Socket } from "socket.io";
 import { GameState, Player, CombatState } from "../../typesPvp";
 import { sendGameState } from "../functions/gameLogic";
 import { actionList } from "../../data";
-import { applyArtifactDamage, healGolem, halveLifeEffect } from "../functions/cartes/artefactFunction";
+import { applyArtifactDamage, healGolem, halveLifeEffect, discardOwnCard } from "../functions/cartes/artefactFunction";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 
 export const targetSelectionSocket = (
@@ -115,6 +115,15 @@ export const targetSelectionSocket = (
              const combatState: CombatState = { log: [] };
              // targetPlayer ici est le joueur lui-même (player) car c'est un sort allié
              healGolem(io, roomId, combatState, player, targetIndex, actionDefSupport.damage, sourceCard.name);
+             combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+             
+             player.discard.push(sourceCard);
+             player.hand.splice(pending.sourceHandIndex, 1);
+        } else if (actionDefSupport && actionDefSupport.function === "discardOwnCard") {
+             const combatState: CombatState = { log: [] };
+             
+             discardOwnCard(io, roomId, combatState, player, targetIndex, sourceCard.name);
+             
              combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
              
              player.discard.push(sourceCard);

@@ -124,3 +124,23 @@ export function halveLifeEffect(
     checkVillageGuardian(opponent, io, roomId);
   }
 }
+
+// Effet Ender Pearl : Défausse une carte de son propre plateau
+export function discardOwnCard(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  player: Player,
+  targetIndex: number,
+  sourceName: string
+): void {
+  const targetCard = player.board[targetIndex];
+  if (!targetCard) return;
+
+  player.board.splice(targetIndex, 1);
+  player.discard.push(targetCard);
+  state.log.push(`${sourceName} téléporte ${targetCard.name} dans le néant (Défaussé).`);
+  
+  // On vérifie les synergies (ex: Si on a défaussé un Villageois, les Golems perdent leur buff)
+  checkVillageGuardian(player, io, roomId);
+}
