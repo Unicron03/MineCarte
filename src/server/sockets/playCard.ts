@@ -22,6 +22,12 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
       return;
     }
 
+    // Vérification de la limite de 3 mobs sur le plateau
+    if (card.category === "mob" && player.board.length >= 3) {
+      io.to(socket.id).emit("log", "Plateau complet : Vous ne pouvez pas avoir plus de 3 monstres.");
+      return;
+    }
+
     // Gérer les équipements qui nécessitent une cible
     if (card.category === "equipement") {
       const availableTargets = player.board
