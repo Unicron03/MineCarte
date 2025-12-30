@@ -47,6 +47,7 @@ const baseDeck1 = [
   createCard("Lingot de fer", 1, "artefact", null, "Lingot de fer", null, null),
   createCard("End Crystal", 2, "artefact", null, "End Crystal", null, null),
   createCard("Ender Pearl", 2, "artefact", null, "Ender Pearl", null, null),
+  createCard("Canne à pêche", 1, "artefact", null, "Canne à pêche", null, null),
 ];
 
 const baseDeck2 = [...baseDeck1];

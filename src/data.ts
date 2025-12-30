@@ -22,6 +22,7 @@ export const actionList: Action[] = [
    { id: 17, name: "Lingot de fer", damage: 20, cost: 1, description: "Soigne 20 PV d'un Golem allié.", function: "healGolem", requiresTarget: true, targetType: "ally" },
    { id: 18, name: "End Crystal", damage: 0, cost: 2, description: "Réduit de moitié la vie d'un mob adverse. (L'armure ne fonctionne pas)", function: "halveLifeEffect", requiresTarget: true, targetType: "enemy" },
    { id: 19, name: "Ender Pearl", damage: 0, cost: 2, description: "Défausse une carte de votre plateau.", function: "discardOwnCard", requiresTarget: true, targetType: "ally" },
+   { id: 20, name: "Canne à pêche", damage: 0, cost: 1, description: "75% de chance de voler 2 énergies, 25% de chance d'en donner 2.", function: "fishingRodEffect" },
 ];
 
 
@@ -140,6 +141,14 @@ export const cardList: InGameCard[] = [
     imageName: "ender_pearl", // Assurez-vous d'avoir l'image ou un placeholder
     effet: "Ender Pearl",
     cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Canne à pêche",
+    imageName: "fishing_rod", // Assurez-vous d'avoir l'image ou un placeholder
+    effet: "Canne à pêche",
+    cost: 1,
     category: "artefact",
   },
 ];

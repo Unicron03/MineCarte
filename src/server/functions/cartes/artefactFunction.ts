@@ -144,3 +144,25 @@ export function discardOwnCard(
   // On vérifie les synergies (ex: Si on a défaussé un Villageois, les Golems perdent leur buff)
   checkVillageGuardian(player, io, roomId);
 }
+
+// Effet Canne à pêche : 75% vol 2 énergies, 25% donne 2 énergies
+export function fishingRodEffect(
+  state: CombatState,
+  player: Player,
+  opponent: Player
+): void {
+  const rand = Math.random();
+  const amount = 2;
+
+  if (rand < 0.75) {
+    // 75% chance : Voler (limité à ce que l'adversaire possède)
+    const stolen = Math.min(opponent.energie, amount);
+    opponent.energie -= stolen;
+    player.energie += stolen;
+    state.log.push(`${player.id} utilise Canne à pêche et vole ${stolen} énergie(s) à l'adversaire !`);
+  } else {
+    // 25% chance : Donner (Maladresse)
+    opponent.energie += amount;
+    state.log.push(`Oups ! ${player.id} s'emmêle les fils et donne ${amount} énergie(s) à l'adversaire.`);
+  }
+}

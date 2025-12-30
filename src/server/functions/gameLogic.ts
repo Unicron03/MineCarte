@@ -3,7 +3,7 @@ import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, checkVillageGuardian } from "./testEffectFonctions";
 import { applyPotionRegen } from "./cartes/attackFunction";
-import { healPlayer, drawCardsEffect } from "./cartes/artefactFunction";
+import { healPlayer, drawCardsEffect, fishingRodEffect } from "./cartes/artefactFunction";
 
 
 // --- Piocher une carte ---
@@ -56,6 +56,10 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         } else if (action.function === "drawCardsEffect") {
           const combatState = { log: [] as string[] };
           drawCardsEffect(combatState, player, action.damage);
+          combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+        } else if (action.function === "fishingRodEffect") {
+          const combatState = { log: [] as string[] };
+          fishingRodEffect(combatState, player, opponent);
           combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
         } else {
           if (!player.effects) player.effects = [];
