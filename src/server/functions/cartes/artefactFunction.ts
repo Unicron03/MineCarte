@@ -214,3 +214,28 @@ export function applyBurnEffect(
   targetCard.effects.push("Burn_3");
   state.log.push(`${sourceName} enflamme ${targetCard.name} ! (Brûlure 3 tours)`);
 }
+
+// Effet Pomme dorée : Soin + Dégâts (3 tours)
+export function applyGoldenAppleEffect(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  player: Player,
+  targetIndex: number,
+  sourceName: string
+): void {
+  const targetCard = player.board[targetIndex];
+  if (!targetCard) return;
+
+  if (!targetCard.effects) targetCard.effects = [];
+
+  // On retire un effet existant pour réinitialiser la durée
+  const existing = targetCard.effects.find(e => e.startsWith("GoldenApple_"));
+  if (existing) {
+    const index = targetCard.effects.indexOf(existing);
+    targetCard.effects.splice(index, 1);
+  }
+
+  targetCard.effects.push("GoldenApple_3");
+  state.log.push(`${sourceName} donne de la force et régénère ${targetCard.name} ! (3 tours)`);
+}

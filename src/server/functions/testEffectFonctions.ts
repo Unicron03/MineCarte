@@ -97,6 +97,12 @@ export function getModifiedDamage(attacker: InGameCard, baseDamage: number): num
     finalDamage *= 2;
   }
 
+  // Application Pomme Dorée (+10 dégâts)
+  const goldenApple = attacker.effects?.find(e => e.startsWith("GoldenApple_"));
+  if (goldenApple) {
+      finalDamage += 10;
+  }
+
   return finalDamage;
 }
 
@@ -145,6 +151,44 @@ export function handleBurnEffect(
       
       // Vérification des synergies (ex: Villageois mort -> Golem perd buff)
       checkVillageGuardian(player, io, roomId);
+    }
+  }
+}
+
+// Gère l'effet de la Pomme dorée (Soin périodique + décrémentation durée)
+// Le bonus de dégâts est géré dans getModifiedDamage
+export function handleGoldenAppleEffect(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  player: Player,
+  cardIndex: number
+): void {
+  const card = player.board[cardIndex];
+  if (!card || !card.effects) return;
+
+  const effect = card.effects.find(e => e.startsWith("GoldenApple_"));
+  if (effect) {
+    const duration = parseInt(effect.split("_")[1]);
+
+    // Soin de 10 PV
+    if (card.pv_durability !== undefined) {
+        const maxPv = card.max_pv || 100; // Fallback si max_pv non défini
+        const healAmount = Math.min(10, maxPv - card.pv_durability);
+        if (healAmount > 0) {
+            card.pv_durability += healAmount;
+            state.log.push(`${card.name} récupère ${healAmount} PV grâce à la Pomme dorée.`);
+        }
+    }
+
+    // Mise à jour de la durée
+    const index = card.effects.indexOf(effect);
+    if (index !== -1) card.effects.splice(index, 1);
+
+    if (duration > 1) {
+        card.effects.push(`GoldenApple_${duration - 1}`);
+    } else {
+        state.log.push(`L'effet de la Pomme dorée sur ${card.name} se dissipe.`);
     }
   }
 }

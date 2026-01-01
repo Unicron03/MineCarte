@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
-import { applyCraftTableEffect, checkVillageGuardian, handleBurnEffect } from "./testEffectFonctions";
+import { applyCraftTableEffect, checkVillageGuardian, handleBurnEffect, handleGoldenAppleEffect } from "./testEffectFonctions";
 import { applyPotionRegen } from "./cartes/attackFunction";
 import { healPlayer, drawCardsEffect, fishingRodEffect } from "./cartes/artefactFunction";
 
@@ -146,20 +146,29 @@ export function playEquipment(
 
 // --- Terminer le tour ---
 export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
+  const playerEnding = state.players[state.turnIndex];
+
+  // --- 1. Effets de FIN de tour (ex: Pomme dorée) ---
+  // On applique le soin et on réduit la durée avant de passer la main
+  const combatStateEnd = { log: [] as string[] };
+  for (let i = playerEnding.board.length - 1; i >= 0; i--) {
+    handleGoldenAppleEffect(io, state.roomId, combatStateEnd, playerEnding, i);
+  }
+  combatStateEnd.log.forEach((msg) => io.to(state.roomId).emit("log", msg));
+
+  // --- 2. Changement de joueur ---
   state.turnIndex = (state.turnIndex + 1) % 2;
   const current = state.players[state.turnIndex];
 
-  // --- Début du tour : Effets passifs (Potion, etc.) ---
-  const combatState = { log: [] as string[] };
+  // --- 3. Effets de DÉBUT de tour (ex: Brûlure, Potion) ---
+  const combatStateStart = { log: [] as string[] };
   
-  // Gestion de la Brûlure (Seau de lave)
-  // On parcourt à l'envers pour pouvoir supprimer les morts sans casser les index
   for (let i = current.board.length - 1; i >= 0; i--) {
-    handleBurnEffect(io, state.roomId, combatState, current, i);
+    handleBurnEffect(io, state.roomId, combatStateStart, current, i);
   }
 
-  applyPotionRegen(combatState, current);
-  combatState.log.forEach((msg) => io.to(state.roomId).emit("log", msg));
+  applyPotionRegen(combatStateStart, current);
+  combatStateStart.log.forEach((msg) => io.to(state.roomId).emit("log", msg));
 
   // Réinitialiser le statut d'attaque des mobs du joueur qui commence son tour
   current.board.forEach((card: InGameCard) => {

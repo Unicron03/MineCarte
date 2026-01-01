@@ -25,6 +25,7 @@ export const actionList: Action[] = [
    { id: 20, name: "Canne à pêche", damage: 0, cost: 1, description: "75% de chance de voler 2 énergies, 25% de chance d'en donner 2.", function: "fishingRodEffect" },
    { id: 21, name: "Potion d'invisibilité", damage: 0, cost: 1, description: "Rend un mob invisible. Il ne peut pas être attaqué par l'adversaire au prochain tour.", function: "giveInvisibleEffect", requiresTarget: true, targetType: "ally" },
    { id: 22, name: "Seau de lave", damage: 10, cost: 2, description: "Applique un malus de brûlure à une carte ennemie : elle perd 10 PV à chaque tour pendant 3 tours.", function: "applyBurnEffect", requiresTarget: true, targetType: "enemy" },
+   { id: 23, name: "Pomme dorée", damage: 10, cost: 2, description: "Soigne 10 PV et augmente les dégâts de 10 pendant 3 tours.", function: "applyGoldenAppleEffect", requiresTarget: true, targetType: "ally" },
 ];
 
 
@@ -166,6 +167,14 @@ export const cardList: InGameCard[] = [
     name: "Seau de lave",
     imageName: "seau_lave",
     effet: "Seau de lave",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Pomme dorée",
+    imageName: "pomme_doree",
+    effet: "Pomme dorée",
     cost: 2,
     category: "artefact",
   },

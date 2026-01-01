@@ -50,6 +50,7 @@ const baseDeck1 = [
   createCard("Canne à pêche", 1, "artefact", null, "Canne à pêche", null, null),
   createCard("Potion d'invisibilité", 1, "artefact", null, "Potion d'invisibilité", null, null),
   createCard("Seau de lave", 2, "artefact", null, "Seau de lave", null, null),
+  createCard("Pomme dorée", 2, "artefact", null, "Pomme dorée", null, null),
 ];
 
 const baseDeck2 = [...baseDeck1];
