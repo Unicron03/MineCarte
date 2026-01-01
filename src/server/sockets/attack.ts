@@ -4,7 +4,7 @@ import { actionList } from "../../data";
 import { sendGameState, checkVictory, drawCard as drawCardLogic } from "../functions/gameLogic";
 import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer } from "../functions/cartes/attackFunction";
 import { drawCard} from "../functions/cartes/talentFunction";
-import { checkVillageGuardian } from "../functions/testEffectFonctions";
+import { checkVillageGuardian, hasInvisibility } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
 function getActionByName(name: string): Action | undefined {
@@ -145,7 +145,7 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
     // Cas 2 : Attaque ciblée -> Demander une cible ennemie
     if (action.function === "AttackOneMob" || action.function === "attackEsquive" || action.function === "damageAndDie" || action.function === "voleEnergie") {
       // On ne demande de cibler que s'il y a des mobs en face
-      const hasMobs = opponent.board.some((c: InGameCard) => c.category === "mob");
+      const hasMobs = opponent.board.some((c: InGameCard) => c.category === "mob" && !hasInvisibility(c));
 
       if (hasMobs) {
         socket.emit("selectEnemyTarget", { attackerIndex, attackName });
@@ -192,6 +192,10 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
     } else {
       // Pour l'attaque, on cible les mobs adverses
       target = targetIndex !== null && opponent.board[targetIndex] ? opponent.board[targetIndex] : null;
+      if (target && hasInvisibility(target)) {
+        socket.emit("log", "Impossible d'attaquer une cible invisible !");
+        return;
+      }
     }
 
     const state: CombatState = { log: [] };

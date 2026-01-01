@@ -4,7 +4,7 @@ import { Server, Socket } from "socket.io";
 import { GameState, Player, CombatState } from "../../typesPvp";
 import { sendGameState } from "../functions/gameLogic";
 import { actionList } from "../../data";
-import { applyArtifactDamage, healGolem, halveLifeEffect, discardOwnCard } from "../functions/cartes/artefactFunction";
+import { applyArtifactDamage, healGolem, halveLifeEffect, discardOwnCard, giveInvisibleEffect } from "../functions/cartes/artefactFunction";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 
 export const targetSelectionSocket = (
@@ -123,6 +123,15 @@ export const targetSelectionSocket = (
              const combatState: CombatState = { log: [] };
              
              discardOwnCard(io, roomId, combatState, player, targetIndex, sourceCard.name);
+             
+             combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+             
+             player.discard.push(sourceCard);
+             player.hand.splice(pending.sourceHandIndex, 1);
+        } else if (actionDefSupport && actionDefSupport.function === "giveInvisibleEffect") {
+             const combatState: CombatState = { log: [] };
+             
+             giveInvisibleEffect(io, roomId, combatState, player, targetIndex, sourceCard.name);
              
              combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
              

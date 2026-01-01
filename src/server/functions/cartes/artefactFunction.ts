@@ -166,3 +166,25 @@ export function fishingRodEffect(
     state.log.push(`Oups ! ${player.id} s'emmêle les fils et donne ${amount} énergie(s) à l'adversaire.`);
   }
 }
+
+// Effet Potion d'invisibilité : Rend un mob invisible
+export function giveInvisibleEffect(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  player: Player,
+  targetIndex: number,
+  sourceName: string
+): void {
+  const targetCard = player.board[targetIndex];
+  if (!targetCard) return;
+
+  if (!targetCard.effects) targetCard.effects = [];
+
+  if (!targetCard.effects.includes("Invisible")) {
+    targetCard.effects.push("Invisible");
+    state.log.push(`${sourceName} rend ${targetCard.name} invisible !`);
+  } else {
+    state.log.push(`${targetCard.name} est déjà invisible.`);
+  }
+}

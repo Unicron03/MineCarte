@@ -23,6 +23,7 @@ export const actionList: Action[] = [
    { id: 18, name: "End Crystal", damage: 0, cost: 2, description: "Réduit de moitié la vie d'un mob adverse. (L'armure ne fonctionne pas)", function: "halveLifeEffect", requiresTarget: true, targetType: "enemy" },
    { id: 19, name: "Ender Pearl", damage: 0, cost: 2, description: "Défausse une carte de votre plateau.", function: "discardOwnCard", requiresTarget: true, targetType: "ally" },
    { id: 20, name: "Canne à pêche", damage: 0, cost: 1, description: "75% de chance de voler 2 énergies, 25% de chance d'en donner 2.", function: "fishingRodEffect" },
+   { id: 21, name: "Potion d'invisibilité", damage: 0, cost: 1, description: "Rend un mob invisible. Il ne peut pas être attaqué par l'adversaire au prochain tour.", function: "giveInvisibleEffect", requiresTarget: true, targetType: "ally" },
 ];
 
 
@@ -148,6 +149,14 @@ export const cardList: InGameCard[] = [
     name: "Canne à pêche",
     imageName: "fishing_rod", // Assurez-vous d'avoir l'image ou un placeholder
     effet: "Canne à pêche",
+    cost: 1,
+    category: "artefact",
+  },
+    // @ts-ignore
+  {
+    name: "Potion d'invisibilité",
+    imageName: "potion_invisibilite",
+    effet: "Potion d'invisibilité",
     cost: 1,
     category: "artefact",
   },

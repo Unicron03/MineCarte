@@ -158,11 +158,15 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
   current.board.forEach((card: InGameCard) => {
     card.hasAttacked = false;
     card.hasUsedTalent = false;
-    // Retirer l'effet Esquive au début du tour du propriétaire (fin de l'effet temporaire)
+    // Retirer l'effet Esquive et Invisible au début du tour du propriétaire (fin de l'effet temporaire)
     if (card.category === "mob" && card.effects) {
       const index = card.effects.indexOf("Esquive");
       if (index !== -1) {
         card.effects.splice(index, 1);
+      }
+      const indexInvisible = card.effects.indexOf("Invisible");
+      if (indexInvisible !== -1) {
+        card.effects.splice(indexInvisible, 1);
       }
     }
   });

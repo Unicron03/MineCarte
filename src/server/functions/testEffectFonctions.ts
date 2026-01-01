@@ -58,6 +58,11 @@ export function hasEsquive(target: InGameCard, state: CombatState): boolean {
   return false;
 }
 
+// Vérifie si une cible est invisible (ne peut pas être ciblée par une attaque)
+export function hasInvisibility(target: InGameCard): boolean {
+  return target.effects?.includes("Invisible") ?? false;
+}
+
 // Vérifie la synergie Golem <-> Villageois
 // À appeler quand une carte est jouée ou quand une carte meurt
 export function checkVillageGuardian(player: Player, io: Server, roomId: string): void {
