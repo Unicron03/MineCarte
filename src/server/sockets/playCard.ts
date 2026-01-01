@@ -3,6 +3,7 @@ import { playCard } from "../functions/gameLogic";
 import { sendGameState } from "../functions/gameLogic";
 import { actionList } from "../../data";
 import { GameState } from "../../typesPvp";
+import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 
 export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, GameState>) {
   socket.on("playCard", ({ cardIndex }) => {
@@ -18,7 +19,10 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
     }
 
     const card = player.hand[cardIndex];
-    if (!card || player.energie < card.cost) {
+    
+    // Calcul du coût réel (incluant Table d'enchantement et Table de craft) pour la vérification
+    const realCost = applyCraftTableEffect(player, card, io, roomId, false);
+    if (!card || player.energie < realCost) {
       return;
     }
 

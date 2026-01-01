@@ -239,3 +239,19 @@ export function applyGoldenAppleEffect(
   targetCard.effects.push("GoldenApple_3");
   state.log.push(`${sourceName} donne de la force et régénère ${targetCard.name} ! (3 tours)`);
 }
+
+// Effet Table d'enchantement : Les équipements coûtent 1 énergie ce tour
+export function applyEnchantmentTableEffect(
+  io: Server,
+  roomId: string,
+  player: Player,
+  sourceName: string
+): void {
+  if (!player.effects) player.effects = [];
+  if (!player.effects.includes("Table d'enchantement")) {
+    player.effects.push("Table d'enchantement");
+    io.to(roomId).emit("log", `${sourceName} s'active : Les équipements coûtent 1 énergie ce tour.`);
+  } else {
+    io.to(roomId).emit("log", `${sourceName} est déjà actif.`);
+  }
+}

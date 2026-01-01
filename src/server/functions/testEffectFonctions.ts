@@ -21,6 +21,15 @@ export function applyArmorEffect(
   return finalDamage;
 }
 
+// Vérifie si la Table d'enchantement est active et réduit le coût des équipements à 1
+export function applyEnchantmentTableCostReduction(player: Player, card: InGameCard): number {
+  // Si l'effet est actif et que c'est un équipement, le coût de base devient 1
+  if (player.effects?.includes("Table d'enchantement") && card.category === "equipement") {
+    return 1;
+  }
+  return card.cost;
+}
+
 // Applique l'effet de la Table de craft (réduction de coût) si disponible.
 export function applyCraftTableEffect(
   player: Player,
@@ -29,7 +38,9 @@ export function applyCraftTableEffect(
   roomId: string,
   consume: boolean = true
 ): number {
-  let finalCost = card.cost;
+  // On applique d'abord la réduction de la Table d'enchantement (fixe le coût à 1)
+  let finalCost = applyEnchantmentTableCostReduction(player, card);
+
   const craftEffectName = "Table de craft";
   const craftEffectIndex = player.effects?.findIndex((e) => e === craftEffectName);
 

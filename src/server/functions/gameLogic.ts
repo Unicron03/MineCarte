@@ -3,7 +3,7 @@ import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, checkVillageGuardian, handleBurnEffect, handleGoldenAppleEffect } from "./testEffectFonctions";
 import { applyPotionRegen } from "./cartes/attackFunction";
-import { healPlayer, drawCardsEffect, fishingRodEffect } from "./cartes/artefactFunction";
+import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect } from "./cartes/artefactFunction";
 
 
 // --- Piocher une carte ---
@@ -52,15 +52,17 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         if (action.function === "healPlayer") {
           const combatState = { log: [] as string[] };
           healPlayer(combatState, player, action.damage);
-          combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+          combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
         } else if (action.function === "drawCardsEffect") {
           const combatState = { log: [] as string[] };
           drawCardsEffect(combatState, player, action.damage);
-          combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+          combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
         } else if (action.function === "fishingRodEffect") {
           const combatState = { log: [] as string[] };
           fishingRodEffect(combatState, player, opponent);
-          combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+          combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
+        } else if (action.function === "applyEnchantmentTableEffect") {
+          applyEnchantmentTableEffect(io, roomId, player, action.name);
         } else {
           if (!player.effects) player.effects = [];
           player.effects.push(action.name);
@@ -154,7 +156,7 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
   for (let i = playerEnding.board.length - 1; i >= 0; i--) {
     handleGoldenAppleEffect(io, state.roomId, combatStateEnd, playerEnding, i);
   }
-  combatStateEnd.log.forEach((msg) => io.to(state.roomId).emit("log", msg));
+  combatStateEnd.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
 
   // --- 2. Changement de joueur ---
   state.turnIndex = (state.turnIndex + 1) % 2;
@@ -168,7 +170,7 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
   }
 
   applyPotionRegen(combatStateStart, current);
-  combatStateStart.log.forEach((msg) => io.to(state.roomId).emit("log", msg));
+  combatStateStart.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
 
   // Réinitialiser le statut d'attaque des mobs du joueur qui commence son tour
   current.board.forEach((card: InGameCard) => {
@@ -184,6 +186,10 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
       if (indexInvisible !== -1) {
         card.effects.splice(indexInvisible, 1);
       }
+    }
+    // Retirer l'effet Table d'enchantement à la fin du tour
+    if (current.effects && current.effects.includes("Table d'enchantement")) {
+      current.effects = current.effects.filter((e: string) => e !== "Table d'enchantement");
     }
   });
 

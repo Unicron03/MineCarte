@@ -51,6 +51,7 @@ const baseDeck1 = [
   createCard("Potion d'invisibilité", 1, "artefact", null, "Potion d'invisibilité", null, null),
   createCard("Seau de lave", 2, "artefact", null, "Seau de lave", null, null),
   createCard("Pomme dorée", 2, "artefact", null, "Pomme dorée", null, null),
+  createCard("Table d'enchantement", 2, "artefact", null, "Table d'enchantement", null, null),
 ];
 
 const baseDeck2 = [...baseDeck1];
