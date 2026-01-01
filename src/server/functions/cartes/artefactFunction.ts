@@ -188,3 +188,29 @@ export function giveInvisibleEffect(
     state.log.push(`${targetCard.name} est déjà invisible.`);
   }
 }
+
+// Effet Seau de lave : Applique Brûlure (3 tours)
+export function applyBurnEffect(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  opponent: Player,
+  targetIndex: number,
+  sourceName: string
+): void {
+  const targetCard = opponent.board[targetIndex];
+  if (!targetCard) return;
+
+  if (!targetCard.effects) targetCard.effects = [];
+
+  // On retire une éventuelle brûlure existante pour réinitialiser la durée
+  const existingBurn = targetCard.effects.find(e => e.startsWith("Burn_"));
+  if (existingBurn) {
+    const index = targetCard.effects.indexOf(existingBurn);
+    targetCard.effects.splice(index, 1);
+  }
+
+  // Ajout de l'effet Brûlure pour 3 tours (Format: Burn_DUREE)
+  targetCard.effects.push("Burn_3");
+  state.log.push(`${sourceName} enflamme ${targetCard.name} ! (Brûlure 3 tours)`);
+}

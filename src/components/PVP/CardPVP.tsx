@@ -61,7 +61,7 @@ const CardPVP: React.FC<CardPVPProps> = ({
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).parentElement!.style.backgroundColor = effect === "Esquive" ? "#bdc3c7" : "#e74c3c";
+                  (e.target as HTMLImageElement).parentElement!.style.backgroundColor = effect === "Esquive" ? "#bdc3c7" : effect === "Invisible" ? "#a29bfe" : effect.startsWith("Burn_") ? "#e67e22" : "#e74c3c";
                 }}
               />
             </div>

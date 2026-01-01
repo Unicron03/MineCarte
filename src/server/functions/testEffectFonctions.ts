@@ -99,3 +99,52 @@ export function getModifiedDamage(attacker: InGameCard, baseDamage: number): num
 
   return finalDamage;
 }
+
+// Gère l'effet de brûlure (dégâts sur la durée)
+export function handleBurnEffect(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  player: Player,
+  cardIndex: number
+): void {
+  const card = player.board[cardIndex];
+  // Vérification que la carte existe et a des effets
+  if (!card || !card.effects) return;
+
+  // On cherche l'effet de brûlure
+  // Typage explicite de 'e' pour éviter l'erreur "implicitly has an 'any' type"
+  const burnEffect = card.effects.find((e: string) => e.startsWith("Burn_"));
+  
+  if (burnEffect) {
+    const duration = parseInt(burnEffect.split("_")[1]);
+
+    // Application des dégâts (10 PV)
+    if (card.pv_durability !== undefined) {
+      card.pv_durability -= 10;
+      state.log.push(`${card.name} brûle et perd 10 PV !`);
+    }
+
+    // Mise à jour de la durée de l'effet
+    const index = card.effects.indexOf(burnEffect);
+    if (index !== -1) {
+      card.effects.splice(index, 1);
+    }
+
+    if (duration > 1) {
+      card.effects.push(`Burn_${duration - 1}`);
+    } else {
+      state.log.push(`La brûlure de ${card.name} se dissipe.`);
+    }
+
+    // Vérification de la mort due à la brûlure
+    if (card.pv_durability !== undefined && card.pv_durability <= 0) {
+      state.log.push(`${card.name} est consumé par le feu !`);
+      player.discard.push(card);
+      player.board.splice(cardIndex, 1);
+      
+      // Vérification des synergies (ex: Villageois mort -> Golem perd buff)
+      checkVillageGuardian(player, io, roomId);
+    }
+  }
+}

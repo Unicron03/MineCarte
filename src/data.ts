@@ -24,6 +24,7 @@ export const actionList: Action[] = [
    { id: 19, name: "Ender Pearl", damage: 0, cost: 2, description: "Défausse une carte de votre plateau.", function: "discardOwnCard", requiresTarget: true, targetType: "ally" },
    { id: 20, name: "Canne à pêche", damage: 0, cost: 1, description: "75% de chance de voler 2 énergies, 25% de chance d'en donner 2.", function: "fishingRodEffect" },
    { id: 21, name: "Potion d'invisibilité", damage: 0, cost: 1, description: "Rend un mob invisible. Il ne peut pas être attaqué par l'adversaire au prochain tour.", function: "giveInvisibleEffect", requiresTarget: true, targetType: "ally" },
+   { id: 22, name: "Seau de lave", damage: 10, cost: 2, description: "Applique un malus de brûlure à une carte ennemie : elle perd 10 PV à chaque tour pendant 3 tours.", function: "applyBurnEffect", requiresTarget: true, targetType: "enemy" },
 ];
 
 
@@ -158,6 +159,14 @@ export const cardList: InGameCard[] = [
     imageName: "potion_invisibilite",
     effet: "Potion d'invisibilité",
     cost: 1,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Seau de lave",
+    imageName: "seau_lave",
+    effet: "Seau de lave",
+    cost: 2,
     category: "artefact",
   },
 ];

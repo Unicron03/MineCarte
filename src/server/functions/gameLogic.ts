@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
-import { applyCraftTableEffect, checkVillageGuardian } from "./testEffectFonctions";
+import { applyCraftTableEffect, checkVillageGuardian, handleBurnEffect } from "./testEffectFonctions";
 import { applyPotionRegen } from "./cartes/attackFunction";
 import { healPlayer, drawCardsEffect, fishingRodEffect } from "./cartes/artefactFunction";
 
@@ -151,6 +151,13 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
 
   // --- Début du tour : Effets passifs (Potion, etc.) ---
   const combatState = { log: [] as string[] };
+  
+  // Gestion de la Brûlure (Seau de lave)
+  // On parcourt à l'envers pour pouvoir supprimer les morts sans casser les index
+  for (let i = current.board.length - 1; i >= 0; i--) {
+    handleBurnEffect(io, state.roomId, combatState, current, i);
+  }
+
   applyPotionRegen(combatState, current);
   combatState.log.forEach((msg) => io.to(state.roomId).emit("log", msg));
 
