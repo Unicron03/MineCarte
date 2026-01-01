@@ -1,9 +1,10 @@
 import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
-import { applyCraftTableEffect, checkVillageGuardian, handleBurnEffect, handleGoldenAppleEffect } from "./testEffectFonctions";
+import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect } from "./testEffectFonctions";
 import { applyPotionRegen } from "./cartes/attackFunction";
-import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect } from "./cartes/artefactFunction";
+import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
+import { detachEquipment } from "./cartes/equipementFunction";
 
 
 // --- Piocher une carte ---
@@ -43,6 +44,15 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
     if (player.energie < finalCost) {
       return { success: false, msg: "Pas assez d'énergie." };
     }
+
+    // Vérification spécifique pour l'Enclume avant de consommer les ressources
+    if (found.name === "Enclume") {
+      const check = checkAnvilCondition(player);
+      if (!check.valid) {
+        return { success: false, msg: check.msg || "Impossible de jouer l'Enclume." };
+      }
+    }
+
     // Application réelle de l'effet (consommation)
     applyCraftTableEffect(player, found, io, roomId, true);
 
@@ -63,6 +73,8 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
           combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
         } else if (action.function === "applyEnchantmentTableEffect") {
           applyEnchantmentTableEffect(io, roomId, player, action.name);
+        } else if (action.function === "anvilEffect") {
+          anvilEffect(io, roomId, player, action.name);
         } else {
           if (!player.effects) player.effects = [];
           player.effects.push(action.name);
@@ -368,4 +380,43 @@ export function checkVictory(io: any, roomState: any, rooms: Map<string, any>) {
   }
 
   return false;
+}
+
+// --- Gestion de la mort et des synergies (Intégré ici car deathLogic n'existe pas) ---
+
+// Vérifie la synergie Golem <-> Villageois
+export function checkVillageGuardian(player: Player, io: Server, roomId: string): void {
+  const hasVillager = player.board.some((c) => c.name === "Villageois");
+  const golems = player.board.filter((c) => c.name === "Golem");
+
+  golems.forEach((golem) => {
+    if (!golem.effects) golem.effects = [];
+    const hasBuff = golem.effects.includes("DoubleDamage");
+
+    if (hasVillager && !hasBuff) {
+      golem.effects.push("DoubleDamage");
+      io.to(roomId).emit("log", `${golem.name} s'enrage grâce à la présence d'un Villageois ! (Dégâts x2)`);
+    } else if (!hasVillager && hasBuff) {
+      golem.effects = golem.effects.filter((e) => e !== "DoubleDamage");
+      io.to(roomId).emit("log", `${golem.name} se calme (Plus de Villageois à protéger).`);
+    }
+  });
+}
+
+// Gère la mort d'un mob (détachement équipement, défausse, logs, synergies)
+export function handleMobDeath(
+    io: Server,
+    roomId: string,
+    player: Player,
+    mobIndex: number,
+    logArray: string[]
+) {
+    const mob = player.board[mobIndex];
+    if (!mob) return;
+
+    detachEquipment(player, mob);
+    player.discard.push(mob);
+    player.board.splice(mobIndex, 1);
+    logArray.push(`${mob.name} est mort !`);
+    checkVillageGuardian(player, io, roomId);
 }

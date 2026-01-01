@@ -6,7 +6,7 @@ export const actionList: Action[] = [
    { id: 1, name: "Morsure", damage: 15, cost: 1, description: "Une morsure violente.", function: "AttackOneMob", requiresTarget: true },
    { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Inflige 5 PV à un mob adverse et retire une énergie à l'adversaire.", function: "voleEnergie", requiresTarget: true },
    { id: 3, name: "Table de craft", damage: 3, cost: 1, description: "Réduit le coût de la prochaine carte de 3.", function: "applyEffect"},
-   { id: 4, name: "Enclume", damage: 0, cost: 0, description: "Récupère un équipement de la défausse.", function: "anvilEffect" },
+   { id: 4, name: "Enclume", damage: 0, cost: 1, description: "Récupère un équipement de la défausse (si disponible en surplus).", function: "anvilEffect" },
    { id: 5, name: "Armure", damage: 0, cost: 2, description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.", function: "armure" },
    { id: 6, name: "Coup d'ombre", damage: 10, cost: 2, description: "Inflige 10 PV à chaque mob adverse.", function: "AttackAllMobs" },
    { id: 7, name: "Soin", damage: 10, cost: 2, description: "Soigne 10 PV à un mob", function: "heal", requiresTarget: true },

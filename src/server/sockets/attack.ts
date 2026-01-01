@@ -4,7 +4,8 @@ import { actionList } from "../../data";
 import { sendGameState, checkVictory, drawCard as drawCardLogic } from "../functions/gameLogic";
 import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer } from "../functions/cartes/attackFunction";
 import { drawCard} from "../functions/cartes/talentFunction";
-import { checkVillageGuardian, hasInvisibility } from "../functions/testEffectFonctions";
+import { hasInvisibility } from "../functions/testEffectFonctions";
+import { checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
 
 // Récupère l'action dans actionList grace a son nom
 function getActionByName(name: string): Action | undefined {
@@ -84,18 +85,13 @@ function finalizeAttack(
   // Gestion de la mort d'une carte (seulement si c'est une attaque ciblée sur un mob adverse)
   // Note: AttackAllMobs gère ses propres morts en interne.
   if (result?.killed && target && targetIndex !== null && action.function !== "heal") { 
-    opponent.discard.push(target);
-    opponent.board.splice(targetIndex, 1);
-    state.log.push(`${target.name} est détruite !`);
-
-    // Vérification des synergies passives (ex: Si le Villageois meurt, le Golem perd son buff)
-    // Note: On vérifie pour les deux joueurs car la mort d'un mob peut affecter l'autre (si on implémente des effets inverses)
-    checkVillageGuardian(opponent, io, roomId);
+    handleMobDeath(io, roomId, opponent, targetIndex, state.log);
   }
 
   // Si c'est une attaque de zone (AttackAllMobs), des mobs ont pu mourir sans déclencher le bloc ci-dessus.
   if (action.function === "AttackAllMobs") {
-    checkVillageGuardian(opponent, io, roomId);
+    // AttackAllMobs devrait idéalement utiliser handleMobDeath en interne, ou on vérifie globalement ici
+    checkVillageGuardian(opponent, io, roomId); 
   }
 
   // Gestion de la défaite du joueur (qui peut arriver sur une attaque directe ou AOE si pas de mobs)

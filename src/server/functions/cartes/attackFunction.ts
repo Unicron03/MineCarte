@@ -1,5 +1,6 @@
 import { InGameCard, Player, CombatState, Action } from "../../../typesPvp";
 import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./../testEffectFonctions";
+import { detachEquipment } from "./equipementFunction";
 
 // Transfère les dégâts excédentaires au joueur adverse
 export function transfertDamageToPlayer(
@@ -225,6 +226,7 @@ export function damageAndDie(
   // 2. Le lanceur meurt instantanément
   const index = player.board.findIndex((c) => c.uuid === attacker.uuid);
   if (index !== -1) {
+    detachEquipment(player, attacker);
     player.discard.push(attacker);
     player.board.splice(index, 1);
     state.log.push(`${attacker.name} explose et est détruit !`);

@@ -22,7 +22,9 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
     
     // Calcul du coût réel (incluant Table d'enchantement et Table de craft) pour la vérification
     const realCost = applyCraftTableEffect(player, card, io, roomId, false);
-    if (!card || player.energie < realCost) {
+    if (!card) return;
+    if (player.energie < realCost) {
+      io.to(socket.id).emit("log", "Pas assez d'énergie.");
       return;
     }
 
@@ -124,6 +126,8 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
     const result = playCard(io, roomId, player, card, opponent);
     if (result.success) {
       sendGameState(io, rooms, roomId);
+    } else {
+      io.to(socket.id).emit("log", result.msg);
     }
   });
 }

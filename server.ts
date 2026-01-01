@@ -41,6 +41,7 @@ const baseDeck1 = [
   createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
   createCard("Armure", 2, "equipement", 10, null, null, null),
   createCard("Potion", 2, "equipement", 10, "Potion", null, null),
+  createCard("Potion", 2, "equipement", 10, "Potion", null, null),
   createCard("Lit", 2, "artefact", null, "Lit", null, null),
   createCard("Livre", 1, "artefact", null, "Livre", null, null),
   createCard("TNT", 2, "artefact", null, "TNT", null, null),
@@ -53,6 +54,7 @@ const baseDeck1 = [
   createCard("Pomme dorée", 2, "artefact", null, "Pomme dorée", null, null),
   createCard("Table d'enchantement", 2, "artefact", null, "Table d'enchantement", null, null),
   createCard("Portail de l’End", 2, "artefact", null, "Portail de l’End", null, null),
+  createCard("Enclume", 1, "artefact", null, "Enclume", null, null),
 ];
 
 const baseDeck2 = [...baseDeck1];

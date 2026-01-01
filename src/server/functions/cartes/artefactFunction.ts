@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import { InGameCard, Player, CombatState, Action } from "../../../typesPvp";
-import { applyArmorEffect, hasEsquive, getModifiedDamage, checkVillageGuardian } from "./../testEffectFonctions";
+import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./../testEffectFonctions";
+import { checkVillageGuardian, handleMobDeath } from "../gameLogic";
 import { drawCard } from "./talentFunction";
 import { transfertDamageToPlayer } from "./attackFunction";
 
@@ -57,12 +58,7 @@ export function applyArtifactDamage(
         transfertDamageToPlayer(state, Math.abs(targetCard.pv_durability), opponent, sourceName);
       }
 
-      state.log.push(`${targetCard.name} a explosé et est détruit !`);
-      opponent.board.splice(targetIndex, 1);
-      opponent.discard.push(targetCard);
-
-      // On vérifie les synergies (ex: Golem perd son buff si Villageois meurt)
-      checkVillageGuardian(opponent, io, roomId);
+      handleMobDeath(io, roomId, opponent, targetIndex, state.log);
     }
   }
 }
@@ -118,10 +114,7 @@ export function halveLifeEffect(
   state.log.push(`${sourceName} réduit la vie de ${targetCard.name} de moitié (-${damage} PV) !`);
 
   if (targetCard.pv_durability <= 0) {
-    state.log.push(`${targetCard.name} est détruit !`);
-    opponent.board.splice(targetIndex, 1);
-    opponent.discard.push(targetCard);
-    checkVillageGuardian(opponent, io, roomId);
+    handleMobDeath(io, roomId, opponent, targetIndex, state.log);
   }
 }
 
@@ -137,12 +130,10 @@ export function discardOwnCard(
   const targetCard = player.board[targetIndex];
   if (!targetCard) return;
 
-  player.board.splice(targetIndex, 1);
-  player.discard.push(targetCard);
+  // On utilise handleMobDeath pour gérer l'équipement, mais on personnalise le log si besoin
+  // Ici handleMobDeath va ajouter "X est mort !", ce qui est acceptable pour une défausse forcée
+  handleMobDeath(io, roomId, player, targetIndex, state.log);
   state.log.push(`${sourceName} téléporte ${targetCard.name} dans le néant (Défaussé).`);
-  
-  // On vérifie les synergies (ex: Si on a défaussé un Villageois, les Golems perdent leur buff)
-  checkVillageGuardian(player, io, roomId);
 }
 
 // Effet Canne à pêche : 75% vol 2 énergies, 25% donne 2 énergies
@@ -282,5 +273,48 @@ export function healEndCreature(
     
     targetCard.pv_durability += healAmount;
     state.log.push(`${sourceName} régénère ${targetCard.name} de ${healAmount} PV.`);
+  }
+}
+
+// Helper : Récupère les équipements candidats à la récupération (Simplifié)
+export function getAnvilCandidates(player: Player): InGameCard[] {
+  // On peut récupérer n'importe quel équipement de la défausse
+  return player.discard.filter(c => c.category === "equipement");
+}
+
+// Vérifie si l'Enclume peut être jouée (utilisé dans playCard pour empêcher l'action)
+export function checkAnvilCondition(player: Player): { valid: boolean; msg?: string } {
+  const discardEquipments = player.discard.filter(c => c.category === "equipement");
+  
+  if (discardEquipments.length === 0) {
+    return { valid: false, msg: "Vous n'avez pas d'équipement dans votre défausse." };
+  }
+
+  return { valid: true };
+}
+
+// Effet Enclume : Récupère un équipement de la défausse
+// Condition : Nombre en défausse > Nombre équipés sur le plateau
+export function anvilEffect(
+  io: Server,
+  roomId: string,
+  player: Player,
+  sourceName: string
+): void {
+  // On récupère les candidats (la vérification a déjà été faite dans playCard normalement)
+  const recoverableCandidates = getAnvilCandidates(player);
+
+  if (recoverableCandidates.length === 0) return;
+
+  // 4. Choisir un équipement aléatoire parmi les candidats valides
+  const randomIndex = Math.floor(Math.random() * recoverableCandidates.length);
+  const cardToRecover = recoverableCandidates[randomIndex];
+
+  // 5. Déplacer de la défausse vers la main
+  const realIndexInDiscard = player.discard.indexOf(cardToRecover);
+  if (realIndexInDiscard !== -1) {
+    player.discard.splice(realIndexInDiscard, 1);
+    player.hand.push(cardToRecover);
+    io.to(roomId).emit("log", `${sourceName} forge à nouveau ${cardToRecover.name} et l'ajoute à votre main !`);
   }
 }

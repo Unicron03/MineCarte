@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import { InGameCard, CombatState, Player } from "../../typesPvp";
 import { actionList } from "../../data";
+import { handleMobDeath, checkVillageGuardian } from "./gameLogic";
 
 // Calcule les dégâts finaux après application des effets de réduction des équipements.
 export function applyArmorEffect(
@@ -74,30 +75,6 @@ export function hasInvisibility(target: InGameCard): boolean {
   return target.effects?.includes("Invisible") ?? false;
 }
 
-// Vérifie la synergie Golem <-> Villageois
-// À appeler quand une carte est jouée ou quand une carte meurt
-export function checkVillageGuardian(player: Player, io: Server, roomId: string): void {
-  // 1. Vérifier la présence d'un Villageois
-  const hasVillager = player.board.some((c) => c.name === "Villageois");
-  
-  // 2. Récupérer tous les Golems
-  const golems = player.board.filter((c) => c.name === "Golem");
-
-  golems.forEach((golem) => {
-    if (!golem.effects) golem.effects = [];
-    const hasBuff = golem.effects.includes("DoubleDamage");
-
-    if (hasVillager && !hasBuff) {
-      // Activation de l'effet
-      golem.effects.push("DoubleDamage");
-      io.to(roomId).emit("log", `${golem.name} s'enrage grâce à la présence d'un Villageois ! (Dégâts x2)`);
-    } else if (!hasVillager && hasBuff) {
-      // Désactivation de l'effet
-      golem.effects = golem.effects.filter((e) => e !== "DoubleDamage");
-      io.to(roomId).emit("log", `${golem.name} se calme (Plus de Villageois à protéger).`);
-    }
-  });
-}
 
 // Calcule les dégâts sortants en fonction des effets de l'attaquant (ex: DoubleDamage)
 export function getModifiedDamage(attacker: InGameCard, baseDamage: number): number {
@@ -157,11 +134,7 @@ export function handleBurnEffect(
     // Vérification de la mort due à la brûlure
     if (card.pv_durability !== undefined && card.pv_durability <= 0) {
       state.log.push(`${card.name} est consumé par le feu !`);
-      player.discard.push(card);
-      player.board.splice(cardIndex, 1);
-      
-      // Vérification des synergies (ex: Villageois mort -> Golem perd buff)
-      checkVillageGuardian(player, io, roomId);
+      handleMobDeath(io, roomId, player, cardIndex, state.log);
     }
   }
 }

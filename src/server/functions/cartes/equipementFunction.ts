@@ -51,3 +51,11 @@ export function anvilEffect(context: EffectContext) {
     
     log(context, `[Artefact] Enclume a récupéré la carte Équipement "${equipment.name}" dans la main.`);
 }
+
+// Détache les équipements d'un mob et les place dans la défausse du joueur
+export function detachEquipment(player: Player, mob: InGameCard) {
+    if (mob.equipment && mob.equipment.length > 0) {
+        player.discard.push(...mob.equipment);
+        mob.equipment = [];
+    }
+}
