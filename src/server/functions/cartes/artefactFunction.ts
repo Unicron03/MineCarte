@@ -255,3 +255,32 @@ export function applyEnchantmentTableEffect(
     io.to(roomId).emit("log", `${sourceName} est déjà actif.`);
   }
 }
+
+// Effet Portail de l'End : Soigne Enderman, Shulker ou Ender Dragon
+export function healEndCreature(
+  io: Server,
+  roomId: string,
+  state: CombatState,
+  player: Player,
+  targetIndex: number,
+  amount: number,
+  sourceName: string
+): void {
+  const targetCard = player.board[targetIndex];
+
+  if (!targetCard) return;
+
+  const validNames = ["Enderman", "Shulker", "Ender Dragon"];
+  if (!validNames.includes(targetCard.name)) {
+    state.log.push(`${sourceName} ne peut être utilisé que sur une créature de l'End.`);
+    return;
+  }
+
+  if (targetCard.pv_durability !== undefined) {
+    const max = targetCard.max_pv ?? targetCard.pv_durability;
+    const healAmount = Math.min(amount, max - targetCard.pv_durability);
+    
+    targetCard.pv_durability += healAmount;
+    state.log.push(`${sourceName} régénère ${targetCard.name} de ${healAmount} PV.`);
+  }
+}

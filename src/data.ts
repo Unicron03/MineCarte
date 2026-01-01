@@ -27,6 +27,7 @@ export const actionList: Action[] = [
    { id: 22, name: "Seau de lave", damage: 10, cost: 2, description: "Applique un malus de brûlure à une carte ennemie : elle perd 10 PV à chaque tour pendant 3 tours.", function: "applyBurnEffect", requiresTarget: true, targetType: "enemy" },
    { id: 23, name: "Pomme dorée", damage: 10, cost: 2, description: "Soigne 10 PV et augmente les dégâts de 10 pendant 3 tours.", function: "applyGoldenAppleEffect", requiresTarget: true, targetType: "ally" },
    { id: 24, name: "Table d'enchantement", damage: 0, cost: 2, description: "Pendant ce tour, tous les équipements coûtent 1 énergie.", function: "applyEnchantmentTableEffect" },
+   { id: 25, name: "Portail de l’End", damage: 30, cost: 2, description: "Soigne 30 PV d'un Enderman, Shulker ou Ender Dragon.", function: "healEndCreature", requiresTarget: true, targetType: "ally" },
 ];
 
 
@@ -184,6 +185,14 @@ export const cardList: InGameCard[] = [
     name: "Table d'enchantement",
     imageName: "table_enchantement",
     effet: "Table d'enchantement",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Portail de l’End",
+    imageName: "portail_end",
+    effet: "Portail de l’End",
     cost: 2,
     category: "artefact",
   },

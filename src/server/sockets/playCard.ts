@@ -83,13 +83,17 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
              if (c.category !== "mob") return false;
              // Filtre spécifique pour Lingot de fer : Uniquement les Golems
              if (actionDef.function === "healGolem") return c.name === "Golem";
+             // Filtre spécifique pour Portail de l'End
+             if (actionDef.function === "healEndCreature") return ["Enderman", "Shulker", "Ender Dragon"].includes(c.name);
              return true;
           });
 
         if (availableTargets.length === 0) {
-          const msg = isEnemyTarget 
-            ? "Aucune cible ennemie disponible." 
-            : (actionDef.function === "healGolem" ? "Pas de golem sur votre plateau." : "Aucune cible valide.");
+          let msg = isEnemyTarget ? "Aucune cible ennemie disponible." : "Aucune cible valide.";
+          
+          if (actionDef.function === "healGolem") msg = "Pas de golem sur votre plateau.";
+          else if (actionDef.function === "healEndCreature") msg = "Pas de créature de l'End sur votre plateau.";
+          
           io.to(socket.id).emit("log", msg);
           return;
         }
