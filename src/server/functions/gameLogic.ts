@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import type { InGameCard, Player, Action } from "../../typesPvp";
+import type { InGameCard, Player } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
@@ -8,408 +8,443 @@ import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
 
 // --- Piocher une carte ---
 export function drawCard(player: Player) {
-  const card = player.deck.shift();
-  if (!card) {
-    console.warn("drawCard: deck vide");
-    return;
-  }
-  player.hand.push(card);
+    const card = player.deck.shift();
+    if (!card) {
+        console.warn("drawCard: deck vide");
+        return;
+    }
+    player.hand.push(card);
 }
 
 // --- Jouer une carte ---
 export function playCard(io: Server, roomId: string, player: Player, card: InGameCard, opponent: Player) {
-  if (!card) return { success: false, msg: "Carte invalide." };
-
-  // Utiliser l'index pour trouver et retirer la carte de manière fiable
-  const cardIndex = player.hand.findIndex((c) => c.uuid === card.uuid);
-  if (cardIndex === -1) return { success: false, msg: "Carte non trouvée en main." };
   
-  const found = player.hand[cardIndex];
+    // --- Validation de base ---
+    if (!card) return { success: false, msg: "Carte invalide." };
 
-  let finalCost = found.cost;
-  
-  // On clone la carte pour éviter les problèmes de référence partagée
-  const cardToPlay = JSON.parse(JSON.stringify(found));
+    // --- Utiliser l'index pour trouver et retirer la carte ---
+    const cardIndex = player.hand.findIndex((c) => c.uuid === card.uuid);
+    if (cardIndex === -1) return { success: false, msg: "Carte non trouvée en main." };
+    
+    // --- Récupérer la carte réelle ---
+    const found = player.hand[cardIndex];
 
-  // --- EQUIPEMENT ---
-  if (found.category === "equipement") {
-    return { success: false, msg: "L'action pour équiper est invalide ici." };
-  }
+    // --- Calcul du coût ---
+    let finalCost = found.cost;
+    
+    // Clon ge la carte pour éviter les problèmes de référence partagée
+    const cardToPlay = JSON.parse(JSON.stringify(found));
 
-  // --- ARTEFACT ---
-  if (found.category === "artefact") {
-    finalCost = applyCraftTableEffect(player, found, io, roomId, false); // Simulation
+    // --- Gestion des équipements ---
+    if (found.category === "equipement") {
+        return { success: false, msg: "L'action pour équiper est invalide ici." };
+    }
+
+    // --- Gestion des artefacts ---
+    if (found.category === "artefact") {
+
+        // --- Calcul du coût avec effets (table de craft) ---
+        finalCost = applyCraftTableEffect(player, found, io, roomId, false); 
+
+        if (player.energie < finalCost) {
+            return { success: false, msg: "Pas assez d'énergie." };
+        }
+
+        // --- Vérification spécifique pour l'Enclume avant de consommer les ressources ---
+        if (found.name === "Enclume") {
+            const check = checkAnvilCondition(player);
+            if (!check.valid) {
+                return { success: false, msg: check.msg || "Impossible de jouer l'Enclume." };
+            }
+        }
+
+        // --- Application réelle de l'effet ---
+        applyCraftTableEffect(player, found, io, roomId, true);
+
+        if (found.effet) {
+            const action = actionList.find(a => a.name === found.effet);
+            if (action) {
+                if (action.function === "healPlayer") {
+                    const combatState = { log: [] as string[] };
+
+                    // --- Soigner le joueur ---
+                    healPlayer(combatState, player, action.damage);
+                    combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
+                } else if (action.function === "drawCardsEffect") {
+                    const combatState = { log: [] as string[] };
+
+                    // --- Piocher des cartes ---
+                    drawCardsEffect(combatState, player, action.damage);
+                    combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
+                } else if (action.function === "fishingRodEffect") {
+                    const combatState = { log: [] as string[] };
+
+                    // --- Effet de la canne à pêche ---
+                    fishingRodEffect(combatState, player, opponent);
+                    combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
+                } else if (action.function === "applyEnchantmentTableEffect") {
+
+                    // --- Effet de la Table d'enchantement ---
+                    applyEnchantmentTableEffect(io, roomId, player, action.name);
+                } else if (action.function === "anvilEffect") {
+
+                    // --- Effet de l'Enclume ---
+                    anvilEffect(io, roomId, player, action.name);
+                } else {
+
+                    // --- Gestion des autres effets ---
+                    if (!player.effects) player.effects = [];
+                    player.effects.push(action.name);
+                    io.to(roomId).emit("log", `[Effet] ${player.id} active ${action.name}.`);
+                }
+            }
+        }
+
+        // --- L'artefact est consommé et va dans la défausse ---
+        player.discard.push(cardToPlay);
+
+        // --- On retire la carte de la main ---
+        player.hand.splice(cardIndex, 1);
+
+        // --- On paie le coût de l'artefact ---
+        player.energie -= finalCost;
+        return { success: true, msg: `Vous avez joué ${found.name}`, update: true };
+    }
+
+    // --- On vérifie les effets actifs (table de craft) ---
+    finalCost = applyCraftTableEffect(player, found, io, roomId, false);
 
     if (player.energie < finalCost) {
-      return { success: false, msg: "Pas assez d'énergie." };
+        return { success: false, msg: "Pas assez d'énergie." };
     }
-
-    // Vérification spécifique pour l'Enclume avant de consommer les ressources
-    if (found.name === "Enclume") {
-      const check = checkAnvilCondition(player);
-      if (!check.valid) {
-        return { success: false, msg: check.msg || "Impossible de jouer l'Enclume." };
-      }
-    }
-
-    // Application réelle de l'effet (consommation)
+    // --- Application réelle de l'effet ---
     applyCraftTableEffect(player, found, io, roomId, true);
-
-    if (found.effet) {
-      const action = actionList.find(a => a.name === found.effet);
-      if (action) {
-        if (action.function === "healPlayer") {
-          const combatState = { log: [] as string[] };
-          healPlayer(combatState, player, action.damage);
-          combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
-        } else if (action.function === "drawCardsEffect") {
-          const combatState = { log: [] as string[] };
-          drawCardsEffect(combatState, player, action.damage);
-          combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
-        } else if (action.function === "fishingRodEffect") {
-          const combatState = { log: [] as string[] };
-          fishingRodEffect(combatState, player, opponent);
-          combatState.log.forEach((msg: string) => io.to(roomId).emit("log", msg));
-        } else if (action.function === "applyEnchantmentTableEffect") {
-          applyEnchantmentTableEffect(io, roomId, player, action.name);
-        } else if (action.function === "anvilEffect") {
-          anvilEffect(io, roomId, player, action.name);
-        } else {
-          if (!player.effects) player.effects = [];
-          player.effects.push(action.name);
-          io.to(roomId).emit("log", `[Effet] ${player.id} active ${action.name}.`);
-        }
-      }
-    }
-    // L'artefact est consommé et va dans la défausse
-    player.discard.push(cardToPlay);
-    // On retire la carte de la main
-    player.hand.splice(cardIndex, 1);
-    // On paie le coût de l'artefact
     player.energie -= finalCost;
-    return { success: true, msg: `Vous avez joué ${found.name}`, update: true };
-  }
 
-  // Pour les mobs, on vérifie d'abord les effets actifs
-  finalCost = applyCraftTableEffect(player, found, io, roomId, false); // Simulation
+    // --- Placement sur le plateau ---
+    if (found.category === "mob") {
+        player.board.push(cardToPlay);
 
-  if (player.energie < finalCost) {
-    return { success: false, msg: "Pas assez d'énergie." };
-  }
-  // Application réelle de l'effet (consommation)
-  applyCraftTableEffect(player, found, io, roomId, true);
-  player.energie -= finalCost;
+        // --- Vérification des synergies (Golem et Villageois) ---
+        checkVillageGuardian(player, io, roomId);
 
-  if (found.category === "mob") {
-    player.board.push(cardToPlay);
+    } else if (found.category === "equipement") {
+        // --- Déjà gérée dans playCardSocket ---
+    } else {
+        return { success: false, msg: `Catégorie de carte non reconnue pour l'action.`};
+    }
+
+    // --- Retirer de la main du joueur ---
+    player.hand.splice(cardIndex, 1);
     
-    // Vérification des synergies passives (ex: Golem + Villageois)
-    checkVillageGuardian(player, io, roomId);
-  } else if (found.category === "equipement") {
-    // La logique d'équipement est gérée dans playCardSocket, cette partie ne devrait pas être atteinte.
-  } else {
-    return { success: false, msg: `Catégorie de carte non reconnue pour l'action.`};
-  }
-
-  // Retirer de la main du joueur
-  player.hand.splice(cardIndex, 1);
-  
-  return { success: true, msg: `Vous avez joué ${found.name}` };
+    return { success: true, msg: `Vous avez joué ${found.name}` };
 }
 
-// --- Jouer un équipement (Nouvelle fonction centralisée) ---
-export function playEquipment(
-  io: Server,
-  roomId: string,
-  player: Player,
-  card: InGameCard,
-  targetMob: InGameCard
-) {
-  // Validation de base
-  const cardIndex = player.hand.findIndex((c) => c.uuid === card.uuid);
-  if (cardIndex === -1) return { success: false, msg: "Carte non trouvée en main." };
+// --- Jouer un équipement ---
+export function playEquipment(io: Server, roomId: string, player: Player, card: InGameCard, targetMob: InGameCard) {
   
-  const found = player.hand[cardIndex];
-  if (found.category !== "equipement") return { success: false, msg: "Ce n'est pas un équipement." };
-  if (targetMob.category !== "mob") return { success: false, msg: "Cible invalide." };
+    // --- Validation de base ---
+    const cardIndex = player.hand.findIndex((c) => c.uuid === card.uuid);
+    if (cardIndex === -1) return { success: false, msg: "Carte non trouvée en main." };
+    
+    const found = player.hand[cardIndex];
+    if (found.category !== "equipement") return { success: false, msg: "Ce n'est pas un équipement." };
+    if (targetMob.category !== "mob") return { success: false, msg: "Cible invalide." };
 
-  // 1. Calcul du coût (Simulation)
-  const finalCost = applyCraftTableEffect(player, found, io, roomId, false);
+    // --- Calcul du coût ---
+    const finalCost = applyCraftTableEffect(player, found, io, roomId, false);
 
-  // 2. Vérification énergie
-  if (player.energie < finalCost) {
-    return { success: false, msg: "Pas assez d'énergie." };
-  }
+    // --- Vérification énergie ---
+    if (player.energie < finalCost) {
+        return { success: false, msg: "Pas assez d'énergie." };
+    }
 
-  // 3. Paiement et Consommation de l'effet
-  applyCraftTableEffect(player, found, io, roomId, true);
-  player.energie -= finalCost;
+    // --- Paiement et Consommation de l'effet ---
+    applyCraftTableEffect(player, found, io, roomId, true);
+    player.energie -= finalCost;
 
-  // 4. Application de l'équipement
-  const equipmentCard = JSON.parse(JSON.stringify(found));
-  if (!targetMob.equipment) targetMob.equipment = [];
-  targetMob.equipment.push(equipmentCard);
+    // --- Application de l'équipement ---
+    const equipmentCard = JSON.parse(JSON.stringify(found));
+    if (!targetMob.equipment) targetMob.equipment = [];
+    targetMob.equipment.push(equipmentCard);
 
-  // 5. Retrait de la main
-  player.hand.splice(cardIndex, 1);
+    // --- Retrait de la main ---
+    player.hand.splice(cardIndex, 1);
 
-  io.to(roomId).emit("log", `${player.id} équipe ${found.name} sur ${targetMob.name}`);
-  return { success: true, msg: `Équipement placé`, update: true };
+    io.to(roomId).emit("log", `${player.id} équipe ${found.name} sur ${targetMob.name}`);
+    return { success: true, msg: `Équipement placé`, update: true };
 }
 
 // --- Terminer le tour ---
 export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
-  const playerEnding = state.players[state.turnIndex];
 
-  // --- 1. Effets de FIN de tour (ex: Pomme dorée) ---
-  // On applique le soin et on réduit la durée avant de passer la main
-  const combatStateEnd = { log: [] as string[] };
-  for (let i = playerEnding.board.length - 1; i >= 0; i--) {
-    handleGoldenAppleEffect(combatStateEnd, playerEnding, i);
-  }
-  combatStateEnd.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
+    // --- Récupérer le joueur qui termine son tour ---
+    const playerEnding = state.players[state.turnIndex];
 
-  // --- 2. Changement de joueur ---
-  state.turnIndex = (state.turnIndex + 1) % 2;
-  const current = state.players[state.turnIndex];
+    // --- Effets de FIN de tour ---
+    const combatStateEnd = { log: [] as string[] };
+    for (let i = playerEnding.board.length - 1; i >= 0; i--) {
 
-  // --- 3. Effets de DÉBUT de tour (ex: Brûlure, Potion) ---
-  const combatStateStart = { log: [] as string[] };
-  
-  for (let i = current.board.length - 1; i >= 0; i--) {
-    handleBurnEffect(io, state.roomId, combatStateStart, current, i);
-  }
-
-  applyPotionRegen(combatStateStart, current);
-  combatStateStart.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
-
-  // Réinitialiser le statut d'attaque des mobs du joueur qui commence son tour
-  current.board.forEach((card: InGameCard) => {
-    card.hasAttacked = false;
-    card.hasUsedTalent = false;
-    // Retirer l'effet Esquive et Invisible au début du tour du propriétaire (fin de l'effet temporaire)
-    if (card.category === "mob" && card.effects) {
-      const index = card.effects.indexOf("Esquive");
-      if (index !== -1) {
-        card.effects.splice(index, 1);
-      }
-      const indexInvisible = card.effects.indexOf("Invisible");
-      if (indexInvisible !== -1) {
-        card.effects.splice(indexInvisible, 1);
-      }
+        // --- gestion de la golden apple ---
+        handleGoldenAppleEffect(combatStateEnd, playerEnding, i);
     }
-    // Retirer l'effet Table d'enchantement à la fin du tour
-    if (current.effects && current.effects.includes("Table d'enchantement")) {
-      current.effects = current.effects.filter((e: string) => e !== "Table d'enchantement");
-    }
-  });
+    combatStateEnd.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
 
-  // on incrémente ici pour indiquer que le joueur "commence" un nouveau tour
-  if (current.turnCount === undefined) current.turnCount = 0;
-  current.turnCount++;
-  // appliquer le gain d'énergie correctement (isSecondPlayer = index === 1)
-  const isSecondPlayer = state.turnIndex === 1;
-  const { gain } = applyEnergyGain(current, isSecondPlayer);
-  // pioche et envoi d'état
-  drawCard(current);
-  io.to(state.roomId).emit(
-    "log",
-    `Tour de ${current.id} → +${gain} énergie (total: ${current.energie})`
-  );
-  sendGameState(io, rooms, state.roomId);
-  if (checkVictory(io, state, rooms)) return;
+    // --- Changement de joueur ---
+    state.turnIndex = (state.turnIndex + 1) % 2;
+    const current = state.players[state.turnIndex];
+
+    // --- Effets de DÉBUT de tour (ex: Brûlure, Potion) ---
+    const combatStateStart = { log: [] as string[] };
+    
+    for (let i = current.board.length - 1; i >= 0; i--) {
+
+        // --- gestion de la brûlure ---
+        handleBurnEffect(io, state.roomId, combatStateStart, current, i);
+    }
+
+    // --- appliquer la régénération de la potion ---
+    applyPotionRegen(combatStateStart, current);
+    combatStateStart.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
+
+    // --- Réinitialiser le statut d'attaque des mobs du joueur qui commence son tour ---
+    current.board.forEach((card: InGameCard) => {
+        card.hasAttacked = false;
+        card.hasUsedTalent = false;
+
+        // --- Retirer l'effet Esquive et Invisible au début du tour du propriétaire ---
+        if (card.category === "mob" && card.effects) {
+            const index = card.effects.indexOf("Esquive");
+            if (index !== -1) {
+                card.effects.splice(index, 1);
+            }
+            const indexInvisible = card.effects.indexOf("Invisible");
+            if (indexInvisible !== -1) {
+                card.effects.splice(indexInvisible, 1);
+            }
+        }
+
+        // --- Retirer l'effet Table d'enchantement à la fin du tour ---
+        if (current.effects && current.effects.includes("Table d'enchantement")) {
+            current.effects = current.effects.filter((e: string) => e !== "Table d'enchantement");
+        }
+    });
+
+    // --- Indiquer que le joueur commence un nouveau tour ---
+    if (current.turnCount === undefined) current.turnCount = 0;
+    current.turnCount++;
+
+    // --- Appliquer le gain d'énergie correctement ---
+    const isSecondPlayer = state.turnIndex === 1;
+    const { gain } = applyEnergyGain(current, isSecondPlayer);
+
+    // --- Pioche et envoi d'état ---
+    drawCard(current);
+    io.to(state.roomId).emit("log",`Tour de ${current.id} → +${gain} énergie (total: ${current.energie})`);
+    sendGameState(io, rooms, state.roomId);
+    if (checkVictory(io, state, rooms)) return;
 }
 
 // --- Envoyer l'état du jeu ---
 export function sendGameState(io: Server, rooms: Map<string, any>, roomId: string) {
-  const state = rooms.get(roomId);
-  if (!state) return;
+  
+    // --- Récupération de l'état du jeu ---
+    const state = rooms.get(roomId);
+    if (!state) return;
 
-  for (const player of state.players) {
-    const opponent = state.players.find((p: any) => p.id !== player.id);
+    // Envoyer un état du jeu adapté à chaque joueur
+    for (const player of state.players) {
 
-    const visibleState = {
-      selfId: player.id,
-      roomId: state.roomId,
-      turnIndex: state.turnIndex,
-      players: [
-        {
-          id: player.id,
-          energie: player.energie,
-          deck: player.deck,
-          hand: player.hand,
-          board: player.board,
-          discard: player.discard,
-          pv: player.pv,
-          effects: player.effects,
-          equipment: player.equipment,
-        },
-        opponent
-          ? {
-              id: opponent.id,
-              energie: opponent.energie,
-              deck: new Array(opponent.deck.length).fill({ hidden: true }),
-              hand: new Array(opponent.hand.length).fill({ hidden: true }),
-              board: opponent.board,
-              discard: opponent.discard,
-              pv: opponent.pv,
-              effects: opponent.effects,
-              equipment: opponent.equipment,
-            }
-          : null,
-      ],
-    };
-    
-    io.to(player.id).emit("updateState", visibleState);
-  }
+        // --- Récupérer l'adversaire ---
+        const opponent = state.players.find((p: any) => p.id !== player.id);
+
+        // --- Construction de l'état visible ---
+        const visibleState = {
+            selfId: player.id,
+            roomId: state.roomId,
+            turnIndex: state.turnIndex,
+            players: [
+                {
+                  id: player.id,
+                  energie: player.energie,
+                  deck: player.deck,
+                  hand: player.hand,
+                  board: player.board,
+                  discard: player.discard,
+                  pv: player.pv,
+                  effects: player.effects,
+                  equipment: player.equipment,
+                },
+                opponent
+                  ? {
+                      id: opponent.id,
+                      energie: opponent.energie,
+                      deck: new Array(opponent.deck.length).fill({ hidden: true }),
+                      hand: new Array(opponent.hand.length).fill({ hidden: true }),
+                      board: opponent.board,
+                      discard: opponent.discard,
+                      pv: opponent.pv,
+                      effects: opponent.effects,
+                      equipment: opponent.equipment,
+                    }
+                  : null,
+            ],
+        };
+        
+        io.to(player.id).emit("updateState", visibleState);
+    }
 }
 
 // --- Gérer le matchmaking ---
-export function handleMatchmaking(
-  io: Server,
-  socket: Socket,
-  rooms: Map<string, any>,
-  waitingPlayer: any,
-  genToken: () => string,
-  createPlayer: any,
-  baseDeck1: any[],
-  baseDeck2: any[],
-  sendGameState: any,
-  applyEnergyGain: any
-): any {
-  if (waitingPlayer) {
-    const waitingSock = io.sockets.sockets.get(waitingPlayer.socketId);
-    if (waitingSock && waitingSock.connected) {
-      const roomId = `room-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+export function handleMatchmaking(io: Server, socket: Socket, rooms: Map<string, any>, waitingPlayer: any, genToken: () => string, createPlayer: any, baseDeck1: any[], baseDeck2: any[], sendGameState: any, applyEnergyGain: any): any {
+  
+    // --- Si un joueur attend déjà ---
+    if (waitingPlayer) {
 
-      socket.join(roomId);
-      waitingSock.join(roomId);
+        // --- Vérifier la connexion du joueur en attente ---
+        const waitingSock = io.sockets.sockets.get(waitingPlayer.socketId);
+        if (waitingSock && waitingSock.connected) {
+            const roomId = `room-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-      const token1 = waitingPlayer.token;
-      const token2 = genToken();
+            socket.join(roomId);
+            waitingSock.join(roomId);
 
-      const p1 = createPlayer(waitingPlayer.socketId, baseDeck1, token1, waitingPlayer.userId);
-      const p2 = createPlayer(socket.id, baseDeck2, token2, (socket as any).userId);
+            // --- Génération des tokens ---
+            const token1 = waitingPlayer.token;
+            const token2 = genToken();
 
-      p1.turnCount = 1; // J1 commence déjà son premier tour
-      p2.turnCount = 0;
+            // --- Création des joueurs ---
+            const p1 = createPlayer(waitingPlayer.socketId, baseDeck1, token1, waitingPlayer.userId);
+            const p2 = createPlayer(socket.id, baseDeck2, token2, (socket as any).userId);
 
-      // J1 commence, il gagne 1 énergie dès le début
-      applyEnergyGain(p1, false);
+            // --- Joueur 1 commence le premier tour ---
+            p1.turnCount = 1;
+            p2.turnCount = 0;
 
+            // --- Appliquer le gain d'énergie initial ---
+            applyEnergyGain(p1, false);
 
-      const state = {
-        roomId,
-        players: [p1, p2],
-        turnIndex: 0, 
-      };
+            // --- Création de l'état de la room ---
+            const state = { roomId, players: [p1, p2], turnIndex: 0 };
 
-      rooms.set(roomId, state);
+            // --- Enregistrement de la room ---
+            rooms.set(roomId, state);
 
-      // Info room + token
-      io.to(p1.id).emit("roomInfo", { roomId, token: token1 });
-      io.to(p2.id).emit("roomInfo", { roomId, token: token2 });
+            // Info room et token
+            io.to(p1.id).emit("roomInfo", { roomId, token: token1 });
+            io.to(p2.id).emit("roomInfo", { roomId, token: token2 });
 
-      io.to(roomId).emit("gameStart");
+            io.to(roomId).emit("gameStart");
 
-      // J1 commence son tour
-      io.to(p1.id).emit("yourTurn");
-      io.to(p2.id).emit("opponentTurn"); 
+            // J1 commence son tour
+            io.to(p1.id).emit("yourTurn");
+            io.to(p2.id).emit("opponentTurn"); 
 
-      // envoyer état après énergie initiale
-      sendGameState(io, rooms, roomId);
+            // envoyer état après énergie initiale
+            sendGameState(io, rooms, roomId);
 
-      console.log(` Room créée: ${roomId}`);
-      return null;
+            console.log(` Room créée: ${roomId}`);
+            return null;
+        } else {
+
+            // --- Le joueur en attente s'est déconnecté ---
+            const newWaiting = { socketId: socket.id, token: genToken(), userId: (socket as any).userId };
+            socket.emit("waiting");
+            console.log(` Nouveau joueur en attente: ${socket.id}`);
+            return newWaiting;
+        }
+    // --- Sinon, mettre le joueur actuel en attente ---
     } else {
-      const newWaiting = { socketId: socket.id, token: genToken(), userId: (socket as any).userId };
-      socket.emit("waiting");
-      console.log(` Nouveau joueur en attente: ${socket.id}`);
-      return newWaiting;
+        const newWaiting = { socketId: socket.id, token: genToken() };
+        socket.emit("waiting");
+        console.log(` Joueur en attente: ${socket.id}`);
+        return newWaiting;
     }
-  } else {
-    const newWaiting = { socketId: socket.id, token: genToken() };
-    socket.emit("waiting");
-    console.log(` Joueur en attente: ${socket.id}`);
-    return newWaiting;
-  }
 }
 
 // --- Gestion du gain d'énergie par tour ---
 export function applyEnergyGain(player: any, isSecondPlayer: boolean) {
-  // sécurités
-  if (!player) throw new Error("applyEnergyGain: player manquant");
-  if (player.turnCount === undefined) player.turnCount = 0;
-  if (player.energie === undefined) player.energie = 0;
 
-  const baseStart = isSecondPlayer ? 2 : 1; // J2 commence avec +2, J1 commence +1
+    // --- Validation ---
+    if (!player) throw new Error("applyEnergyGain: player manquant");
+    if (player.turnCount === undefined) player.turnCount = 0;
+    if (player.energie === undefined) player.energie = 0;
 
-  // On suppose que player.turnCount a déjà été incrémenté pour ce tour
-  // gain = baseStart + (turnCount - 1) * 2, plafonné à 5
-  const gain = Math.min(baseStart + Math.max(0, player.turnCount - 1) * 2, 5);
+    // --- Calcul du gain ---
+    const baseStart = isSecondPlayer ? 2 : 1; 
 
-  const before = player.energie;
-  player.energie = Math.min(player.energie + gain, 20); // cumul, cap 20
+    // --- Formule de gain d'énergie ---
+    const gain = Math.min(baseStart + Math.max(0, player.turnCount - 1) * 2, 5);
 
-  return { gain, before, after: player.energie };
+    const before = player.energie;
+    player.energie = Math.min(player.energie + gain, 20);
+
+    return { gain, before, after: player.energie };
 }
 
 // --- Vérification de la victoire ---
 export function checkVictory(io: any, roomState: any, rooms: Map<string, any>) {
-  const [p1, p2] = roomState.players;
+    
+    // --- Vérification des points de vie ---
+    const [p1, p2] = roomState.players;
 
-  if (p1.pv <= 0 && p2.pv <= 0) {
-    io.to(roomState.roomId).emit("draw");
-    rooms.delete(roomState.roomId);
-    return true;
-  }
+    // --- Cas de match nul ---
+    if (p1.pv <= 0 && p2.pv <= 0) {
+        io.to(roomState.roomId).emit("draw");
+        rooms.delete(roomState.roomId);
+        return true;
+    }
 
-  if (p1.pv <= 0) {
-    io.to(p1.id).emit("defeat", { reason: "pv_zero" });
-    io.to(p2.id).emit("victory", { reason: "enemy_zero" });
-    rooms.delete(roomState.roomId);
-    return true;
-  }
+    // --- Cas de victoire J2 ---
+    if (p1.pv <= 0) {
+        io.to(p1.id).emit("defeat", { reason: "pv_zero" });
+        io.to(p2.id).emit("victory", { reason: "enemy_zero" });
+        rooms.delete(roomState.roomId);
+        return true;
+    }
 
-  if (p2.pv <= 0) {
-    io.to(p2.id).emit("defeat", { reason: "pv_zero" });
-    io.to(p1.id).emit("victory", { reason: "enemy_zero" });
-    rooms.delete(roomState.roomId);
-    return true;
-  }
+    // --- Cas de victoire J1 ---
+    if (p2.pv <= 0) {
+        io.to(p2.id).emit("defeat", { reason: "pv_zero" });
+        io.to(p1.id).emit("victory", { reason: "enemy_zero" });
+        rooms.delete(roomState.roomId);
+        return true;
+    }
 
-  return false;
+    return false;
 }
 
-// --- Gestion de la mort et des synergies (Intégré ici car deathLogic n'existe pas) ---
-
-// Vérifie la synergie Golem <-> Villageois
+// Vérifie la synergie Golem et Villageois
 export function checkVillageGuardian(player: Player, io: Server, roomId: string): void {
-  const hasVillager = player.board.some((c) => c.name === "Villageois");
-  const golems = player.board.filter((c) => c.name === "Golem");
 
-  golems.forEach((golem) => {
-    if (!golem.effects) golem.effects = [];
-    const hasBuff = golem.effects.includes("DoubleDamage");
+    // --- Vérification de la présence du Villageois ---
+    const hasVillager = player.board.some((c) => c.name === "Villageois");
 
-    if (hasVillager && !hasBuff) {
-      golem.effects.push("DoubleDamage");
-      io.to(roomId).emit("log", `${golem.name} s'enrage grâce à la présence d'un Villageois ! (Dégâts x2)`);
-    } else if (!hasVillager && hasBuff) {
-      golem.effects = golem.effects.filter((e) => e !== "DoubleDamage");
-      io.to(roomId).emit("log", `${golem.name} se calme (Plus de Villageois à protéger).`);
-    }
-  });
+    // --- Application/Déploiement du buff sur les Golems ---
+    const golems = player.board.filter((c) => c.name === "Golem");
+
+    // --- Appliquer ou retirer le buff ---
+    golems.forEach((golem) => {
+
+        // --- Initialisation des effets si nécessaire ---
+        if (!golem.effects) golem.effects = [];
+        const hasBuff = golem.effects.includes("DoubleDamage");
+
+        // --- Appliquer le buff si un Villageois est présent et le buff n'est pas déjà appliqué ---
+        if (hasVillager && !hasBuff) {
+            golem.effects.push("DoubleDamage");
+            io.to(roomId).emit("log", `${golem.name} s'enrage grâce à la présence d'un Villageois ! (Dégâts x2)`);
+
+        // --- Retirer le buff si aucun Villageois n'est présent mais le buff est actif ---
+        } else if (!hasVillager && hasBuff) {
+            golem.effects = golem.effects.filter((e) => e !== "DoubleDamage");
+            io.to(roomId).emit("log", `${golem.name} se calme (Plus de Villageois à protéger).`);
+        }
+    });
 }
 
 // Gère la mort d'un mob (détachement équipement, défausse, logs, synergies)
-export function handleMobDeath(
-    io: Server,
-    roomId: string,
-    player: Player,
-    mobIndex: number,
-    logArray: string[]
-) {
+export function handleMobDeath(io: Server, roomId: string, player: Player, mobIndex: number, logArray: string[]) {
     const mob = player.board[mobIndex];
     if (!mob) return;
 
