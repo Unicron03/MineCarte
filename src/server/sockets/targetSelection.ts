@@ -104,7 +104,7 @@ export const targetSelectionSocket = (
         } else if (actionDef && actionDef.function === "applyBurnEffect") {
             const combatState: CombatState = { log: [] };
             
-            applyBurnEffect(io, roomId, combatState, opponent, targetIndex, sourceCard.name);
+            applyBurnEffect(combatState, opponent, targetIndex, sourceCard.name);
 
             combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
             
@@ -123,7 +123,7 @@ export const targetSelectionSocket = (
         if (actionDefSupport && actionDefSupport.function === "healGolem") {
              const combatState: CombatState = { log: [] };
              // targetPlayer ici est le joueur lui-même (player) car c'est un sort allié
-             healGolem(io, roomId, combatState, player, targetIndex, actionDefSupport.damage, sourceCard.name);
+             healGolem(combatState, player, targetIndex, actionDefSupport.damage, sourceCard.name);
              combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
              
              player.discard.push(sourceCard);
@@ -140,7 +140,7 @@ export const targetSelectionSocket = (
         } else if (actionDefSupport && actionDefSupport.function === "giveInvisibleEffect") {
              const combatState: CombatState = { log: [] };
              
-             giveInvisibleEffect(io, roomId, combatState, player, targetIndex, sourceCard.name);
+             giveInvisibleEffect(combatState, player, targetIndex, sourceCard.name);
              
              combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
              
@@ -149,7 +149,7 @@ export const targetSelectionSocket = (
         } else if (actionDefSupport && actionDefSupport.function === "applyGoldenAppleEffect") {
              const combatState: CombatState = { log: [] };
              
-             applyGoldenAppleEffect(io, roomId, combatState, player, targetIndex, sourceCard.name);
+             applyGoldenAppleEffect(combatState, player, targetIndex, sourceCard.name);
              
              combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
              
@@ -158,7 +158,7 @@ export const targetSelectionSocket = (
         } else if (actionDefSupport && actionDefSupport.function === "healEndCreature") {
              const combatState: CombatState = { log: [] };
              
-             healEndCreature(io, roomId, combatState, player, targetIndex, actionDefSupport.damage, sourceCard.name);
+             healEndCreature(combatState, player, targetIndex, actionDefSupport.damage, sourceCard.name);
              
              combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
              

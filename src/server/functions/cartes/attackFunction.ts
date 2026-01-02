@@ -1,4 +1,4 @@
-import { InGameCard, Player, CombatState, Action } from "../../../typesPvp";
+import { InGameCard, Player, CombatState} from "../../../typesPvp";
 import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./../testEffectFonctions";
 import { detachEquipment } from "./equipementFunction";
 
