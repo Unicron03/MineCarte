@@ -55,7 +55,7 @@ const baseDeck1 = [
   //createCard("Table d'enchantement", 2, "artefact", null, "Table d'enchantement", null, null),
   createCard("Portail de l’End", 2, "artefact", null, "Portail de l’End", null, null),
   //createCard("Enclume", 1, "artefact", null, "Enclume", null, null),
-  createCard("Warden", 4, "mob", 150, "Détection Sonore", "Coup d'ombre", null),
+  createCard("Warden", 4, "mob", 150, "Détection Sonore", "Coup d'ombre", "Hurlement Sombre"),
   createCard("Cloche", 2, "artefact", null, "Cloche", null, null),
 ];
 

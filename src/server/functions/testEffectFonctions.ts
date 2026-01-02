@@ -192,3 +192,8 @@ export function handleGoldenAppleEffect(state: CombatState, player: Player, card
         }
     }
 }
+
+// Vérifie si une carte est étourdie
+export function isStunned(card: InGameCard): boolean {
+    return card.effects?.some((e: string) => e.startsWith("Stun_")) ?? false;
+}

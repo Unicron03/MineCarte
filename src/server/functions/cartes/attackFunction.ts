@@ -225,6 +225,25 @@ export function attackDirectPlayer(state: CombatState, attacker: InGameCard, amo
     return { killed: opponent.pv <= 0 };
 }
 
+// Attaque qui inflige des dégâts et étourdit la cible
+export function hurlementSombre(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player): { killed: boolean } | void {
+    
+    // --- Utilise la logique de base pour infliger les dégâts ---
+    const result = AttackOneMob(state, attacker, target, amount, opponent);
 
+    // --- Application de l'effet Stun si la cible est un mob vivant ---
+    if (target && target.category === "mob" && target.pv_durability !== undefined && target.pv_durability > 0) {
+        if (!target.effects) target.effects = [];
 
+        // --- On retire un éventuel stun existant pour réinitialiser ---
+        const existing = target.effects.find(e => e.startsWith("Stun_"));
+        if (existing) {
+             const index = target.effects.indexOf(existing);
+             target.effects.splice(index, 1);
+        }
 
+        target.effects.push("Stun_1"); // Stun pour 1 tour
+        state.log.push(`${target.name} est étourdi par le hurlement !`);
+    }
+    return result;
+}

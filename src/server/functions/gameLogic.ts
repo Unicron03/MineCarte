@@ -211,6 +211,20 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
                 card.effects[bellEffectIndex] = `BellDiscount_${duration - 1}`;
             }
         }
+
+        // --- Gestion de l'effet Stun ---
+        const stunIndex = card.effects.findIndex((e: string) => e.startsWith("Stun_"));
+        if (stunIndex !== -1) {
+            const effect = card.effects[stunIndex];
+            const duration = parseInt(effect.split("_")[1]);
+
+            if (duration <= 1) {
+                card.effects.splice(stunIndex, 1);
+                combatStateEnd.log.push(`${card.name} n'est plus étourdi.`);
+            } else {
+                card.effects[stunIndex] = `Stun_${duration - 1}`;
+            }
+        }
     }
     combatStateEnd.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
 

@@ -2,9 +2,9 @@ import { Server, Socket } from "socket.io";
 import { CombatState, Player, Action, InGameCard } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
-import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer } from "../functions/cartes/attackFunction";
+import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre } from "../functions/cartes/attackFunction";
 import { drawCard} from "../functions/cartes/talentFunction";
-import { hasInvisibility } from "../functions/testEffectFonctions";
+import { hasInvisibility, isStunned } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
 function getActionByName(name: string): Action | undefined {
@@ -71,6 +71,10 @@ function executeAction( state: CombatState, action: Action, attacker: InGameCard
             // Si damage est 0, on pioche 1 carte par défaut
             drawCard(state, player, action.damage || 1);
             return;
+
+        case "hurlementSombre":
+            if (!action.damage) return;
+            return hurlementSombre(state, attacker, target, action.damage, opponent);
     }
 }
 
@@ -122,6 +126,12 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
             return;
         }
 
+        // --- Vérifier si le mob est étourdi ---
+        if (isStunned(attacker)) {
+            socket.emit("log", "Ce mob est étourdi et ne peut pas attaquer !");
+            return;
+        }
+
         // --- Récupération de l'action ---
         const action = getActionByName(attackName);
         if (!action) {
@@ -138,7 +148,7 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
         }
 
         // --- Attaque ciblée -> Demander une cible ennemie ---
-        if (action.function === "AttackOneMob" || action.function === "attackEsquive" || action.function === "damageAndDie" || action.function === "voleEnergie") {
+        if (action.function === "AttackOneMob" || action.function === "attackEsquive" || action.function === "damageAndDie" || action.function === "voleEnergie" || action.function === "hurlementSombre") {
           
             // --- Vérifier la présence de cibles valides ---
             const hasMobs = opponent.board.some((c: InGameCard) => c.category === "mob" && !hasInvisibility(c));
@@ -180,6 +190,12 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
 
         if (attacker.hasAttacked) {
             socket.emit("log", "Ce mob a déjà attaqué ce tour-ci !");
+            return;
+        }
+
+        // --- Vérifier si le mob est étourdi ---
+        if (isStunned(attacker)) {
+            socket.emit("log", "Ce mob est étourdi et ne peut pas attaquer !");
             return;
         }
 
