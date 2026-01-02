@@ -60,6 +60,7 @@ const baseDeck1 = [
   createCard("Araignée", 2, "mob", 35, "Ralentissement calculé", "Morsure", null),
   createCard("Tortue", 2, "mob", 60, "Carapace Protectrice", "Morsure", null),
   createCard("Creeper", 3, "mob", 40, "Pression Psychologique", "Explosion", null),
+  createCard("Wither", 3, "mob", 100, "Explosion noire", "Morsure", null),
 ];
 
 const baseDeck2 = [...baseDeck1];

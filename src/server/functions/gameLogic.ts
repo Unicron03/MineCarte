@@ -4,7 +4,7 @@ import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
-import { removeEnergyFromOpponent, applyCarapaceEffect, pressionPsychologique } from "./cartes/talentFunction";
+import { removeEnergyFromOpponent, applyCarapaceEffect, pressionPsychologique, checkWitherExplosionNoire } from "./cartes/talentFunction";
 
 
 // --- Piocher une carte ---
@@ -139,6 +139,12 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         // S'active immédiatement à la pose
         if (found.talent === "Carapace Protectrice") {
              applyCarapaceEffect(io, roomId, player, opponent, cardToPlay);
+        }
+
+        // --- Talent Wither (Explosion noire) ---
+        // Vérification à la pose (peu probable d'être < 30% mais cohérent)
+        if (found.talent === "Explosion noire") {
+             checkWitherExplosionNoire(io, roomId, player, opponent, cardToPlay);
         }
 
         // --- DÉTECTION SONORE (WARDEN) ---
@@ -283,6 +289,15 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
             if (opponent) {
                 applyCarapaceEffect(io, state.roomId, current, opponent, card);
                 checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            }
+        }
+
+        // --- Talent Wither (Explosion noire) ---
+        // Vérification à chaque début de tour
+        if (card.talent === "Explosion noire") {
+            const opponent = state.players.find((p: any) => p.id !== current.id);
+            if (opponent) {
+                checkWitherExplosionNoire(io, state.roomId, current, opponent, card);
             }
         }
     }

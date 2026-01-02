@@ -34,6 +34,7 @@ export const actionList: Action[] = [
   { id: 30, name: "Ralentissement calculé", damage: 1, cost: 0, description: "Retire 1 énergie à l'adversaire au début du tour.", function: "removeEnergyFromOpponent", autoActivate: true },
   { id: 31, name: "Carapace Protectrice", damage: 0, cost: 0, description: "Réduit les dégâts de la première attaque subie de 50%.", function: "applyCarapaceEffect", autoActivate: true },
   { id: 32, name: "Pression Psychologique", damage: 0, cost: 0, description: "Si le Creeper meurt d'une attaque adverse, il inflige 15 PV aux mobs adverses et 5 PV au joueur.", function: "pressionPsychologique", autoActivate: true },
+  { id: 33, name: "Explosion noire", damage: 0, cost: 0, description: "Passif: Dégâts x2 si PV <= 30%.", function: "checkWitherExplosionNoire", autoActivate: true },
 ];
 
 
@@ -258,6 +259,16 @@ export const cardList: InGameCard[] = [
     talent: "Pression Psychologique",
     attack1: "Explosion",
     pv_durability: 40,
+    cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Wither",
+    imageName: "wither",
+    talent: "Explosion noire",
+    attack1: "Morsure",
+    pv_durability: 100,
     cost: 3,
     category: "mob",
   },

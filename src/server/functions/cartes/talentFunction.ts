@@ -81,3 +81,34 @@ export function pressionPsychologique(io: Server, roomId: string, deadCreeperOwn
     });
     io.to(roomId).emit("log", `Tous les mobs adverses subissent 15 dégâts.`);
 }
+
+// Talent Wither : Explosion noire (Enrage < 30% PV)
+export function checkWitherExplosionNoire(io: Server, roomId: string, player: Player, opponent: Player, card: InGameCard): void {
+    if (card.pv_durability === undefined) return;
+    
+    // Initialisation max_pv si absent (pour le calcul du %)
+    const maxPv = card.max_pv || card.pv_durability;
+    const threshold = maxPv * 0.3;
+
+    if (!card.effects) card.effects = [];
+
+    // Si PV <= 30% et pas encore enragé
+    if (card.pv_durability <= threshold) {
+        if (!card.effects.includes("WitherEnrage")) {
+            card.effects.push("WitherEnrage");
+            io.to(roomId).emit("log", `☠️ ${card.name} entre en phase d'Explosion Noire ! Dégâts doublés !`);
+        }
+
+        // Déclenchement du Warden adverse (copie de la logique pour éviter dépendance circulaire avec testEffectFonctions)
+        const warden = opponent.board.find(c => c.category === "mob" && c.name === "Warden" && c.talent === "Détection Sonore");
+        if (warden) {
+            soundDetection(io, roomId, opponent, player, card);
+        }
+    } else {
+        // Si soigné au-dessus de 30%, on retire l'effet
+        if (card.effects.includes("WitherEnrage")) {
+            card.effects = card.effects.filter(e => e !== "WitherEnrage");
+            io.to(roomId).emit("log", `${card.name} se calme (PV > 30%).`);
+        }
+    }
+}

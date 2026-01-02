@@ -102,6 +102,11 @@ export function getModifiedDamage(attacker: InGameCard, baseDamage: number): num
     if (attacker.effects?.includes("DoubleDamage")) {
         finalDamage *= 2;
     }
+    
+    // Application WitherEnrage (Wither)
+    if (attacker.effects?.includes("WitherEnrage")) {
+        finalDamage *= 2;
+    }
 
     // Application Pomme Dorée (+10 dégâts)
     const goldenApple = attacker.effects?.find(e => e.startsWith("GoldenApple_"));
