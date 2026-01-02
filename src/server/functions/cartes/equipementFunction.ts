@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
-import type { Player, InGameCard } from "../../../typesPvp"; 
+import type { Player, InGameCard, CombatState } from "../../../typesPvp";
+import { heal } from "./attackFunction"; 
 
 // --- Identifiants d'Effets Temporaires ---
 // Utilisés dans player.effects pour les bonus durant le tour
@@ -58,4 +59,20 @@ export function detachEquipment(player: Player, mob: InGameCard) {
         player.discard.push(...mob.equipment);
         mob.equipment = [];
     }
+}
+
+// Applique l'effet de régénération de la Potion
+export function applyPotionRegen(
+  state: CombatState,
+  player: Player
+): void {
+  player.board.forEach((card) => {
+    if (card.category === "mob" && card.equipment) {
+      const hasPotion = card.equipment.some((eq) => eq.name === "Potion");
+      if (hasPotion) {
+        state.log.push(`[Potion] La potion s'active sur ${card.name}.`);
+        heal(state, card, 10);
+      }
+    }
+  });
 }

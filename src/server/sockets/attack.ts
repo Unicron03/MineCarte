@@ -62,10 +62,6 @@ function executeAction( state: CombatState, action: Action, attacker: InGameCard
       // Si damage est 0 (ex: Téléportation), on pioche 1 carte par défaut
       drawCard(state, player, action.damage || 1);
       return;
-
-    case "applyEffect":
-      // applyEffect(state, player, action); 
-      return;
    }
 }
 

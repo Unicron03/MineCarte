@@ -5,6 +5,24 @@ import { checkVillageGuardian, handleMobDeath } from "../gameLogic";
 import { drawCard } from "./talentFunction";
 import { transfertDamageToPlayer } from "./attackFunction";
 
+
+//Applique un effet à un joueur pour une certaine durée.
+export function applyEffect(
+  state: CombatState,
+  player: Player,
+  action: Action
+): void {
+
+  if (!player.effects) player.effects = [];
+
+  // Ajoute l'effet au joueur
+  player.effects.push(action.name);
+
+  state.log.push(
+    `[Effet] ${player.id} est affecté par "${action.name}".`
+  );
+}
+
 // Soigne le joueur directement
 export function healPlayer(
   state: CombatState,

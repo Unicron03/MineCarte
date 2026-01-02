@@ -2,9 +2,8 @@ import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, Action } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect } from "./testEffectFonctions";
-import { applyPotionRegen } from "./cartes/attackFunction";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
-import { detachEquipment } from "./cartes/equipementFunction";
+import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
 
 
 // --- Piocher une carte ---
