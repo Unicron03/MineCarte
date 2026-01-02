@@ -4,6 +4,7 @@ import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
+import { removeEnergyFromOpponent } from "./cartes/talentFunction";
 
 
 // --- Piocher une carte ---
@@ -128,6 +129,12 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         // --- Vérification des synergies (Golem et Villageois) ---
         checkVillageGuardian(player, io, roomId, opponent);
 
+        // --- Talent Araignée (Ralentissement calculé) ---
+        // S'active immédiatement à la pose
+        if (found.talent === "Ralentissement calculé") {
+             removeEnergyFromOpponent(io, roomId, player, opponent, cardToPlay);
+        }
+
         // --- DÉTECTION SONORE (WARDEN) ---
         // Si le mob joué a un talent auto-actif (ex: Golem), cela déclenche le Warden adverse
         const action = actionList.find(a => a.name === found.talent);
@@ -249,6 +256,16 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
         if (card.name === "Golem" && card.effects?.includes("DoubleDamage")) {
             const opponent = state.players.find((p: any) => p.id !== current.id);
             if (opponent) {
+                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            }
+        }
+
+        // --- Talent Araignée (Ralentissement calculé) ---
+        // S'active à chaque début de tour
+        if (card.talent === "Ralentissement calculé") {
+            const opponent = state.players.find((p: any) => p.id !== current.id);
+            if (opponent) {
+                removeEnergyFromOpponent(io, state.roomId, current, opponent, card);
                 checkAndTriggerWarden(io, state.roomId, current, opponent, card);
             }
         }

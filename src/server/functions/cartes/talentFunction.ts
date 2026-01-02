@@ -39,3 +39,14 @@ export function soundDetection(io: Server, roomId: string, wardenOwner: Player, 
         }
     }
 }
+
+// Retire de l'énergie à l'adversaire
+export function removeEnergyFromOpponent(io: Server, roomId: string, player: Player, opponent: Player, card: InGameCard): void {
+    const amount = 1;
+    if (opponent.energie > 0) {
+        opponent.energie = Math.max(0, opponent.energie - amount);
+        io.to(roomId).emit("log", `${card.name} utilise Ralentissement calculé et retire ${amount} énergie à l'adversaire.`);
+    } else {
+        io.to(roomId).emit("log", `${card.name} tente de retirer de l'énergie, mais l'adversaire est déjà à 0.`);
+    }
+}

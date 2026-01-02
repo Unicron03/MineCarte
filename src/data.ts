@@ -31,6 +31,7 @@ export const actionList: Action[] = [
   { id: 26, name: "Détection Sonore", damage: 0, cost: 0, description: "Passif: Si un talent adverse est activé, le mob actionneur prend 10 PV.", function: "soundDetection", autoActivate: true },
   { id: 27, name: "Cloche", damage: 0, cost: 2, description: "Si le Warden ciblé a moins de 50% de sa vie, ses attaques coûtent 1 au prochain tour.", function: "applyBellEffect", requiresTarget: true, targetType: "ally" },
   { id: 28, name: "Hurlement Sombre", damage: 40, cost: 4, description: "Inflige 40 PV et étourdit la cible (ne peut pas attaquer au prochain tour).", function: "hurlementSombre", requiresTarget: true },
+  { id: 30, name: "Ralentissement calculé", damage: 1, cost: 0, description: "Retire 1 énergie à l'adversaire au début du tour.", function: "removeEnergyFromOpponent", autoActivate: true },
 ];
 
 
@@ -226,6 +227,16 @@ export const cardList: InGameCard[] = [
     attack2: "Hurlement Sombre",
     pv_durability: 150,
     cost: 4,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Araignée",
+    imageName: "araignee",
+    talent: "Ralentissement calculé",
+    attack1: "Morsure",
+    pv_durability: 35,
+    cost: 2,
     category: "mob",
   },
 ];
