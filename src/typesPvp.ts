@@ -1,3 +1,5 @@
+import { Server } from "socket.io";
+
 // Carte pour le combat (union) 
 export type InGameCard = {
     uuid: string;
@@ -68,11 +70,19 @@ export type Player = {
     _disconnectedAt: number | null; 
 };
 
-// État du jeu (PvP)
+// État du jeu
 export type GameState = {
     roomId: string;
-    players: Player[]; // liste des joueurs
-    turnIndex: number; // à qui le tour
+    players: Player[];
+    turnIndex: number;
+};
+
+// Contexte pour les effets de carte
+export type EffectContext = {
+    io: Server;
+    roomId: string;
+    currentPlayer: Player;
+    opponentPlayer: Player;
 };
 
 // Action d'une carte (PvP)

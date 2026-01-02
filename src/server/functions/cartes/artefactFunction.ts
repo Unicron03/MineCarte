@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { InGameCard, Player, CombatState, Action } from "../../../typesPvp";
-import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./../testEffectFonctions";
-import { checkVillageGuardian, handleMobDeath } from "../gameLogic";
+import { applyArmorEffect } from "./../testEffectFonctions";
+import { handleMobDeath } from "../gameLogic";
 import { drawCard } from "./talentFunction";
 import { transfertDamageToPlayer } from "./attackFunction";
 

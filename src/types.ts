@@ -21,13 +21,3 @@ export type Deck = {
     name: string;
     cards: CollectionCard[];
 };
-
-// --------------- Types pour le PvP ---------------
-
-
-
-
-
-
-
-// ---------- Sa on va réflechir  -----------------
