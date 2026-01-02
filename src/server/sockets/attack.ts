@@ -16,14 +16,22 @@ function getActionByName(name: string): Action | undefined {
 // Fonction principale pour exécuter une action d'attaque ou de soin
 function executeAction( state: CombatState, action: Action, attacker: InGameCard, target: InGameCard | null, player: Player, opponent: Player): { killed?: boolean } | void | null {
 
+    let finalCost = action.cost;
+
+    // --- Vérification de l'effet Cloche ---
+    if (attacker.category === "mob" && attacker.effects?.some(e => e.startsWith("BellDiscount_"))) {
+        finalCost = 1;
+        state.log.push(`${attacker.name} attaque à coût réduit grâce à la Cloche !`);
+    }
+
     // --- Vérification de l'énergie ---
-    if (player.energie < action.cost) {
+    if (player.energie < finalCost) {
         state.log.push(`Pas assez d'énergie pour ${action.name}`);
         return null;
     }
 
     // --- Retirer l'énergie au joueur ---
-    player.energie -= action.cost;
+    player.energie -= finalCost;
 
     // --- Executer l'action ---
     switch (action.function) {

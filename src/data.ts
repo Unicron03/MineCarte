@@ -8,7 +8,7 @@ export const actionList: Action[] = [
    { id: 3, name: "Table de craft", damage: 3, cost: 1, description: "Réduit le coût de la prochaine carte de 3.", function: "applyEffect"},
    { id: 4, name: "Enclume", damage: 0, cost: 1, description: "Récupère un équipement de la défausse (si disponible en surplus).", function: "anvilEffect" },
    { id: 5, name: "Armure", damage: 0, cost: 2, description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.", function: "armure" },
-   { id: 6, name: "Coup d'ombre", damage: 10, cost: 2, description: "Inflige 10 PV à chaque mob adverse.", function: "AttackAllMobs" },
+   { id: 6, name: "Coup d'ombre", damage: 10, cost: 3, description: "Inflige 10 PV à chaque mob adverse.", function: "AttackAllMobs" },
    { id: 7, name: "Soin", damage: 10, cost: 2, description: "Soigne 10 PV à un mob", function: "heal", requiresTarget: true },
    { id: 8, name: "Téléportation", damage: 0, cost: 0, description: "Pioche 1 cartes.", function: "drawCard" },
    { id: 9, name: "Téléportation Furtive", damage: 30, cost: 3, description: "Inflige 30 PV à un mob de l'adversaire & A une chance d'esquiver tous les dégâts d'une attaque lors du prochain tour", function: "attackEsquive", requiresTarget: true },
@@ -29,7 +29,7 @@ export const actionList: Action[] = [
    { id: 24, name: "Table d'enchantement", damage: 0, cost: 2, description: "Pendant ce tour, tous les équipements coûtent 1 énergie.", function: "applyEnchantmentTableEffect" },
    { id: 25, name: "Portail de l’End", damage: 30, cost: 2, description: "Soigne 30 PV d'un Enderman, Shulker ou Ender Dragon.", function: "healEndCreature", requiresTarget: true, targetType: "ally" },
   { id: 26, name: "Détection Sonore", damage: 0, cost: 0, description: "Passif: Si un talent adverse est activé, le mob actionneur prend 10 PV.", function: "soundDetection", autoActivate: true },
-  { id: 27, name: "Sonic Boom", damage: 40, cost: 3, description: "Une attaque sonique puissante.", function: "AttackOneMob", requiresTarget: true },
+  { id: 27, name: "Cloche", damage: 0, cost: 2, description: "Si le Warden ciblé a moins de 50% de sa vie, ses attaques coûtent 1 au prochain tour.", function: "applyBellEffect", requiresTarget: true, targetType: "ally" },
 ];
 
 
@@ -200,10 +200,18 @@ export const cardList: InGameCard[] = [
   },
   // @ts-ignore
   {
+    name: "Cloche",
+    imageName: "cloche",
+    effet: "Cloche",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
     name: "Warden",
     imageName: "warden",
     talent: "Détection Sonore",
-    attack1: "Affamé",
+    attack1: "Coup d'ombre",
     pv_durability: 120,
     cost: 4,
     category: "mob",

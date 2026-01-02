@@ -190,9 +190,27 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
     // --- Effets de FIN de tour ---
     const combatStateEnd = { log: [] as string[] };
     for (let i = playerEnding.board.length - 1; i >= 0; i--) {
+        const card = playerEnding.board[i];
+        if (!card || card.category !== 'mob' || !card.effects) continue;
 
         // --- gestion de la golden apple ---
         handleGoldenAppleEffect(combatStateEnd, playerEnding, i);
+
+        // --- Gestion de l'effet Cloche ---
+        const bellEffectIndex = card.effects.findIndex((e: string) => e.startsWith("BellDiscount_"));
+        if (bellEffectIndex !== -1) {
+            const effect = card.effects[bellEffectIndex];
+            const duration = parseInt(effect.split("_")[1]);
+
+            if (duration <= 1) {
+                // Le tour est terminé, on retire l'effet
+                card.effects.splice(bellEffectIndex, 1);
+                combatStateEnd.log.push(`L'effet de la Cloche sur ${card.name} se dissipe.`);
+            } else {
+                // On décrémente la durée (pour des effets futurs plus longs)
+                card.effects[bellEffectIndex] = `BellDiscount_${duration - 1}`;
+            }
+        }
     }
     combatStateEnd.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
 
@@ -462,7 +480,7 @@ export function checkVillageGuardian(player: Player, io: Server, roomId: string,
 
         // --- Retirer le buff si aucun Villageois n'est présent mais le buff est actif ---
         } else if (!hasVillager && hasBuff) {
-            golem.effects = golem.effects.filter((e) => e !== "DoubleDamage");
+            golem.effects = golem.effects.filter((e: string) => e !== "DoubleDamage");
             io.to(roomId).emit("log", `${golem.name} se calme (Plus de Villageois à protéger).`);
         }
     });

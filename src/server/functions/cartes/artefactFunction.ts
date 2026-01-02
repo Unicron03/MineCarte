@@ -322,3 +322,32 @@ export function anvilEffect(io: Server, roomId: string, player: Player, sourceNa
         io.to(roomId).emit("log", `${sourceName} forge à nouveau ${cardToRecover.name} et l'ajoute à votre main !`);
     }
 }
+
+// Effet Cloche : Réduit le coût des attaques du Warden
+export function applyBellEffect(state: CombatState, player: Player, targetIndex: number, sourceName: string): void {
+    // --- Récupération de la carte cible ---
+    const targetCard = player.board[targetIndex];
+
+    // --- Vérification de la cible ---
+    if (!targetCard || targetCard.category !== "mob" || targetCard.name !== "Warden") {
+        state.log.push(`Cible invalide pour ${sourceName}.`);
+        return;
+    }
+
+    if (targetCard.pv_durability !== undefined && targetCard.max_pv !== undefined) {
+        // Vérifie si le Warden a moins de 50% de sa vie
+        if (targetCard.pv_durability < targetCard.max_pv / 2) {
+            if (!targetCard.effects) targetCard.effects = [];
+
+            // Ajoute l'effet pour le prochain tour
+            if (!targetCard.effects.includes("BellDiscount_1")) {
+                targetCard.effects.push("BellDiscount_1"); // _1 pour 1 tour
+                state.log.push(`La ${sourceName} résonne ! Les attaques de ${targetCard.name} coûteront 1 au prochain tour.`);
+            } else {
+                state.log.push(`${targetCard.name} est déjà sous l'effet de la Cloche.`);
+            }
+        } else {
+            state.log.push(`La ${sourceName} sonne mais ${targetCard.name} a trop de vie pour être affecté.`);
+        }
+    }
+}

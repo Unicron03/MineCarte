@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import { GameState, Player, CombatState } from "../../typesPvp";
 import { sendGameState } from "../functions/gameLogic";
 import { actionList } from "../../data";
-import { applyArtifactDamage, healGolem, halveLifeEffect, discardOwnCard, giveInvisibleEffect, applyBurnEffect, applyGoldenAppleEffect, healEndCreature } from "../functions/cartes/artefactFunction";
+import { applyArtifactDamage, healGolem, halveLifeEffect, discardOwnCard, giveInvisibleEffect, applyBurnEffect, applyGoldenAppleEffect, healEndCreature, applyBellEffect } from "../functions/cartes/artefactFunction";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 
 // Gère le socket pour la sélection de cible
@@ -201,6 +201,18 @@ export const targetSelectionSocket = (io: Server, socket: Socket, rooms: Map<str
                     
                     combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
                     
+                    // --- La carte jouée est consommée (dans la défausse) ---
+                    player.discard.push(sourceCard);
+                    player.hand.splice(pending.sourceHandIndex, 1);
+
+                } else if (actionDefSupport && actionDefSupport.function === "applyBellEffect") {
+                    const combatState: CombatState = { log: [] };
+
+                    // --- Appel de la fonction de la cloche ---
+                    applyBellEffect(combatState, player, targetIndex, sourceCard.name);
+
+                    combatState.log.forEach((msg) => io.to(roomId).emit("log", msg));
+
                     // --- La carte jouée est consommée (dans la défausse) ---
                     player.discard.push(sourceCard);
                     player.hand.splice(pending.sourceHandIndex, 1);
