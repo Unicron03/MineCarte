@@ -50,3 +50,14 @@ export function removeEnergyFromOpponent(io: Server, roomId: string, player: Pla
         io.to(roomId).emit("log", `${card.name} tente de retirer de l'énergie, mais l'adversaire est déjà à 0.`);
     }
 }
+
+// Talent Tortue : Applique l'effet de protection
+export function applyCarapaceEffect(io: Server, roomId: string, player: Player, opponent: Player, card: InGameCard): void {
+    if (!card.effects) card.effects = [];
+    
+    // On ajoute l'effet s'il n'est pas déjà présent
+    if (!card.effects.includes("CarapaceProtectrice")) {
+        card.effects.push("CarapaceProtectrice");
+        io.to(roomId).emit("log", `${card.name} rentre dans sa carapace (Protection 50% prochaine attaque).`);
+    }
+}

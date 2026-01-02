@@ -9,6 +9,16 @@ export function applyArmorEffect(target: InGameCard, initialDamage: number, stat
   
     let finalDamage = initialDamage;
 
+    // --- Gestion Carapace Protectrice (Tortue) ---
+    if (target.effects?.includes("CarapaceProtectrice")) {
+        finalDamage = Math.floor(finalDamage * 0.5);
+        state.log.push(`La carapace de ${target.name} réduit les dégâts de 50% !`);
+        
+        // Retrait de l'effet après la première attaque (consommation)
+        const index = target.effects.indexOf("CarapaceProtectrice");
+        if (index !== -1) target.effects.splice(index, 1);
+    }
+
     if (target.category === "mob" && target.equipment && target.equipment.length > 0) {
       
         // Vérification de la présence d'une armure

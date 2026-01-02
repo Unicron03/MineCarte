@@ -32,6 +32,7 @@ export const actionList: Action[] = [
   { id: 27, name: "Cloche", damage: 0, cost: 2, description: "Si le Warden ciblé a moins de 50% de sa vie, ses attaques coûtent 1 au prochain tour.", function: "applyBellEffect", requiresTarget: true, targetType: "ally" },
   { id: 28, name: "Hurlement Sombre", damage: 40, cost: 4, description: "Inflige 40 PV et étourdit la cible (ne peut pas attaquer au prochain tour).", function: "hurlementSombre", requiresTarget: true },
   { id: 30, name: "Ralentissement calculé", damage: 1, cost: 0, description: "Retire 1 énergie à l'adversaire au début du tour.", function: "removeEnergyFromOpponent", autoActivate: true },
+  { id: 31, name: "Carapace Protectrice", damage: 0, cost: 0, description: "Réduit les dégâts de la première attaque subie de 50%.", function: "applyCarapaceEffect", autoActivate: true },
 ];
 
 
@@ -236,6 +237,16 @@ export const cardList: InGameCard[] = [
     talent: "Ralentissement calculé",
     attack1: "Morsure",
     pv_durability: 35,
+    cost: 2,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Tortue",
+    imageName: "tortue",
+    talent: "Carapace Protectrice",
+    attack1: "Morsure",
+    pv_durability: 60,
     cost: 2,
     category: "mob",
   },

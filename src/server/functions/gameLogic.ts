@@ -4,7 +4,7 @@ import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
-import { removeEnergyFromOpponent } from "./cartes/talentFunction";
+import { removeEnergyFromOpponent, applyCarapaceEffect } from "./cartes/talentFunction";
 
 
 // --- Piocher une carte ---
@@ -133,6 +133,12 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         // S'active immédiatement à la pose
         if (found.talent === "Ralentissement calculé") {
              removeEnergyFromOpponent(io, roomId, player, opponent, cardToPlay);
+        }
+
+        // --- Talent Tortue (Carapace Protectrice) ---
+        // S'active immédiatement à la pose
+        if (found.talent === "Carapace Protectrice") {
+             applyCarapaceEffect(io, roomId, player, opponent, cardToPlay);
         }
 
         // --- DÉTECTION SONORE (WARDEN) ---
@@ -266,6 +272,16 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
             const opponent = state.players.find((p: any) => p.id !== current.id);
             if (opponent) {
                 removeEnergyFromOpponent(io, state.roomId, current, opponent, card);
+                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            }
+        }
+
+        // --- Talent Tortue (Carapace Protectrice) ---
+        // S'active à chaque début de tour
+        if (card.talent === "Carapace Protectrice") {
+            const opponent = state.players.find((p: any) => p.id !== current.id);
+            if (opponent) {
+                applyCarapaceEffect(io, state.roomId, current, opponent, card);
                 checkAndTriggerWarden(io, state.roomId, current, opponent, card);
             }
         }

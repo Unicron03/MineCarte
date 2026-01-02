@@ -58,6 +58,7 @@ const baseDeck1 = [
   createCard("Warden", 4, "mob", 150, "Détection Sonore", "Coup d'ombre", "Hurlement Sombre"),
   createCard("Cloche", 2, "artefact", null, "Cloche", null, null),
   createCard("Araignée", 2, "mob", 35, "Ralentissement calculé", "Morsure", null),
+  createCard("Tortue", 2, "mob", 60, "Carapace Protectrice", "Morsure", null),
 ];
 
 const baseDeck2 = [...baseDeck1];
