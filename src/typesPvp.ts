@@ -49,8 +49,8 @@ export type PendingAction = {
     type: "EQUIPMENT" | "OFFENSIVE_ARTIFACT" | "SUPPORT_ARTIFACT" | "SPELL" | "ATTACK";
     sourceHandIndex: number; // L'index de la carte jouée dans la main
     validTargetIndices: number[]; // Les index valides sur le plateau cible
-    targetPlayerId: string; // L'ID du joueur ciblé (soi-même ou adversaire)
-    actionData?: any; // Données supplémentaires (ex: montant dégâts)
+    targetPlayerId: string; // L'ID du joueur ciblé
+    actionData?: any; // Données supplémentaires (montant dégâts, ...)
 };
 
 // Joueur (utilisé pour le pvp)

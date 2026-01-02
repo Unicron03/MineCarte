@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import type { InGameCard, Player } from "../../typesPvp";
 import { actionList } from "../../data";
-import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect } from "./testEffectFonctions";
+import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
 
@@ -126,8 +126,14 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         player.board.push(cardToPlay);
 
         // --- Vérification des synergies (Golem et Villageois) ---
-        checkVillageGuardian(player, io, roomId);
+        checkVillageGuardian(player, io, roomId, opponent);
 
+        // --- DÉTECTION SONORE (WARDEN) ---
+        // Si le mob joué a un talent auto-actif (ex: Golem), cela déclenche le Warden adverse
+        const action = actionList.find(a => a.name === found.talent);
+        if (action && action.autoActivate) {
+             checkAndTriggerWarden(io, roomId, player, opponent, cardToPlay);
+        }
     } else if (found.category === "equipement") {
         // --- Déjà gérée dans playCardSocket ---
     } else {
@@ -198,9 +204,22 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
     const combatStateStart = { log: [] as string[] };
     
     for (let i = current.board.length - 1; i >= 0; i--) {
+        const card = current.board[i];
 
         // --- gestion de la brûlure ---
         handleBurnEffect(io, state.roomId, combatStateStart, current, i);
+
+        // Si la carte a été retirée (morte), l'index i pointe soit vers undefined, soit vers une autre carte
+        if (current.board[i] !== card) continue;
+
+        // --- DÉTECTION SONORE (WARDEN) ---
+        // Si le Golem a son talent actif (DoubleDamage), le Warden réagit à chaque début de tour
+        if (card.name === "Golem" && card.effects?.includes("DoubleDamage")) {
+            const opponent = state.players.find((p: any) => p.id !== current.id);
+            if (opponent) {
+                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            }
+        }
     }
 
     // --- appliquer la régénération de la potion ---
@@ -415,7 +434,7 @@ export function checkVictory(io: any, roomState: any, rooms: Map<string, any>) {
 }
 
 // Vérifie la synergie Golem et Villageois
-export function checkVillageGuardian(player: Player, io: Server, roomId: string): void {
+export function checkVillageGuardian(player: Player, io: Server, roomId: string, opponent?: Player): void {
 
     // --- Vérification de la présence du Villageois ---
     const hasVillager = player.board.some((c) => c.name === "Villageois");
@@ -434,6 +453,12 @@ export function checkVillageGuardian(player: Player, io: Server, roomId: string)
         if (hasVillager && !hasBuff) {
             golem.effects.push("DoubleDamage");
             io.to(roomId).emit("log", `${golem.name} s'enrage grâce à la présence d'un Villageois ! (Dégâts x2)`);
+            
+            // --- DÉTECTION SONORE (WARDEN) ---
+            // Si le Golem gagne son effet, le Warden réagit immédiatement
+            if (opponent) {
+                checkAndTriggerWarden(io, roomId, player, opponent, golem);
+            }
 
         // --- Retirer le buff si aucun Villageois n'est présent mais le buff est actif ---
         } else if (!hasVillager && hasBuff) {

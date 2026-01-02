@@ -28,6 +28,8 @@ export const actionList: Action[] = [
    { id: 23, name: "Pomme dorée", damage: 10, cost: 2, description: "Soigne 10 PV et augmente les dégâts de 10 pendant 3 tours.", function: "applyGoldenAppleEffect", requiresTarget: true, targetType: "ally" },
    { id: 24, name: "Table d'enchantement", damage: 0, cost: 2, description: "Pendant ce tour, tous les équipements coûtent 1 énergie.", function: "applyEnchantmentTableEffect" },
    { id: 25, name: "Portail de l’End", damage: 30, cost: 2, description: "Soigne 30 PV d'un Enderman, Shulker ou Ender Dragon.", function: "healEndCreature", requiresTarget: true, targetType: "ally" },
+  { id: 26, name: "Détection Sonore", damage: 0, cost: 0, description: "Passif: Si un talent adverse est activé, le mob actionneur prend 10 PV.", function: "soundDetection", autoActivate: true },
+  { id: 27, name: "Sonic Boom", damage: 40, cost: 3, description: "Une attaque sonique puissante.", function: "AttackOneMob", requiresTarget: true },
 ];
 
 
@@ -195,6 +197,36 @@ export const cardList: InGameCard[] = [
     effet: "Portail de l’End",
     cost: 2,
     category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Warden",
+    imageName: "warden",
+    talent: "Détection Sonore",
+    attack1: "Affamé",
+    pv_durability: 120,
+    cost: 4,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Warden",
+    imageName: "warden",
+    talent: "Détection Sonore",
+    attack1: "Morsure",
+    pv_durability: 150,
+    cost: 4,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Warden",
+    imageName: "warden",
+    talent: "Détection Sonore",
+    attack1: "Morsure",
+    pv_durability: 150,
+    cost: 4,
+    category: "mob",
   },
 ];
 

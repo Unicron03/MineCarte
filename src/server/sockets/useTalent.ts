@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { GameState } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState } from "../functions/gameLogic";
+import { checkAndTriggerWarden } from "../functions/testEffectFonctions";
 
 // Gère le socket pour utiliser un talent de carte
 export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, GameState>) => {
@@ -127,6 +128,9 @@ export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, G
             player.energie -= actionDef.cost;
             card.hasUsedTalent = true;
             io.to(roomId).emit("log", `${player.id} utilise le talent : ${actionDef.name}`);
+            
+            // --- DÉTECTION SONORE (WARDEN) ---
+            checkAndTriggerWarden(io, roomId, player, opponent, card);
             sendGameState(io, rooms, roomId);
         }
     });

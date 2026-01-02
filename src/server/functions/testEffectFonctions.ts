@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { InGameCard, CombatState, Player } from "../../typesPvp";
 import { actionList } from "../../data";
 import { handleMobDeath, checkVillageGuardian } from "./gameLogic";
+import { soundDetection } from "./cartes/talentFunction";
 
 // Calcule les dégâts finaux après application des effets de réduction des équipements.
 export function applyArmorEffect(target: InGameCard, initialDamage: number, state: CombatState): number {
@@ -142,6 +143,16 @@ export function handleBurnEffect(io: Server, roomId: string, state: CombatState,
             state.log.push(`${card.name} est consumé par le feu !`);
             handleMobDeath(io, roomId, player, cardIndex, state.log);
         }
+    }
+}
+
+// Vérifie si l'adversaire a un Warden et déclenche son passif
+export function checkAndTriggerWarden(io: Server, roomId: string, actingPlayer: Player, opponentPlayer: Player, actingCard: InGameCard) {
+    // On cherche si l'adversaire a un Warden avec le talent "Détection Sonore"
+    const warden = opponentPlayer.board.find(c => c.category === "mob" && c.name === "Warden" && c.talent === "Détection Sonore");
+    
+    if (warden) {
+        soundDetection(io, roomId, opponentPlayer, actingPlayer, actingCard);
     }
 }
 
