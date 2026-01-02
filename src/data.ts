@@ -33,6 +33,7 @@ export const actionList: Action[] = [
   { id: 28, name: "Hurlement Sombre", damage: 40, cost: 4, description: "Inflige 40 PV et étourdit la cible (ne peut pas attaquer au prochain tour).", function: "hurlementSombre", requiresTarget: true },
   { id: 30, name: "Ralentissement calculé", damage: 1, cost: 0, description: "Retire 1 énergie à l'adversaire au début du tour.", function: "removeEnergyFromOpponent", autoActivate: true },
   { id: 31, name: "Carapace Protectrice", damage: 0, cost: 0, description: "Réduit les dégâts de la première attaque subie de 50%.", function: "applyCarapaceEffect", autoActivate: true },
+  { id: 32, name: "Pression Psychologique", damage: 0, cost: 0, description: "Si le Creeper meurt d'une attaque adverse, il inflige 15 PV aux mobs adverses et 5 PV au joueur.", function: "pressionPsychologique", autoActivate: true },
 ];
 
 
@@ -248,6 +249,16 @@ export const cardList: InGameCard[] = [
     attack1: "Morsure",
     pv_durability: 60,
     cost: 2,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Creeper",
+    imageName: "creeper",
+    talent: "Pression Psychologique",
+    attack1: "Explosion",
+    pv_durability: 40,
+    cost: 3,
     category: "mob",
   },
 ];

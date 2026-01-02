@@ -14,7 +14,7 @@ function getActionByName(name: string): Action | undefined {
 }
 
 // Fonction principale pour exécuter une action d'attaque ou de soin
-function executeAction( state: CombatState, action: Action, attacker: InGameCard, target: InGameCard | null, player: Player, opponent: Player): { killed?: boolean } | void | null {
+function executeAction(io: Server, roomId: string, state: CombatState, action: Action, attacker: InGameCard, target: InGameCard | null, player: Player, opponent: Player): { killed?: boolean } | void | null {
 
     let finalCost = action.cost;
 
@@ -57,7 +57,7 @@ function executeAction( state: CombatState, action: Action, attacker: InGameCard
 
         case "AttackAllMobs":
             if (!action.damage) return;
-            return AttackAllMobs(state, attacker, action.damage, opponent);
+            return AttackAllMobs(io, roomId, state, attacker, action.damage, opponent, player);
 
         case "heal":
             if (!action.damage) return;
@@ -79,11 +79,11 @@ function executeAction( state: CombatState, action: Action, attacker: InGameCard
 }
 
 // Fonction utilitaire pour finaliser l'attaque
-function finalizeAttack(io: Server,  rooms: Map<string, any>,  roomId: string,  room: any, result: any,  state: CombatState,  opponent: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action) {
+function finalizeAttack(io: Server,  rooms: Map<string, any>,  roomId: string,  room: any, result: any,  state: CombatState,  opponent: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player) {
   
     // Gestion de la mort d'une carte (attaque cible unique)
     if (result?.killed && target && targetIndex !== null && action.function !== "heal") { 
-        handleMobDeath(io, roomId, opponent, targetIndex, state.log);
+        handleMobDeath(io, roomId, opponent, targetIndex, state.log, attackerPlayer);
     }
 
     // Si c'est une attaque de zone
@@ -162,14 +162,14 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
 
         // --- Attaque de zone ou sans cible -> Exécution immédiate ---
         const state: CombatState = { log: [] };
-        const result = executeAction(state, action, attacker, null, player, opponent);
+        const result = executeAction(io, roomId, state, action, attacker, null, player, opponent);
         
         if (result !== null) {
             attacker.hasAttacked = true;
         }
 
         // --- Finalisation de l'attaque ---
-        finalizeAttack(io, rooms, roomId, room, result, state, opponent, null, null, action);
+        finalizeAttack(io, rooms, roomId, room, result, state, opponent, null, null, action, player);
     });
 
     // Exécution de l'attaque après sélection de la cible
@@ -221,14 +221,14 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
 
         // --- Exécution de l'attaque ---
         const state: CombatState = { log: [] };
-        const result = executeAction(state, action, attacker, target, player, opponent);
+        const result = executeAction(io, roomId, state, action, attacker, target, player, opponent);
         
         if (result !== null) {
             attacker.hasAttacked = true;
         }
 
         // --- Finalisation de l'attaque ---
-        finalizeAttack(io, rooms, roomId, room, result, state, opponent, target, targetIndex, action);
+        finalizeAttack(io, rooms, roomId, room, result, state, opponent, target, targetIndex, action, player);
     });
 
 }

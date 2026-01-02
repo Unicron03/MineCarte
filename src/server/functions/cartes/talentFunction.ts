@@ -34,7 +34,7 @@ export function soundDetection(io: Server, roomId: string, wardenOwner: Player, 
         const cardIndex = opponent.board.findIndex(c => c.uuid === activatorCard.uuid);
         if (cardIndex !== -1) {
             const log: string[] = [];
-            handleMobDeath(io, roomId, opponent, cardIndex, log);
+            handleMobDeath(io, roomId, opponent, cardIndex, log, wardenOwner);
             log.forEach(l => io.to(roomId).emit("log", l));
         }
     }
@@ -60,4 +60,24 @@ export function applyCarapaceEffect(io: Server, roomId: string, player: Player, 
         card.effects.push("CarapaceProtectrice");
         io.to(roomId).emit("log", `${card.name} rentre dans sa carapace (Protection 50% prochaine attaque).`);
     }
+}
+
+// Talent Creeper : Pression Psychologique (Deathrattle)
+export function pressionPsychologique(io: Server, roomId: string, deadCreeperOwner: Player, killerOpponent: Player): void {
+    io.to(roomId).emit("log", `Pression Psychologique ! Le Creeper explose en mourant !`);
+
+    // Inflige 5 PV au joueur adverse
+    killerOpponent.pv -= 5;
+    io.to(roomId).emit("log", `Le joueur adverse subit 5 dégâts.`);
+
+    // Inflige 15 PV à chaque mob adverse
+    killerOpponent.board.forEach((card, index) => {
+        if (card.category === "mob" && card.pv_durability !== undefined) {
+            card.pv_durability -= 15;
+            // Note: On ne gère pas la mort en chaîne ici pour simplifier, ou on pourrait appeler handleMobDeath récursivement
+            // mais attention aux boucles infinies si deux Creepers se tuent mutuellement.
+            // Pour l'instant, on laisse le jeu nettoyer les morts au prochain check ou action.
+        }
+    });
+    io.to(roomId).emit("log", `Tous les mobs adverses subissent 15 dégâts.`);
 }

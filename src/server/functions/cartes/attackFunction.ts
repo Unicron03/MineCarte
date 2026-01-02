@@ -1,6 +1,8 @@
-import { InGameCard, Player, CombatState} from "../../../typesPvp";
+import { Server } from "socket.io";
+import { InGameCard, Player, CombatState } from "../../../typesPvp";
 import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./../testEffectFonctions";
 import { detachEquipment } from "./equipementFunction";
+import { handleMobDeath } from "../gameLogic";
 
 // Transfère les dégâts excédentaires au joueur adverse
 export function transfertDamageToPlayer(state: CombatState, amount: number, opponent: Player,sourceName: string): void {
@@ -76,7 +78,7 @@ export function heal(state: CombatState, target: InGameCard, amount: number): vo
 }
 
 //Attaque tous les mobs adverses. (gestion des morts des mobs car multicible)
-export function AttackAllMobs(state: CombatState, attacker: InGameCard, amount: number, opponent: Player): { killed: boolean } | void {
+export function AttackAllMobs(io: Server, roomId: string, state: CombatState, attacker: InGameCard, amount: number, opponent: Player, attackerPlayer: Player): { killed: boolean } | void {
 
     // --- Calcul des dégâts réels avec les bonnus de l'attaquant ---
     const realDamage = getModifiedDamage(attacker, amount);
@@ -114,9 +116,8 @@ export function AttackAllMobs(state: CombatState, attacker: InGameCard, amount: 
                 if (target.pv_durability < 0) {
                     transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
                 }
-                opponent.discard.push(target);
-                opponent.board.splice(i, 1);
-                state.log.push(`${target.name} est détruite !`);
+                // Utilisation de handleMobDeath pour gérer correctement la mort (et les talents comme Creeper)
+                handleMobDeath(io, roomId, opponent, i, state.log, attackerPlayer);
             }
         }
     }

@@ -4,7 +4,7 @@ import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
-import { removeEnergyFromOpponent, applyCarapaceEffect } from "./cartes/talentFunction";
+import { removeEnergyFromOpponent, applyCarapaceEffect, pressionPsychologique } from "./cartes/talentFunction";
 
 
 // --- Piocher une carte ---
@@ -534,7 +534,7 @@ export function checkVillageGuardian(player: Player, io: Server, roomId: string,
 }
 
 // Gère la mort d'un mob (détachement équipement, défausse, logs, synergies)
-export function handleMobDeath(io: Server, roomId: string, player: Player, mobIndex: number, logArray: string[]) {
+export function handleMobDeath(io: Server, roomId: string, player: Player, mobIndex: number, logArray: string[], killer?: Player) {
     const mob = player.board[mobIndex];
     if (!mob) return;
 
@@ -542,5 +542,12 @@ export function handleMobDeath(io: Server, roomId: string, player: Player, mobIn
     player.discard.push(mob);
     player.board.splice(mobIndex, 1);
     logArray.push(`${mob.name} est mort !`);
+
+    // --- Talent Creeper : Pression Psychologique ---
+    // S'active seulement si tué par un adversaire (killer présent et ID différent)
+    if (mob.category === "mob" && mob.talent === "Pression Psychologique" && killer && killer.id !== player.id) {
+        pressionPsychologique(io, roomId, player, killer);
+    }
+
     checkVillageGuardian(player, io, roomId);
 }
