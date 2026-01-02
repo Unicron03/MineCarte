@@ -165,7 +165,7 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
   // On applique le soin et on réduit la durée avant de passer la main
   const combatStateEnd = { log: [] as string[] };
   for (let i = playerEnding.board.length - 1; i >= 0; i--) {
-    handleGoldenAppleEffect(io, state.roomId, combatStateEnd, playerEnding, i);
+    handleGoldenAppleEffect(combatStateEnd, playerEnding, i);
   }
   combatStateEnd.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
 
