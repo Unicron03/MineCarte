@@ -32,7 +32,7 @@ const userToRoom: Map<string, { roomId: string; playerIndex: number }> = new Map
 // --- Définition des decks de base ---
 const baseDeck1 = [
   //createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
-  //createCard("Gast", 1, "mob", 45, null, "Téléportation Furtive","Explosion"),
+  createCard("Gast", 1, "mob", 45, "Retour à l'envoyeur", "Morsure","Explosion"),
   //createCard("Table de craft", 1, "artefact", null, "Table de craft", null, null),
   //createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
@@ -60,7 +60,7 @@ const baseDeck1 = [
   //createCard("Araignée", 2, "mob", 35, "Ralentissement calculé", "Morsure", null),
   //createCard("Tortue", 2, "mob", 60, "Carapace Protectrice", "Morsure", null),
   //createCard("Creeper", 3, "mob", 40, "Pression Psychologique", "Explosion", null),
-  //createCard("Wither", 3, "mob", 100, "Explosion noire", "Morsure", null),
+  //createCard("Wither", 3, "mob", 100, "Explosion noire", "Téléportation Furtive", null),
   //createCard("Sorcière", 3, "mob", 40, "Enchantement puissant", "Soin", null),
   createCard("Shulker", 3, "mob", 60, "Lévitation", "Morsure", null),
 ];

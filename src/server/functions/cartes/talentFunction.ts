@@ -137,3 +137,21 @@ export function levitation(io: Server, roomId: string, player: Player, opponent:
 
     io.to(roomId).emit("log", `${card.name} utilise Levitation : ${removedCard.name} retourne dans le deck de l'adversaire.`);
 }
+
+// Talent Gast : Retour à l'envoyeur (25% de chance de s'auto-attaquer)
+export function checkRetourALEnvoyeur(io: Server, roomId: string, attacker: InGameCard, player: Player, opponent: Player): boolean {
+    
+    // Le talent est sollicité à chaque attaque, donc le Warden adverse réagit (s'il est présent)
+    const warden = opponent.board.find(c => c.category === "mob" && c.name === "Warden" && c.talent === "Détection Sonore");
+    if (warden) {
+        soundDetection(io, roomId, opponent, player, attacker);
+    }
+
+    // 25% de chance
+    if (Math.random() < 0.25) {
+        io.to(roomId).emit("log", `Retour à l'envoyeur ! Le talent de ${attacker.name} s'active et l'attaque se retourne contre lui !`);
+        return true; // L'attaque est redirigée
+    }
+    
+    return false; // L'attaque continue normalement
+}

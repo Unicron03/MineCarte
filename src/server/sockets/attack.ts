@@ -3,7 +3,7 @@ import { CombatState, Player, Action, InGameCard } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
 import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre } from "../functions/cartes/attackFunction";
-import { drawCard} from "../functions/cartes/talentFunction";
+import { drawCard, checkRetourALEnvoyeur } from "../functions/cartes/talentFunction";
 import { hasInvisibility, isStunned } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
@@ -79,18 +79,18 @@ function executeAction(io: Server, roomId: string, state: CombatState, action: A
 }
 
 // Fonction utilitaire pour finaliser l'attaque
-function finalizeAttack(io: Server,  rooms: Map<string, any>,  roomId: string,  room: any, result: any,  state: CombatState,  opponent: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player) {
+function finalizeAttack(io: Server,  rooms: Map<string, any>,  roomId: string,  room: any, result: any,  state: CombatState,  targetOwner: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player) {
   
     // Gestion de la mort d'une carte (attaque cible unique)
     if (result?.killed && target && targetIndex !== null && action.function !== "heal") { 
-        handleMobDeath(io, roomId, opponent, targetIndex, state.log, attackerPlayer);
+        handleMobDeath(io, roomId, targetOwner, targetIndex, state.log, attackerPlayer);
     }
 
     // Si c'est une attaque de zone
     if (action.function === "AttackAllMobs") {
 
         // On vérifie la présence du Gardien du Village
-        checkVillageGuardian(opponent, io, roomId); 
+        checkVillageGuardian(targetOwner, io, roomId); 
     }
 
     // Gestion de la défaite du joueur
@@ -205,10 +205,14 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
 
         // --- Déterminer la cible en fonction du type d'action ---
         let target: InGameCard | null = null;
+        let targetOwner = opponent; // Par défaut, la cible est à l'adversaire
+        let finalTargetIndex = targetIndex;
+
         if (action.function === "heal") {
 
             // --- Pour le soin, cibler les mobs du joueur ---
             target = targetIndex !== null && player.board[targetIndex] ? player.board[targetIndex] : null;
+            targetOwner = player;
         } else {
 
             // --- Pour l'attaque, cibler les mobs adverses ---
@@ -219,16 +223,28 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
             }
         }
 
+        // --- Talent Gast : Retour à l'envoyeur ---
+        // Si le mob a ce talent, il y a une chance que l'attaque soit redirigée sur lui-même
+        if (attacker.category === "mob" && attacker.talent === "Retour à l'envoyeur") {
+            const isRedirected = checkRetourALEnvoyeur(io, roomId, attacker, player, opponent);
+            if (isRedirected) {
+                target = attacker;
+                targetOwner = player; // La cible devient le joueur lui-même
+                finalTargetIndex = attackerIndex; // L'index devient celui de l'attaquant
+            }
+        }
+
         // --- Exécution de l'attaque ---
         const state: CombatState = { log: [] };
-        const result = executeAction(io, roomId, state, action, attacker, target, player, opponent);
+        // Note: On passe targetOwner comme "opponent" (le receveur des dégâts excédentaires) pour executeAction
+        const result = executeAction(io, roomId, state, action, attacker, target, player, targetOwner);
         
         if (result !== null) {
             attacker.hasAttacked = true;
         }
 
         // --- Finalisation de l'attaque ---
-        finalizeAttack(io, rooms, roomId, room, result, state, opponent, target, targetIndex, action, player);
+        finalizeAttack(io, rooms, roomId, room, result, state, targetOwner, target, finalTargetIndex, action, player);
     });
 
 }

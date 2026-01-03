@@ -162,7 +162,8 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         // --- DÉTECTION SONORE (WARDEN) ---
         // Si le mob joué a un talent auto-actif (ex: Golem), cela déclenche le Warden adverse
         const action = actionList.find(a => a.name === found.talent);
-        if (action && action.autoActivate) {
+        // Exception pour le Gast : Son talent "Retour à l'envoyeur" est passif mais ne se déclenche qu'à l'attaque, pas à la pose
+        if (action && action.autoActivate && found.talent !== "Retour à l'envoyeur") {
              checkAndTriggerWarden(io, roomId, player, opponent, cardToPlay);
         }
     } else if (found.category === "equipement") {

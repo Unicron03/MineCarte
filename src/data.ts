@@ -37,6 +37,7 @@ export const actionList: Action[] = [
   { id: 33, name: "Explosion noire", damage: 0, cost: 0, description: "Passif: Dégâts x2 si PV <= 30%.", function: "checkWitherExplosionNoire", autoActivate: true },
   { id: 34, name: "Enchantement puissant", damage: 0, cost: 0, description: "Se rajoute 5 PV (même au-delà de sa vie).", function: "enchantementPuissant", autoActivate: true },
   { id: 35, name: "Lévitation", damage: 0, cost: 0, description: "Mélange une carte de la main de l'adversaire dans son deck.", function: "levitation", autoActivate: true },
+  { id: 36, name: "Retour à l'envoyeur", damage: 0, cost: 0, description: "25% de chance que l'attaque revienne sur le lanceur.", function: "checkRetourALEnvoyeur", autoActivate: true },
 ];
 
 
@@ -91,6 +92,7 @@ export const cardList: InGameCard[] = [
   {
     name: "Gast",
     imageName: "Gast",
+    talent: "Retour à l'envoyeur",
     attack1: "Téléportation Furtive",
     attack2: "Explosion",
     pv_durability: 25,
