@@ -234,6 +234,26 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
             }
         }
 
+        // --- Talent Poulpe : Encre Noire ---
+        // Si le joueur ciblé (targetOwner) est sous l'effet Encre Noire, l'attaque est redirigée
+        if (targetOwner.effects && targetOwner.effects.includes("EncreNoire")) {
+            // On cherche les mobs valides pour la redirection (les mobs du défenseur)
+            const validRedirectTargets = targetOwner.board
+                .map((c: InGameCard, idx: number) => ({ card: c, index: idx }))
+                .filter((item: { card: InGameCard; index: number }) => item.card.category === "mob");
+
+            if (validRedirectTargets.length > 0) {
+                // Choix aléatoire
+                const randomTarget = validRedirectTargets[Math.floor(Math.random() * validRedirectTargets.length)];
+                target = randomTarget.card;
+                finalTargetIndex = randomTarget.index;
+                
+                // Consommation de l'effet
+                targetOwner.effects = targetOwner.effects.filter((e: string) => e !== "EncreNoire");
+                socket.emit("log", `Encre Noire ! L'attaque est redirigée vers ${target?.name} !`);
+            }
+        }
+
         // --- Exécution de l'attaque ---
         const state: CombatState = { log: [] };
         // Note: On passe targetOwner comme "opponent" (le receveur des dégâts excédentaires) pour executeAction

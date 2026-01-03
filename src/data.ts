@@ -38,6 +38,7 @@ export const actionList: Action[] = [
   { id: 34, name: "Enchantement puissant", damage: 0, cost: 0, description: "Se rajoute 5 PV (même au-delà de sa vie).", function: "enchantementPuissant", autoActivate: true },
   { id: 35, name: "Lévitation", damage: 0, cost: 0, description: "Mélange une carte de la main de l'adversaire dans son deck.", function: "levitation", autoActivate: true },
   { id: 36, name: "Retour à l'envoyeur", damage: 0, cost: 0, description: "25% de chance que l'attaque revienne sur le lanceur.", function: "checkRetourALEnvoyeur", autoActivate: true },
+  { id: 37, name: "Encre Noire", damage: 0, cost: 0, description: "La première attaque du prochain tour adverse est redirigée aléatoirement sur un de vos mobs.", function: "encreNoire", autoActivate: true },
 ];
 
 
@@ -294,6 +295,16 @@ export const cardList: InGameCard[] = [
     attack1: "Morsure",
     pv_durability: 60,
     cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Poulpe",
+    imageName: "poulpe",
+    talent: "Encre Noire",
+    attack1: "Morsure",
+    pv_durability: 40,
+    cost: 2,
     category: "mob",
   },
 ];

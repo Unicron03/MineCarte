@@ -63,6 +63,7 @@ const baseDeck1 = [
   //createCard("Wither", 3, "mob", 100, "Explosion noire", "Téléportation Furtive", null),
   //createCard("Sorcière", 3, "mob", 40, "Enchantement puissant", "Soin", null),
   createCard("Shulker", 3, "mob", 60, "Lévitation", "Morsure", null),
+  createCard("Poulpe", 2, "mob", 40, "Encre Noire", "Morsure", null),
 ];
 
 const baseDeck2 = [...baseDeck1];

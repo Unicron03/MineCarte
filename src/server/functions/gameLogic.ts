@@ -4,7 +4,7 @@ import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
-import { removeEnergyFromOpponent, applyCarapaceEffect, pressionPsychologique, checkWitherExplosionNoire, enchantementPuissant, levitation } from "./cartes/talentFunction";
+import { removeEnergyFromOpponent, applyCarapaceEffect, pressionPsychologique, checkWitherExplosionNoire, enchantementPuissant, levitation, encreNoire } from "./cartes/talentFunction";
 
 
 // --- Piocher une carte ---
@@ -157,6 +157,12 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         // S'active immédiatement à la pose
         if (found.talent === "Lévitation") {
              levitation(io, roomId, player, opponent, cardToPlay);
+        }
+
+        // --- Talent Poulpe (Encre Noire) ---
+        // S'active immédiatement à la pose
+        if (found.talent === "Encre Noire") {
+             encreNoire(io, roomId, player, opponent, cardToPlay);
         }
 
         // --- DÉTECTION SONORE (WARDEN) ---
@@ -330,6 +336,16 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
             const opponent = state.players.find((p: any) => p.id !== current.id);
             if (opponent) {
                 levitation(io, state.roomId, current, opponent, card);
+                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            }
+        }
+
+        // --- Talent Poulpe (Encre Noire) ---
+        // S'active à chaque début de tour
+        if (card.talent === "Encre Noire") {
+            const opponent = state.players.find((p: any) => p.id !== current.id);
+            if (opponent) {
+                encreNoire(io, state.roomId, current, opponent, card);
                 checkAndTriggerWarden(io, state.roomId, current, opponent, card);
             }
         }

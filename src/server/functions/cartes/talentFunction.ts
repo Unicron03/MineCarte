@@ -155,3 +155,13 @@ export function checkRetourALEnvoyeur(io: Server, roomId: string, attacker: InGa
     
     return false; // L'attaque continue normalement
 }
+
+// Talent Poulpe : Encre Noire (Redirection de la prochaine attaque)
+export function encreNoire(io: Server, roomId: string, player: Player, opponent: Player, card: InGameCard): void {
+    if (!player.effects) player.effects = [];
+    
+    if (!player.effects.includes("EncreNoire")) {
+        player.effects.push("EncreNoire");
+        io.to(roomId).emit("log", `${card.name} crache de l'Encre Noire ! La prochaine attaque adverse sera redirigée.`);
+    }
+}
