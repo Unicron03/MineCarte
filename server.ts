@@ -57,11 +57,12 @@ const baseDeck1 = [
   //createCard("Enclume", 1, "artefact", null, "Enclume", null, null),
   createCard("Warden", 4, "mob", 150, "Détection Sonore", "Coup d'ombre", "Hurlement Sombre"),
   //createCard("Cloche", 2, "artefact", null, "Cloche", null, null),
-  createCard("Araignée", 2, "mob", 35, "Ralentissement calculé", "Morsure", null),
-  createCard("Tortue", 2, "mob", 60, "Carapace Protectrice", "Morsure", null),
-  createCard("Creeper", 3, "mob", 40, "Pression Psychologique", "Explosion", null),
-  createCard("Wither", 3, "mob", 100, "Explosion noire", "Morsure", null),
-  createCard("Sorcière", 3, "mob", 40, "Enchantement puissant", "Soin", null),
+  //createCard("Araignée", 2, "mob", 35, "Ralentissement calculé", "Morsure", null),
+  //createCard("Tortue", 2, "mob", 60, "Carapace Protectrice", "Morsure", null),
+  //createCard("Creeper", 3, "mob", 40, "Pression Psychologique", "Explosion", null),
+  //createCard("Wither", 3, "mob", 100, "Explosion noire", "Morsure", null),
+  //createCard("Sorcière", 3, "mob", 40, "Enchantement puissant", "Soin", null),
+  createCard("Shulker", 3, "mob", 60, "Lévitation", "Morsure", null),
 ];
 
 const baseDeck2 = [...baseDeck1];

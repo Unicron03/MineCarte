@@ -36,6 +36,7 @@ export const actionList: Action[] = [
   { id: 32, name: "Pression Psychologique", damage: 0, cost: 0, description: "Si le Creeper meurt d'une attaque adverse, il inflige 15 PV aux mobs adverses et 5 PV au joueur.", function: "pressionPsychologique", autoActivate: true },
   { id: 33, name: "Explosion noire", damage: 0, cost: 0, description: "Passif: Dégâts x2 si PV <= 30%.", function: "checkWitherExplosionNoire", autoActivate: true },
   { id: 34, name: "Enchantement puissant", damage: 0, cost: 0, description: "Se rajoute 5 PV (même au-delà de sa vie).", function: "enchantementPuissant", autoActivate: true },
+  { id: 35, name: "Lévitation", damage: 0, cost: 0, description: "Mélange une carte de la main de l'adversaire dans son deck.", function: "levitation", autoActivate: true },
 ];
 
 
@@ -280,6 +281,16 @@ export const cardList: InGameCard[] = [
     talent: "Enchantement puissant",
     attack1: "Soin",
     pv_durability: 40,
+    cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Shulker",
+    imageName: "shulker",
+    talent: "Lévitation",
+    attack1: "Morsure",
+    pv_durability: 60,
     cost: 3,
     category: "mob",
   },

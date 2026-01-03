@@ -120,3 +120,20 @@ export function enchantementPuissant(io: Server, roomId: string, player: Player,
     card.pv_durability += healAmount;
     io.to(roomId).emit("log", `${card.name} utilise Enchantement puissant et gagne ${healAmount} PV (PV actuels: ${card.pv_durability}).`);
 }
+
+// Talent Shulker : Lévitation (Mélange une carte adverse dans le deck)
+export function levitation(io: Server, roomId: string, player: Player, opponent: Player, card: InGameCard): void {
+    if (opponent.hand.length === 0) {
+        io.to(roomId).emit("log", `${card.name} utilise Levitation, mais la main de l'adversaire est vide.`);
+        return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * opponent.hand.length);
+    const removedCard = opponent.hand.splice(randomIndex, 1)[0];
+
+    // Insertion aléatoire dans le deck
+    const randomDeckIndex = Math.floor(Math.random() * (opponent.deck.length + 1));
+    opponent.deck.splice(randomDeckIndex, 0, removedCard);
+
+    io.to(roomId).emit("log", `${card.name} utilise Levitation : ${removedCard.name} retourne dans le deck de l'adversaire.`);
+}
