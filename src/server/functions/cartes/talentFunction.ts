@@ -96,7 +96,7 @@ export function checkWitherExplosionNoire(io: Server, roomId: string, player: Pl
     if (card.pv_durability <= threshold) {
         if (!card.effects.includes("WitherEnrage")) {
             card.effects.push("WitherEnrage");
-            io.to(roomId).emit("log", `☠️ ${card.name} entre en phase d'Explosion Noire ! Dégâts doublés !`);
+            io.to(roomId).emit("log", ` ${card.name} entre en phase d'Explosion Noire ! Dégâts doublés !`);
         }
 
         // Déclenchement du Warden adverse (copie de la logique pour éviter dépendance circulaire avec testEffectFonctions)
@@ -111,4 +111,12 @@ export function checkWitherExplosionNoire(io: Server, roomId: string, player: Pl
             io.to(roomId).emit("log", `${card.name} se calme (PV > 30%).`);
         }
     }
+}
+
+// Talent Sorcière : Enchantement puissant (Gain de PV infini)
+export function enchantementPuissant(io: Server, roomId: string, player: Player, opponent: Player, card: InGameCard): void {
+    if (card.pv_durability === undefined) return;
+    const healAmount = 5;
+    card.pv_durability += healAmount;
+    io.to(roomId).emit("log", `${card.name} utilise Enchantement puissant et gagne ${healAmount} PV (PV actuels: ${card.pv_durability}).`);
 }
