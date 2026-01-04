@@ -12,6 +12,7 @@ import GameLogs from "@/components/PVP/GameLogs";
 import EndGameScreen from "@/components/PVP/EndGameScreen";
 import LoadingScreen from "@/components/PVP/LoadingScreen";
 import PlayerHand from "@/components/PVP/PlayerHand";
+import AlertPopup from "@/components/PVP/AlertPopup";
 
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket"; 
@@ -42,6 +43,9 @@ export default function GamePage() {
         targets: any[] 
     } | null>(null);
 
+    // --- État pour les alertes (ex: pas assez d'énergie) ---
+    const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
     useEffect(() => {
         if (!socket) return;
 
@@ -61,10 +65,33 @@ export default function GamePage() {
             setPendingAttack(data);
         });
 
+        // --- Écoute des erreurs serveur ---
+        socket.on("error", (data: { message: string } | string) => {
+            const msg = typeof data === 'string' ? data : data.message;
+            setAlertMessage(msg || "Une erreur est survenue.");
+        });
+
+        // --- Écoute des logs pour afficher les alertes (ex: Pas assez d'énergie) ---
+        socket.on("log", (message: string) => {
+            // On filtre les messages qui semblent être des erreurs ou des avertissements
+            const lowerMsg = message.toLowerCase();
+            if (
+                lowerMsg.includes("pas assez d'énergie") ||
+                lowerMsg.includes("impossible") ||
+                lowerMsg.includes("erreur") ||
+                lowerMsg.includes("ne pouvez pas") ||
+                lowerMsg.includes("doit avoir")
+            ) {
+                setAlertMessage(message);
+            }
+        });
+
         return () => {
             socket.off("requestTargetSelection");
             socket.off("selectAllyTarget");
             socket.off("selectEnemyTarget");
+            socket.off("error");
+            socket.off("log");
         };
     }, [socket]);
 
@@ -81,7 +108,8 @@ export default function GamePage() {
 
     // Nouvelle fonction pour initier l'attaque
     const handleRequestAttack = (attackerIndex: number, attackName: string) => {
-        if (!gameState) return;
+        if (!gameState || !me) return;
+
         socket.emit("requestAttack", { 
             roomId: gameState.roomId, 
             attackerIndex, 
@@ -121,6 +149,12 @@ export default function GamePage() {
             setSelectionMode('none');
             setPendingAttack(null);
         }
+    };
+
+    // --- Wrapper pour jouer une carte avec validation locale ---
+    const handlePlayCardWrapper = (cardIndex: number) => {
+        if (!me) return;
+        playCard(cardIndex);
     };
 
     // --- Rendu écran chargement de partie ---
@@ -189,7 +223,7 @@ export default function GamePage() {
                     </div>
                     
                     {/* Plateau adverse */}
-                    <div className="flex gap-2">
+                    <div className="flex justify-center gap-16">
                     {opponent?.board?.length ? (
                         opponent.board.map((card, i) => (
                         <div
@@ -230,7 +264,7 @@ export default function GamePage() {
                         isSelf={true}
                     />
 
-                    <div className="flex gap-2 mb-4">
+                    <div className="flex justify-center gap-16 mb-4">
                     {me?.board?.length ? (
                         me.board.map((card, i) => {
                         const alreadyAttacked = card.hasAttacked ?? false;
@@ -287,7 +321,7 @@ export default function GamePage() {
                     {/* Main du joueur (Nouvelle version) */}
                     <PlayerHand 
                         hand={me?.hand || []} 
-                        onPlayCard={playCard} 
+                        onPlayCard={handlePlayCardWrapper} 
                         isMyTurn={yourTurn} 
                         selectionMode={selectionMode}
                     />
@@ -320,6 +354,13 @@ export default function GamePage() {
                     }
                 />
             )}
+
+            {/* --- POPUP D'ALERTE --- */}
+            <AlertPopup
+                isOpen={!!alertMessage}
+                message={alertMessage}
+                onClose={() => setAlertMessage(null)}
+            />
         </div>
     );
 }
