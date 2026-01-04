@@ -7,6 +7,10 @@ import { useRouter } from "next/navigation";
 import Deck from "../../components/combats/Deck";
 import CardPVP from "@/components/PVP/CardPVP";
 import EffectDisplay from "@/components/PVP/EffectDisplay";
+import LeftPanel from "@/components/PVP/LeftPanel";
+import GameLogs from "@/components/PVP/GameLogs";
+import EndGameScreen from "@/components/PVP/EndGameScreen";
+import LoadingScreen from "@/components/PVP/LoadingScreen";
 
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket"; 
@@ -120,36 +124,19 @@ export default function GamePage() {
 
     // --- Rendu écran chargement de partie ---
     if (!gameState) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-black text-white">
-            Connexion au serveur...
-            </div>
-        );
+        return <LoadingScreen />;
     }
 
     // --- Rendu de l'écran de fin de partie ---
     if (endGameResult) {
-        const text =
-        endGameResult === "win"
-            ? "Vous avez gagné !"
-            : endGameResult === "lose"
-            ? "Vous avez perdu..."
-            : "Égalité";
-
         return (
-        <div className="fixed inset-0 bg-black bg-opacity-95 flex flex-col items-center justify-center text-white z-50">
-            <h1 className="text-4xl font-bold mb-6">{text}</h1>
-
-            <button
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg text-xl"
-            onClick={() => {
-                closeSocket();
-                router.push("/");
-            }}
-            >
-            Quitter la partie
-            </button>
-        </div>
+            <EndGameScreen 
+                result={endGameResult} 
+                onQuit={() => {
+                    closeSocket();
+                    router.push("/");
+                }} 
+            />
         );
     }
 
@@ -159,40 +146,13 @@ export default function GamePage() {
     return (
         <div style={{ backgroundImage: "url('/img/backgrounPVP.jpg')" }} className="relative min-h-screen bg-cover flex flex-row justify-between p-4" > 
             {/* --- PANEL GAUCHE --- */}
-            <div className="w-64 bg-black/70 text-white rounded-lg p-4 text-sm h-[90vh] overflow-y-auto border border-gray-600">
-                <button onClick={quitHandler} className="mb-4 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"> Quitter</button>  
-                <h3 className="text-lg font-bold mb-2 text-yellow-400"> Informations</h3>
-                <div className="mb-4">
-                    <h4 className="font-semibold text-green-400 mb-1">Vous</h4>
-                    <p>Énergie : {me?.energie ?? 0}</p>
-                    <p>Cartes dans le deck : {me?.deck?.length ?? 0}</p>
-                    <p>Cartes en main : {me?.hand?.length ?? 0}</p>
-                    <p>Cartes dans la défausse : {me?.discard?.length ?? 0}</p>
-                    <p>Cartes sur le plateau : {me?.board?.length ?? 0}</p>
-                    <p>PV : {me?.pv ?? 0}</p>
-                    <p>Effect : {me?.effects && me.effects.length > 0 ? me.effects.join(", ") : "Aucun"}</p>
-                </div>
-                <div>
-                    <h4 className="font-semibold text-red-400 mb-1">Adversaire</h4>
-                    <p>Énergie : {opponent?.energie ?? 0}</p>
-                    <p>Cartes dans le deck : {opponent?.deck?.length ?? 0}</p>
-                    <p>Cartes en main : {opponent?.hand?.length ?? 0}</p>
-                    <p>Cartes dans la défausse : {opponent?.discard?.length ?? 0}</p>
-                    <p>Cartes sur le plateau : {opponent?.board?.length ?? 0}</p>
-                    <p>PV : {opponent?.pv ?? 0}</p>
-                    <p>Effect : {opponent?.effects && opponent.effects.length > 0 ? opponent.effects.join(", ") : "Aucun"}</p>
-                </div>
-            </div>
+            <LeftPanel me={me ?? null} opponent={opponent ?? null} onQuit={quitHandler} />
         
             {/* --- CONTENU PRINCIPAL --- */}
             <div className="flex-1 flex flex-col items-center justify-between">
 
                 {/* Logs en haut à droite */}
-                <div className="absolute top-2 right-2 w-64 h-48 bg-black/70 p-2 rounded-lg text-white text-xs overflow-y-auto font-mono">
-                    {logs.map((l, i) => (
-                        <p key={i}>{l}</p>
-                    ))}
-                </div>
+                <GameLogs logs={logs} />
             
                 {/* Zone adversaire */}
                 <div className="w-full flex flex-col items-center " style={{ border: "solid 1px red"}}>
