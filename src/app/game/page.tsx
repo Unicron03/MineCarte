@@ -11,6 +11,7 @@ import LeftPanel from "@/components/PVP/LeftPanel";
 import GameLogs from "@/components/PVP/GameLogs";
 import EndGameScreen from "@/components/PVP/EndGameScreen";
 import LoadingScreen from "@/components/PVP/LoadingScreen";
+import PlayerHand from "@/components/PVP/PlayerHand";
 
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket"; 
@@ -155,7 +156,7 @@ export default function GamePage() {
                 <GameLogs logs={logs} />
             
                 {/* Zone adversaire */}
-                <div className="w-full flex flex-col items-center " style={{ border: "solid 1px red"}}>
+                <div className="w-full flex flex-col items-center ">
                     <h2 className="text-lg font-mono text-white mb-2">Adversaire</h2>
 
                     {/* Affichage des effets de l'adversaire */}
@@ -283,37 +284,25 @@ export default function GamePage() {
                         ))}
                     </div>
             
-                    <div className="flex gap-2">
-                        {me?.hand.map((card, i) => (
-                        <div key={i}
-                            className="card bg-[url('/card-front.png')] bg-cover border-2 border-blue-700 w-20 h-28 flex flex-col justify-end text-center text-xs"
-                            >
-                            <div className="bg-black/70 text-white">
-                                <p>{card.name}</p>
-                                <p>COST {card.cost}</p>
-                            </div>
-                            {yourTurn && selectionMode === 'none' && (
-                                <button
-                                className="bg-blue-600 text-white text-xs px-1 rounded"
-                                onClick={() => playCard(i)}
-                                >
-                                Jouer
-                                </button>
-                            )}
-                        </div>
-                        ))}
-                    </div>
+                    {/* Main du joueur (Nouvelle version) */}
+                    <PlayerHand 
+                        hand={me?.hand || []} 
+                        onPlayCard={playCard} 
+                        isMyTurn={yourTurn} 
+                        selectionMode={selectionMode}
+                    />
 
-                    {yourTurn && (
-                        <button
-                        className="mt-4 bg-gray-800 text-white px-4 py-2 rounded"
-                        onClick={endTurn}
-                        >
-                        Fin du tour
-                        </button>
-                    )}
                 </div>
             </div>
+
+            {yourTurn && (
+                <button
+                    className="absolute right-6 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold text-xl px-8 py-4 rounded-xl border-2 border-yellow-400 shadow-2xl hover:scale-110 transition-all z-50"
+                    onClick={endTurn}
+                >
+                    FIN DU TOUR
+                </button>
+            )}
 
             {/* --- MODALE DE SÉLECTION GÉNÉRIQUE --- */}
             {selectionModalData && (

@@ -31,7 +31,7 @@ const userToRoom: Map<string, { roomId: string; playerIndex: number }> = new Map
 
 // --- Définition des decks de base ---
 const baseDeck1 = [
-  //createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
+  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Gast", 1, "mob", 45, "Retour à l'envoyeur", "Morsure","Explosion"),
   //createCard("Table de craft", 1, "artefact", null, "Table de craft", null, null),
   //createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
