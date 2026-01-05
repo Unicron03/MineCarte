@@ -42,6 +42,8 @@ export type CardPVPProps = {
     onTalentClick?: () => void;
     onAttackClick?: (attackName: string) => void;
     onClick?: () => void;
+    onEffectClick?: (effectName: string) => void;
+    onEquipmentClick?: (equipment: InGameCard) => void;
 };
 
 // Type pour une action en attente de sélection de cible

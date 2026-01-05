@@ -9,6 +9,8 @@ const CardPVP: React.FC<CardPVPProps> = ({
   onTalentClick,
   onAttackClick,
   onClick,
+  onEffectClick,
+  onEquipmentClick,
 }) => {
   const finalCost = overrides?.cost ?? card.cost ?? 0;
   
@@ -16,14 +18,14 @@ const CardPVP: React.FC<CardPVPProps> = ({
   
   const finalVie = isMob ? (overrides?.pv_durability ?? card.pv_durability ?? 0) : undefined;
   
-  const attack1 = isMob ? actionList.find((a: { name: string }) => a.name === card.attack1) : undefined;
-  const attack2 = isMob ? actionList.find((a: { name: string }) => a.name === card.attack2) : undefined;
+  const attack1 = isMob ? actionList.find((a) => a.name === card.attack1) : undefined;
+  const attack2 = isMob ? actionList.find((a) => a.name === card.attack2) : undefined;
   
   // L'effet est dans la propriété effet pour les Artefacts/Équipements, et talent pour les Mobs
   const effetOuTalent = isMob ? card.talent : card.effet;
   
   // Récupérer la définition du talent pour vérifier s'il est autoActivate
-  const talentAction = isMob && card.talent ? actionList.find((a: { name: string }) => a.name === card.talent) : undefined;
+  const talentAction = isMob && card.talent ? actionList.find((a) => a.name === card.talent) : undefined;
   const isAutoActivate = talentAction?.autoActivate === true;
 
   // Gestion indépendante des clics (Talent vs Attaque)
@@ -34,8 +36,8 @@ const CardPVP: React.FC<CardPVPProps> = ({
   const canAttack = clickable && !card.hasAttacked;
 
   // Déterminer la couleur de la bordure
-  let borderColor = "border-gray-800";
-  if (card.category === "mob") borderColor = "border-red-500";
+  let borderColor = "border-gray-600";
+  if (card.category === "mob") borderColor = "border-red-600";
   else if (card.category === "artefact") borderColor = "border-yellow-500";
   else if (card.category === "equipement") borderColor = "border-blue-500";
   
@@ -43,17 +45,142 @@ const CardPVP: React.FC<CardPVPProps> = ({
   
   return (
     <div 
-      className={`relative w-[120px] h-[180px] bg-yellow-100 border-2 ${borderColor} rounded-lg shadow-lg flex flex-col overflow-hidden ${clickable && onClick ? "cursor-pointer hover:scale-105 transition-transform" : ""}`}
+      className={`relative w-40 h-60 bg-gray-900 rounded-xl border-2 ${borderColor} shadow-2xl flex flex-col overflow-hidden select-none ${clickable && onClick ? "cursor-pointer hover:scale-105 transition-transform" : ""}`}
       onClick={clickable && onClick ? onClick : undefined}
     >
-      {/* --- Affichage des Effets (En bas à gauche) --- */}
+      {/* Image de fond */}
+      <img
+        src={imgSrc}
+        alt={card.name}
+        className="absolute inset-0 w-full h-full object-cover opacity-60"
+      />
+
+      {/* En-tete : Cout et PV */}
+      <div className="relative z-10 flex justify-between items-start p-2">
+        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+          <span className="text-white font-bold text-lg">{finalCost}</span>
+        </div>
+        {isMob && finalVie !== undefined && (
+          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+            <span className="text-white font-bold text-sm">{finalVie}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Affichage des Equipements (En haut a droite, sous les PV) */}
+      {card.equipment && card.equipment.length > 0 && (
+        <div className="absolute top-11 right-2 z-20 flex flex-col gap-1">
+          {card.equipment.map((equip, index) => (
+            <div 
+              key={index}
+              title={equip.name}
+              className={`w-6 h-6 rounded-full border border-blue-400 bg-gray-800 overflow-hidden shadow-md ${onEquipmentClick ? "cursor-pointer hover:scale-110 transition-transform" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onEquipmentClick) onEquipmentClick(equip);
+             }}
+            >
+              <img 
+                src={`/card/${equip.imageName}.png`} 
+                alt={equip.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).parentElement!.style.backgroundColor = "#3498db";
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Nom de la carte */}
+      <div className="relative z-10 mt-0 mx-2 bg-black/70 border border-white/20 rounded px-2 py-1 text-center">
+        <span className="text-white font-bold text-xs uppercase tracking-wide truncate block">
+          {card.name}
+        </span>
+      </div>
+
+      {/* Zone de description (Boutons d'action) */}
+      <div className="relative z-10 flex-1 mt-2 mx-2 mb-8 bg-black/80 border border-white/10 rounded p-2 overflow-y-auto flex flex-col gap-2 scrollbar-thin scrollbar-thumb-gray-600">
+        {/* Talent / Effet */}
+        {effetOuTalent && (
+          <button
+            className={`w-full px-2 py-1 rounded text-[10px] text-left border border-purple-500/30 ${
+              canUseTalent
+                ? "bg-purple-900/80 hover:bg-purple-800 text-purple-100"
+                : "bg-purple-900/40 text-purple-300/60 cursor-default"
+            } ${isAutoActivate ? "italic" : ""}`}
+            disabled={!canUseTalent}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isMob && onTalentClick) onTalentClick();
+            }}
+          >
+            <span className="font-bold block border-b border-purple-500/30 pb-0.5 mb-0.5">
+              {isMob ? (isAutoActivate ? "Passif" : "Talent") : "Effet"}
+            </span>
+            {effetOuTalent}
+          </button>
+        )}
+
+        {/* Attaques (Mobs uniquement) */}
+        {isMob && (
+          <>
+            {attack1 && (
+              <button
+                className={`w-full px-2 py-1 rounded text-[10px] text-left border border-red-500/30 ${
+                  canAttack
+                    ? "bg-red-900/80 hover:bg-red-800 text-red-100"
+                    : "bg-red-900/40 text-red-300/60 cursor-default"
+                }`}
+                disabled={!canAttack}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (canAttack) onAttackClick?.(attack1.name);
+                }}
+              >
+                <span className="font-bold block border-b border-red-500/30 pb-0.5 mb-0.5">
+                  {attack1.name} <span className="text-white/80">({attack1.damage} dmg)</span>
+                </span>
+                <span className="opacity-80 italic">{attack1.description}</span>
+              </button>
+            )}
+            {attack2 && (
+              <button
+                className={`w-full px-2 py-1 rounded text-[10px] text-left border border-blue-500/30 ${
+                  canAttack
+                    ? "bg-blue-900/80 hover:bg-blue-800 text-blue-100"
+                    : "bg-blue-900/40 text-blue-300/60 cursor-default"
+                }`}
+                disabled={!canAttack}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (canAttack) onAttackClick?.(attack2.name);
+                }}
+              >
+                <span className="font-bold block border-b border-blue-500/30 pb-0.5 mb-0.5">
+                  {attack2.name} <span className="text-white/80">({attack2.damage} dmg)</span>
+                </span>
+                <span className="opacity-80 italic">{attack2.description}</span>
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Affichage des Effets (En bas a gauche) */}
       {card.effects && card.effects.length > 0 && (
         <div className="absolute bottom-2 left-2 z-20 flex flex-row flex-wrap gap-1 max-w-[80%]">
           {card.effects.map((effect, index) => (
             <div 
               key={index}
               title={effect}
-              className="w-8 h-8 rounded-full border-2 border-white bg-gray-800 overflow-hidden shadow-md"
+              className={`w-6 h-6 rounded-full border border-white bg-gray-800 overflow-hidden shadow-md ${onEffectClick ? "cursor-pointer hover:scale-110 transition-transform" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onEffectClick) onEffectClick(effect);
+             }}
             >
               <img 
                 src={`/card/${effect}.png`} 
@@ -68,92 +195,6 @@ const CardPVP: React.FC<CardPVPProps> = ({
           ))}
         </div>
       )}
-
-      {/* Image */}
-      <img
-        src={imgSrc}
-        alt={card.name}
-        className="absolute inset-0 w-full h-full object-cover opacity-80"
-      />
-
-      {/* Overlay */}
-      <div className="absolute inset-0 flex flex-col justify-between p-1 bg-black/40 text-white text-[9px] font-mono">
-        {/* Nom, coût, PV */}
-        <div className="flex justify-between items-center bg-black/60 p-1 rounded">
-          <span className="font-bold text-xs">{card.name}</span>
-          <span className="bg-blue-500 px-1 rounded">C: {finalCost}</span>
-          {/* PV/Durabilité uniquement pour les Mobs */}
-          {isMob && finalVie !== undefined && (
-            <span className="bg-red-500 px-1 rounded">PV: {finalVie}</span>
-          )}
-        </div>
-
-        {/* CONTENU SPÉCIFIQUE À LA CATÉGORIE */}
-        <div className="flex-1 overflow-auto mt-1 p-1">
-          {/* Affichage du Talent/Effet */}
-          {effetOuTalent && (
-              <button
-                className={`px-1 py-[1px] bg-purple-600 rounded text-[8px] text-left mb-1 w-full ${
-                  canUseTalent ? "hover:bg-purple-800" : "cursor-default opacity-80"
-                } ${isAutoActivate ? "italic border border-purple-300" : ""}`}
-                disabled={!canUseTalent} // Seuls les Mobs sont cliquables pour le talent, et si pas déjà utilisé
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isMob && onTalentClick) onTalentClick();
-                }}
-              >
-                {isMob ? `${isAutoActivate ? "Passif" : "Talent"}: ${effetOuTalent}` : `Effet: ${effetOuTalent}`}
-              </button>
-          )}
-
-          {isMob && (
-            // --- Mob ---
-            <div className="flex flex-col gap-1">
-              {attack1 && (
-                <button
-                  className={`px-1 py-[1px] bg-red-600 rounded text-[8px] text-left ${
-                    canAttack ? "hover:bg-red-800" : "cursor-default opacity-80"
-                  }`}
-                  disabled={!canAttack}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (canAttack) onAttackClick?.(attack1.name);
-                  }}
-                >
-                  {attack1.name} ({attack1.damage} dmg / coût: {attack1.cost})
-                  <br />
-                  <span className="text-[7px] opacity-80">{attack1.description}</span>
-                </button>
-              )}
-              {attack2 && (
-                <button
-                  className={`px-1 py-[1px] bg-blue-600 rounded text-[8px] text-left ${
-                    canAttack ? "hover:bg-blue-800" : "cursor-default opacity-80"
-                  }`}
-                  disabled={!canAttack}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (canAttack) onAttackClick?.(attack2.name);
-                  }}
-                >
-                  {attack2.name} ({attack2.damage} dmg / coût: {attack2.cost})
-                  <br />
-                  <span className="text-[7px] opacity-80">{attack2.description}</span>
-                </button>
-              )}
-            </div>
-          )}
-          
-          {!isMob && !effetOuTalent && (
-              <p className="text-xs text-center text-gray-400">Aucun effet défini</p>
-          )}
-        </div>
-        
-        {/* Catégorie en bas à droite */}
-        <span className="self-end bg-gray-800 px-1 rounded text-[7px] opacity-90">
-            {card.category.toUpperCase()}
-        </span>
-      </div>
     </div>
   );
 };

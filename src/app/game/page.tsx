@@ -13,6 +13,7 @@ import EndGameScreen from "@/components/PVP/EndGameScreen";
 import LoadingScreen from "@/components/PVP/LoadingScreen";
 import PlayerHand from "@/components/PVP/PlayerHand";
 import AlertPopup from "@/components/PVP/AlertPopup";
+import EffectDetailsModal from "@/components/PVP/EffectDetailsModal";
 
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket"; 
@@ -20,8 +21,9 @@ import { getSocket, closeSocket } from "@/client/sockets/socket";
 // --- Nouveau Hook ---
 import { useGameLogic } from "@/client/functions/useGameLogic";
 
-import { EquipmentBadge } from "@/components/PVP/EquipmentBadge";
 import SelectionModal from "@/components/PVP/SelectionModal";
+import { actionList } from "@/data";
+import { InGameCard } from "@/typesPvp";
 
 export default function GamePage() {
     // On récupère les infos de base, mais on va surcharger la logique d'attaque
@@ -45,6 +47,15 @@ export default function GamePage() {
 
     // --- État pour les alertes (ex: pas assez d'énergie) ---
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
+     // --- État pour la modale de détails (Effets/Equipements) ---
+    const [detailsModal, setDetailsModal] = useState<{
+        show: boolean;
+        title: string;
+        description: string;
+        imageName: string;
+        type: "effect" | "equipment" | "talent";
+    } | null>(null);
 
     useEffect(() => {
         if (!socket) return;
@@ -157,6 +168,68 @@ export default function GamePage() {
         playCard(cardIndex);
     };
 
+    // --- Gestionnaire de clic sur un effet ---
+    const handleEffectClick = (effectName: string) => {
+        let title = effectName;
+        let description = "Un effet mystérieux.";
+        
+        // 1. Vérifier si c'est un effet standard connu (Burn, etc.)
+        if (effectName.startsWith("Burn_")) {
+            const dmg = effectName.split("_")[1];
+            title = "Brûlure";
+            description = `Cette unité subit ${dmg} dégâts à la fin de son tour.`;
+        } else if (effectName === "Esquive") {
+            title = "Esquive";
+            description = "La prochaine attaque subie sera ignorée.";
+        } else if (effectName === "Invisible") {
+            title = "Invisibilité";
+            description = "Cette unité ne peut pas être ciblée par des attaques adverses.";
+        } else if (effectName.startsWith("GoldenApple_")) {
+            title = "Pomme Dorée";
+            description = "Bonus de dégâts et régénération.";
+        } else {
+            // 2. Chercher dans la liste des actions/cartes
+            const action = actionList.find(a => a.name === effectName || a.function === effectName);
+            if (action) {
+                title = action.name;
+                description = action.description || description;
+            }
+        }
+
+        setDetailsModal({
+            show: true,
+            title,
+            description,
+            imageName: effectName,
+            type: "effect"
+        });
+    };
+
+    // --- Gestionnaire de clic sur un équipement ---
+    const handleEquipmentClick = (equipment: InGameCard) => {
+        let title = equipment.name;
+        let description = "Aucune description.";
+        
+        // On cherche la description dans actionList via le nom ou l'effet
+        const action = actionList.find(a => a.name === equipment.name || (equipment.category !== "mob" && a.name === equipment.effet));
+        
+        if (action) {
+            description = action.description || description;
+        }
+
+        setDetailsModal({
+            show: true,
+            title,
+            description,
+            imageName: equipment.imageName,
+            type: "equipment"
+        });
+    };
+
+    const closeDetailsModal = () => {
+        setDetailsModal(null);
+    };
+
     // --- Rendu écran chargement de partie ---
     if (!gameState) {
         return <LoadingScreen />;
@@ -242,9 +315,9 @@ export default function GamePage() {
                                     pv_durability: card.pv_durability,
                                 }}
                                 clickable={false}
+                                onEffectClick={handleEffectClick}
+                                onEquipmentClick={handleEquipmentClick}
                             />
-                            {/* Indicateur d'équipement */}
-                            <EquipmentBadge equipment={card.equipment} />
                         </div>
                         ))
                     ) : (
@@ -289,9 +362,9 @@ export default function GamePage() {
                             // Appel de la demande d'attaque
                             onAttackClick={(attackName) => handleRequestAttack(i, attackName)}
                             onTalentClick={() => handleUseTalent(card.uuid)}
+                            onEffectClick={handleEffectClick}
+                            onEquipmentClick={handleEquipmentClick}
                         />
-                        {/* Indicateur d'équipement */}
-                        <EquipmentBadge equipment={card.equipment} />
                         </div>
                         )})
                     ) : (
@@ -361,6 +434,18 @@ export default function GamePage() {
                 message={alertMessage}
                 onClose={() => setAlertMessage(null)}
             />
+
+            {/* --- MODALE DÉTAILS EFFET/EQUIPEMENT --- */}
+            {detailsModal && (
+                <EffectDetailsModal
+                    isOpen={detailsModal.show}
+                    title={detailsModal.title}
+                    description={detailsModal.description}
+                    imageName={detailsModal.imageName}
+                    type={detailsModal.type}
+                    onClose={closeDetailsModal}
+                />
+            )}
         </div>
     );
 }
