@@ -57,11 +57,20 @@ const CardPVP: React.FC<CardPVPProps> = ({
 
       {/* En-tete : Cout et PV */}
       <div className="relative z-10 flex justify-between items-start p-2">
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+        {/* Nom de la carte centré */}
+        <div className="absolute top-3 left-0 w-full flex justify-center px-10 pointer-events-none">
+          <div className="bg-black/70 border border-white/20 rounded px-2 py-0.5 text-center truncate">
+            <span className="text-white font-bold text-[10px] uppercase tracking-wide block">
+              {card.name}
+            </span>
+          </div>
+        </div>
+
+        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
           <span className="text-white font-bold text-lg">{finalCost}</span>
         </div>
         {isMob && finalVie !== undefined && (
-          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
             <span className="text-white font-bold text-sm">{finalVie}</span>
           </div>
         )}
@@ -93,13 +102,6 @@ const CardPVP: React.FC<CardPVPProps> = ({
           ))}
         </div>
       )}
-
-      {/* Nom de la carte */}
-      <div className="relative z-10 mt-0 mx-2 bg-black/70 border border-white/20 rounded px-2 py-1 text-center">
-        <span className="text-white font-bold text-xs uppercase tracking-wide truncate block">
-          {card.name}
-        </span>
-      </div>
 
       {/* Zone de description (Boutons d'action) */}
       <div className="relative z-10 flex-1 mt-2 mx-2 mb-8 bg-black/80 border border-white/10 rounded p-2 overflow-y-auto flex flex-col gap-2 scrollbar-thin scrollbar-thumb-gray-600">
@@ -141,7 +143,7 @@ const CardPVP: React.FC<CardPVPProps> = ({
                 }}
               >
                 <span className="font-bold block border-b border-red-500/30 pb-0.5 mb-0.5">
-                  {attack1.name} <span className="text-white/80">({attack1.damage} dmg)</span>
+                  {attack1.name} <span className="text-white/80">({attack1.damage} dmg | Coût: {attack1.cost})</span>
                 </span>
                 <span className="opacity-80 italic">{attack1.description}</span>
               </button>
@@ -160,7 +162,7 @@ const CardPVP: React.FC<CardPVPProps> = ({
                 }}
               >
                 <span className="font-bold block border-b border-blue-500/30 pb-0.5 mb-0.5">
-                  {attack2.name} <span className="text-white/80">({attack2.damage} dmg)</span>
+                  {attack2.name} <span className="text-white/80">({attack2.damage} dmg | Coût: {attack2.cost})</span>
                 </span>
                 <span className="opacity-80 italic">{attack2.description}</span>
               </button>

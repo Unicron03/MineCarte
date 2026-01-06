@@ -41,21 +41,23 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
 
       {/* En-tête : Coût et PV */}
       <div className="relative z-10 flex justify-between items-start p-2">
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+        {/* Nom de la carte centré */}
+        <div className="absolute top-3 left-0 w-full flex justify-center px-10 pointer-events-none">
+          <div className="bg-black/70 border border-white/20 rounded px-2 py-0.5 text-center truncate">
+            <span className="text-white font-bold text-[10px] uppercase tracking-wide block">
+              {card.name}
+            </span>
+          </div>
+        </div>
+
+        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
           <span className="text-white font-bold text-lg">{card.cost}</span>
         </div>
         {isMob && card.pv_durability !== undefined && (
-          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
             <span className="text-white font-bold text-sm">{card.pv_durability}</span>
           </div>
         )}
-      </div>
-
-      {/* Nom de la carte */}
-      <div className="relative z-10 mt-1 mx-2 bg-black/70 border border-white/20 rounded px-2 py-1 text-center">
-        <span className="text-white font-bold text-xs uppercase tracking-wide truncate block">
-          {card.name}
-        </span>
       </div>
 
       {/* Zone de description (Attaques / Talents) */}
@@ -76,12 +78,12 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
           <>
             {attack1Data && (
               <div className="text-xs text-red-300">
-                <span className="font-bold block"> {attack1Data.name} <span className="text-white">({attack1Data.damage} dmg)</span></span>
+                <span className="font-bold block"> {attack1Data.name} <span className="text-white">({attack1Data.damage} dmg | Coût: {attack1Data.cost})</span></span>
               </div>
             )}
             {attack2Data && (
               <div className="text-xs text-blue-300">
-                <span className="font-bold block"> {attack2Data.name} <span className="text-white">({attack2Data.damage} dmg)</span></span>
+                <span className="font-bold block"> {attack2Data.name} <span className="text-white">({attack2Data.damage} dmg | Coût: {attack2Data.cost})</span></span>
               </div>
             )}
           </>

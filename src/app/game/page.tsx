@@ -14,6 +14,7 @@ import LoadingScreen from "@/components/PVP/LoadingScreen";
 import PlayerHand from "@/components/PVP/PlayerHand";
 import AlertPopup from "@/components/PVP/AlertPopup";
 import EffectDetailsModal from "@/components/PVP/EffectDetailsModal";
+import TurnIndicator from "@/components/PVP/TurnIndicator";
 
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket"; 
@@ -105,6 +106,15 @@ export default function GamePage() {
             socket.off("log");
         };
     }, [socket]);
+
+    // --- Sécurité : Réinitialiser la sélection si le tour se termine (ex: timeout) ---
+    useEffect(() => {
+        if (!yourTurn) {
+            setSelectionMode('none');
+            setPendingAttack(null);
+            setSelectionModalData(null);
+        }
+    }, [yourTurn]);
 
     // --- Handlers ---
     const handleCancelSelection = () => {
@@ -253,6 +263,9 @@ export default function GamePage() {
 
     return (
         <div style={{ backgroundImage: "url('/img/backgrounPVP.jpg')" }} className="relative min-h-screen bg-cover flex flex-row justify-between p-4" > 
+            {/* --- INDICATEUR DE TOUR --- */}
+            <TurnIndicator isMyTurn={yourTurn} />
+
             {/* --- PANEL GAUCHE --- */}
             <LeftPanel me={me ?? null} opponent={opponent ?? null} onQuit={quitHandler} />
         
@@ -404,8 +417,13 @@ export default function GamePage() {
 
             {yourTurn && (
                 <button
-                    className="absolute right-6 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-bold text-xl px-8 py-4 rounded-xl border-2 border-yellow-400 shadow-2xl hover:scale-110 transition-all z-50"
-                    onClick={endTurn}
+                    className={`absolute right-6 top-1/2 -translate-y-1/2 font-bold text-xl px-8 py-4 rounded-xl border-2 shadow-2xl transition-all z-50 ${
+                        (selectionMode !== 'none' || selectionModalData?.show)
+                            ? "bg-gray-600 border-gray-500 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white border-yellow-400 hover:scale-110"
+                    }`}
+                    onClick={(selectionMode !== 'none' || selectionModalData?.show) ? undefined : endTurn}
+                    disabled={selectionMode !== 'none' || (selectionModalData?.show ?? false)}
                 >
                     FIN DU TOUR
                 </button>

@@ -14,7 +14,7 @@ function getActionByName(name: string): Action | undefined {
 }
 
 // Fonction principale pour exécuter une action d'attaque ou de soin
-function executeAction(io: Server, roomId: string, state: CombatState, action: Action, attacker: InGameCard, target: InGameCard | null, player: Player, opponent: Player): { killed?: boolean } | void | null {
+function executeAction(io: Server, roomId: string, state: CombatState, action: Action, attacker: InGameCard, target: InGameCard | null, player: Player, opponent: Player): { killed?: boolean; error?: string; msg?: string } | void | null {
 
     let finalCost = action.cost;
 
@@ -26,8 +26,7 @@ function executeAction(io: Server, roomId: string, state: CombatState, action: A
 
     // --- Vérification de l'énergie ---
     if (player.energie < finalCost) {
-        state.log.push(`Pas assez d'énergie pour ${action.name}`);
-        return null;
+        return { error: "not_enough_energy", msg: `Pas assez d'énergie pour ${action.name}` };
     }
 
     // --- Retirer l'énergie au joueur ---
@@ -114,6 +113,20 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
 
         const playerIndex = room.players.findIndex((p: Player) => p.id === socket.id);
         if (playerIndex === -1) return;
+
+        // --- Vérifier que c'est bien le tour du joueur ---
+        if (room.turnIndex !== playerIndex) {
+            socket.emit("log", "Ce n'est pas votre tour !");
+            return;
+        }
+
+
+        // --- Vérifier que c'est bien le tour du joueur ---
+        if (room.turnIndex !== playerIndex) {
+            socket.emit("log", "Ce n'est pas votre tour !");
+            return;
+        }
+
         const player = room.players[playerIndex];
         const opponent = room.players[playerIndex === 0 ? 1 : 0];
 
@@ -164,6 +177,11 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
         const state: CombatState = { log: [] };
         const result = executeAction(io, roomId, state, action, attacker, null, player, opponent);
         
+        if (result && (result as any).error) {
+            socket.emit("log", (result as any).msg);
+            return;
+        }
+
         if (result !== null) {
             attacker.hasAttacked = true;
         }
@@ -259,6 +277,11 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
         // Note: On passe targetOwner comme "opponent" (le receveur des dégâts excédentaires) pour executeAction
         const result = executeAction(io, roomId, state, action, attacker, target, player, targetOwner);
         
+        if (result && (result as any).error) {
+            socket.emit("log", (result as any).msg);
+            return;
+        }
+
         if (result !== null) {
             attacker.hasAttacked = true;
         }
