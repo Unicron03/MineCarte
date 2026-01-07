@@ -1,16 +1,31 @@
 import { NextResponse } from "next/server";
-import { faker } from "@faker-js/faker";
+import { getLeaderboard } from "@/prisma/requests";
+import { GameMode } from "../../../../generated/prisma";
 
-export async function GET() {
-    // Génère un tableau de 10 joueurs aléatoires
-    const players = Array.from({ length: 10 }, () => ({
-        id: faker.string.uuid(),
-        name: faker.person.firstName(),
-        points: faker.number.int({ min: 100, max: 10000 }),
-    }));
+export async function GET(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const gameMode = searchParams.get('mode') as GameMode | null;
 
-    // Trie par score décroissant
-    players.sort((a, b) => b.points - a.points);
+        if (!gameMode) {
+            return NextResponse.json({ error: "Game mode is required" }, { status: 400 });
+        }
 
-    return NextResponse.json(players);
+        const leaderboard = await getLeaderboard(gameMode, 10);
+
+        // Formater les données pour le frontend
+        const formattedLeaderboard = leaderboard.map(player => ({
+            id: player.user_id,
+            name: player.user.pseudo,
+            points: player.points,
+            victories: player.victories,
+            defeats: player.defeats,
+            nbParty: player.nb_party
+        }));
+
+        return NextResponse.json(formattedLeaderboard);
+    } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+        return NextResponse.json({ error: "Failed to fetch leaderboard" }, { status: 500 });
+    }
 }

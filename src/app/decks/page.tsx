@@ -4,7 +4,7 @@ import Footer from "@/components/Footer"
 import { Button } from "@/shadcn/ui/button"
 import Image from "next/image"
 import { Check, CircleEllipsis } from "lucide-react"
-import { Deck } from "@/types"
+import { userId, defaultNbDecksPerUser, backCard, defaultNbCardsPerDeck } from "@/types"
 import {
     Drawer,
     DrawerClose,
@@ -19,86 +19,26 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuGroup,
-    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/shadcn/ui/dropdown-menu"
 import DeckConstruction from "@/components/deck-construction"
+import { getUserCollection, getUserDecks } from "@/prisma/requests";
+import CreateDeckButton from "@/components/deck/create-deck-button";
+import DeleteDeckButton from "@/components/deck/delete-deck-button";
+import RenameDeckDialog from "@/components/deck/rename-deck-dialog";
+import DuplicateDeckButton from "@/components/deck/duplicate-deck-button";
+import EquipDeckButton from "@/components/deck/equip-deck-button";
 
-export default function DecksPage() {
-    const deck1: Deck = {
-        id: 1,
-        name: "Mon super deck",
-        cards: [{
-            id: 1,
-            name: "Creeper",
-            description: "Un monstre vert qui explose",
-            category: "Monstre",
-            rarity: 2,
-            pv_durability: 100,
-            cost: 50,
-            talent: null,
-            attack1: 20,
-            attack2: null,
-            main_img: "/cards/creeper/front.png",
-            background_img: "/cards/creeper/back.png",
-            third_img: "/cards/creeper/mid.png",
-        }, {
-            id: 2,
-            name: "Squelette",
-            description: "Un squelette avec un arc",
-            category: "Monstre",
-            rarity: 3,
-            pv_durability: 80,
-            cost: 60,
-            talent: null,
-            attack1: 25,
-            attack2: null,
-            main_img: "/cards/skeleton/front.png",
-            background_img: "/cards/skeleton/back.png",
-            third_img: "/cards/skeleton/mid.png",
-        }],
-    }
-    const deck2: Deck = {
-        id: 2,
-        name: "Un second deck très long mais nécessaire pour tester des choses avec des points",
-        cards: [{
-            id: 1,
-            name: "Squelette",
-            description: "Un squelette avec un arc",
-            category: "Monstre",
-            rarity: 3,
-            pv_durability: 80,
-            cost: 60,
-            talent: null,
-            attack1: 25,
-            attack2: null,
-            main_img: "/cards/skeleton/front.png",
-            background_img: "/cards/skeleton/back.png",
-            third_img: "/cards/skeleton/mid.png",
-        }, {
-            id: 2,
-            name: "Creeper",
-            description: "Un monstre vert qui explose",
-            category: "Monstre",
-            rarity: 2,
-            pv_durability: 100,
-            cost: 50,
-            talent: null,
-            attack1: 20,
-            attack2: null,
-            main_img: "/cards/creeper/front.png",
-            background_img: "/cards/creeper/back.png",
-            third_img: "/cards/creeper/mid.png",
-        }],
-    }
-    const decks = [deck1, deck2, deck1, deck2, deck1, deck2, deck1, deck2, deck1, deck2, deck1, deck2, deck1, deck2, deck1, deck2]
-    const idDeckActive = 2;
-    const deckLimit = 15;
+export const dynamic = 'force-dynamic';
+
+export default async function DecksPage() {
+    const collection = await getUserCollection(userId);
+    const userDecks = await getUserDecks(userId);
 
     return (
-        <main className="flex flex-col p-4 tsparticles
-            bg-fixed bg-contain bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('/img/background_black.png')]
+        <main className="flex flex-col h-auto p-4 tsparticles
+            bg-fixed bg-cover bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('/img/background_black.png')]
         ">
             <header className="flex justify-end items-center gap-4">
                 <div className="fixed flex right-4 top-4 gap-4 z-50">
@@ -107,24 +47,47 @@ export default function DecksPage() {
                 </div>
             </header>
 
-            <div className="flex-1 flex flex-col gap-4 mb-4">
-                <span className="text-2xl font-medium self-center">Ici vous pouvez choisir un deck et en construire jusqu&apos;à 5.</span>
+            <div className="flex-1 flex flex-col gap-12 mb-4">
+                <span className="text-2xl font-medium self-center">Ici vous pouvez choisir un deck et en construire jusqu&apos;à {defaultNbDecksPerUser}.</span>
 
                 <div className="flex items-center justify-between gap-4">
-                    <Button>Créer un nouveau deck</Button>
-                    <span className="dark:outline-white outline-black outline-2 rounded-lg text-base font-medium p-2">Limite de decks : {decks.length}/{deckLimit}</span>
+                    <CreateDeckButton userId={userId} />
+                    <span className="dark:outline-white outline-black outline-2 rounded-lg text-base font-medium p-2">Limite de decks : {userDecks.length}/{defaultNbDecksPerUser}</span>
                 </div>
 
-                <div className="flex flex-wrap justify-between gap-y-8">
-                    {decks.map((deck) => (
+                <div className="flex flex-wrap justify-around gap-8">
+                    {userDecks.map((deck) => (
                         <div key={deck.id} className="flex flex-col items-center gap-2">
                             <Drawer>
                                 <DrawerTrigger asChild>
                                     <div className="relative w-64 h-88 cursor-pointer">
-                                        <Image className="absolute w-full h-full" src={deck.cards[0].background_img} fill alt={deck.cards[0].name}/>
-                                        { deck.cards[0].third_img && <Image className="absolute w-full h-full" src={deck.cards[0].third_img} fill alt={deck.cards[0].name}/> }
-                                        <Image className="absolute w-full h-full" src={deck.cards[0].main_img} fill alt={deck.cards[0].name}/>
-                                        {deck.id === idDeckActive &&
+                                        {deck.deck_cards && deck.deck_cards.length > 0 ? (
+                                            <>
+                                                <Image 
+                                                    className="absolute w-full h-full" 
+                                                    src={deck.deck_cards[0].card.background_img} 
+                                                    fill 
+                                                    alt={deck.deck_cards[0].card.name}
+                                                />
+                                                {deck.deck_cards[0].card.third_img && (
+                                                    <Image 
+                                                        className="absolute w-full h-full" 
+                                                        src={deck.deck_cards[0].card.third_img} 
+                                                        fill 
+                                                        alt={deck.deck_cards[0].card.name}
+                                                    />
+                                                )}
+                                                <Image 
+                                                    className="absolute w-full h-full" 
+                                                    src={deck.deck_cards[0].card.main_img} 
+                                                    fill 
+                                                    alt={deck.deck_cards[0].card.name}
+                                                />
+                                            </>
+                                        ) : (
+                                            <Image className="absolute w-full h-full" src={backCard.third_img || ""} fill alt="Deck vide"/>
+                                        )}
+                                        {deck.is_active &&
                                             <div className="absolute -top-2 -right-2 z-10 bg-green-600 rounded-sm p-1">
                                                 <Check />
                                             </div>
@@ -136,21 +99,21 @@ export default function DecksPage() {
                                     <DrawerHeader>
                                         <DrawerTitle>Deck : {deck.name}</DrawerTitle>
                                         <DrawerDescription className="text-base text-gray-500">Ajouter en retirer des cartes en cliquant dessus</DrawerDescription>
+                                        <span className="text-left font-medium text-base">Nombre de cartes dans le deck : {deck.deck_cards.reduce((sum, deckCard) => sum + deckCard.quantity, 0)} / {defaultNbCardsPerDeck}</span>
                                     </DrawerHeader>
 
-                                    <DeckConstruction deck={deck} />
+                                    <DeckConstruction deck={deck} collection={collection} />
 
                                     <DrawerFooter>
-                                        <Button>Enregistrer</Button>
                                         <DrawerClose asChild>
-                                            <Button variant="outline">Annuler</Button>
+                                            <Button variant="outline">Fermer</Button>
                                         </DrawerClose>
                                     </DrawerFooter>
                                 </DrawerContent>
                             </Drawer>
 
                             <div className="flex justify-center items-center gap-3 w-64">
-                                <span className="text-xl font-bold truncate" title={deck.name}>{deck.name}</span>
+                                <span className="text-xl font-bold truncate" title={deck.name || "Deck n°" + deck.id}>{deck.name}</span>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant={"link"} className="w-fit h-fit !p-0 hover:opacity-60">
@@ -161,18 +124,25 @@ export default function DecksPage() {
                                     <DropdownMenuContent className="w-56" align="start">
                                         <DropdownMenuGroup>
                                             <DropdownMenuLabel>Actions sur le deck</DropdownMenuLabel>
-                                            <DropdownMenuItem>
-                                                Équiper
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                Renommer
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                Dupliquer
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                Supprimer
-                                            </DropdownMenuItem>
+                                            <EquipDeckButton 
+                                                userId={userId}
+                                                deckId={deck.id}
+                                                isActive={deck.is_active || false}
+                                            />
+                                            <RenameDeckDialog
+                                                deckId={deck.id}
+                                                currentName={deck.name}
+                                            />
+                                            <DuplicateDeckButton 
+                                                userId={userId}
+                                                deckId={deck.id}
+                                            />
+                                            <DeleteDeckButton 
+                                                userId={userId} 
+                                                deckId={deck.id}
+                                                deckName={deck.name}
+                                                isActive={deck.is_active || false}
+                                            />
                                         </DropdownMenuGroup>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

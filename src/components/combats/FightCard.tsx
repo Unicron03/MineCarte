@@ -1,7 +1,21 @@
 import Image from "next/image";
 import DialogPreFight from "./DialogPreFight";
+import { getActiveDeck, getUserStatsForMode } from "@/prisma/requests";
+import { userId } from "@/types";
+import { GameMode } from "../../../generated/prisma/client";
 
-export default function FightCard({ bg, name, isComing, actions } : { bg?: string, name?: string, isComing?: boolean, actions?: { label: string, link: string, modeName: string }[] }) {
+export const dynamic = 'force-dynamic';
+
+type Action = {
+    label: string,
+    link: string,
+    modeName: string,
+    modeEnum: GameMode
+}
+
+export default async function FightCard({ bg, name, isComing, actions } : { bg?: string, name?: string, isComing?: boolean, actions?: Action[] }) {
+    const activeDeck = await getActiveDeck(userId);
+
     return (
         <main className="glass-nav w-full h-full !rounded-2xl after:!rounded-2xl p-4 relative">
             {
@@ -18,9 +32,13 @@ export default function FightCard({ bg, name, isComing, actions } : { bg?: strin
                         <div className="flex-1"></div>
 
                         <footer className="flex justify-around">
-                            {actions ? actions.map((action, index) => (
-                                <DialogPreFight key={index} btnName={action.label} modeName={action.modeName} bg={bg} link={action.link} />
-                            )) : <></>}
+                            {actions ? actions.map(async (action, index) => {
+                                const userStats = await getUserStatsForMode(userId, action.modeEnum);
+
+                                return (
+                                    <DialogPreFight key={index} btnName={action.label} modeName={action.modeName} bg={bg} link={action.link} activeDeck={activeDeck} userStats={userStats} gameMode={action.modeEnum} />
+                                );
+                            }) : <></>}
                         </footer>
                     </div>
                 )

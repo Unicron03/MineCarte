@@ -28,7 +28,7 @@ const AtroposCard = forwardRef<HTMLDivElement, AtroposCardProps>(({ card, isPuls
 
     return (
         <div ref={ref}>
-            <Atropos className="atropos-banner p-4" highlight={false} shadow={false} {...props} innerClassName="rounded-[0.5rem]">
+            <Atropos className="atropos-banner" highlight={false} shadow={false} {...props} innerClassName="rounded-[0.5rem]">
                 {isPulsating && (
                     <div
                         className="absolute pulsate-gold top-0 left-0 z-30 w-full h-full"

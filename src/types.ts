@@ -1,4 +1,10 @@
+import { Prisma } from "../generated/prisma/client";
+
 export const userId: number = 2;
+export const defaultNbCardGivenInChest: number = 5;
+export const defaultNbDecksPerUser: number = 10;
+export const defaultNbCardsPerDeck: number = 15;
+export const defaultHoursTimeNextChest: number = 8;
 
 export type Card = {
     id: number;
@@ -36,11 +42,11 @@ export type GameState = {
     turnIndex: number;
 };
 
-export const backCard: Card = {
+export const backCard: Prisma.cardsGetPayload<{}> = {
     id: 0,
-    name: "Dos de carte",
-    description: "Dos de carte par défaut",
-    category: "Dos de carte",
+    name: "? ? ?",
+    description: "Carte pas encore découverte !",
+    category: "FORTEMPLATE",
     rarity: 0,
     pv_durability: 0,
     cost: 0,
@@ -49,7 +55,7 @@ export const backCard: Card = {
     attack2: null,
     main_img: "/cards/transparent.png",
     background_img: "/cards/transparent.png",
-    third_img: "/cards/undescovered.png",
+    third_img: "/cards/back.png",
 }
 
 export const exampleCollectionCards: Card[] = [

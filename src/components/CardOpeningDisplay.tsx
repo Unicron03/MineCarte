@@ -1,16 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, backCard } from "@/types";
-import AtroposCard from "./cards/AtroposCard";
+import { backCard } from "@/types";
+import AtroposCard from "./combats/cards/AtroposCard";
 import { Button } from "@/shadcn/ui/button";
 import Link from "next/link";
 import CardPopupDetails from "./card-popup-details";
 import ConfettiSides from "./particles/confetti-sides";
 import Confetti from "./particles/confetti";
+import { Prisma } from "../../generated/prisma/client";
+
+type DrawnCard = Prisma.cardsGetPayload<{}> & { 
+    isNew: boolean;
+    quantity: number;
+    favorite: boolean;
+};
 
 interface CardOpeningDisplayProps {
-    drawnCards: Card[];
+    drawnCards: DrawnCard[];
     onClose: () => void;
 }
 
@@ -24,8 +31,7 @@ export default function CardOpeningDisplay({ drawnCards, onClose }: CardOpeningD
 
     useEffect(() => {
         if (currentCardIndex < drawnCards.length) {
-            console.log("test");
-            if (drawnCards[currentCardIndex].rarity === 4) setIsAnimationActive(true);
+            if (drawnCards[currentCardIndex].rarity === 3) setIsAnimationActive(true);
             else setIsAnimationActive(false);
         }
     }, [currentCardIndex, drawnCards]);
@@ -44,11 +50,11 @@ export default function CardOpeningDisplay({ drawnCards, onClose }: CardOpeningD
         setCanSpawnConfetti(false);
 
         const newFlipped = [...flipped];
-        newFlipped[index] = true; // Cards can only be flipped once
+        newFlipped[index] = true;
         setFlipped(newFlipped);
         
         if (isAnimationActive) {
-            await new Promise(resolve => setTimeout(resolve, 550)); // Wait for flip animation
+            await new Promise(resolve => setTimeout(resolve, 550));
             setShowConfetti(true);
         }
     };
@@ -65,7 +71,7 @@ export default function CardOpeningDisplay({ drawnCards, onClose }: CardOpeningD
                 <div className="flex flex-col items-center justify-center gap-8">
                     {drawnCards.map((card, index) => (
                         <div
-                            key={card.id}
+                            key={`${card.id}-${index}`}
                             className={`absolute left-1/2 transition-all duration-500 ease-in-out
                                 ${index === currentCardIndex ? 'opacity-100 scale-125 z-10' : 'opacity-0 scale-100 -z-10'}
                                 ${index > currentCardIndex ? 'translate-y-50' : ''}
@@ -77,7 +83,6 @@ export default function CardOpeningDisplay({ drawnCards, onClose }: CardOpeningD
                             }}
                         >
                             <div
-                                key={card.id}
                                 className={`flip-card ${flipped[index] ? 'is-flipped' : ''}`}
                                 onClick={() => !flipped[index] && handleFlip(index)}
                             >
@@ -86,6 +91,11 @@ export default function CardOpeningDisplay({ drawnCards, onClose }: CardOpeningD
                                         <AtroposCard isPulsating={isAnimationActive ? true : false} card={backCard} />
                                     </div>
                                     <div className="flip-card-back" onClick={handleCardClick}>
+                                        {card.isNew && (
+                                            <div className="absolute right-0 z-50 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold px-3 py-1 rounded-full text-sm shadow-lg animate-pulse">
+                                                NEW
+                                            </div>
+                                        )}
                                         <AtroposCard card={card} />
                                     </div>
                                 </div>
@@ -99,9 +109,14 @@ export default function CardOpeningDisplay({ drawnCards, onClose }: CardOpeningD
                 <div className="flex flex-col items-center justify-center w-full">
                     <span className="text-white text-2xl font-medium mb-8">Cartes obtenues :</span>
                     <div className="flex flex-wrap justify-evenly gap-4 w-full">
-                        {drawnCards.map((card) => (
-                            <div key={card.id} className="">
-                                <CardPopupDetails undescovered={false} card={card} />
+                        {drawnCards.map((card, index) => (
+                            <div key={`${card.id}-${index}`} className="relative">
+                                {card.isNew && (
+                                    <div className="absolute -top-2 -right-2 z-20 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold px-3 py-1 rounded-full text-sm shadow-lg animate-pulse">
+                                        NEW
+                                    </div>
+                                )}
+                                <CardPopupDetails card={card} quantity={card.quantity} undescovered={true} favorite={card.favorite} />
                             </div>
                         ))}
                     </div>

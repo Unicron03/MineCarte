@@ -1,7 +1,8 @@
-import { Video } from "@/components/VideoReader";
 import fs from "fs";
 import path from "path";
 import HomePageClient from "@/components/HomePageClient";
+import { userId } from "@/types";
+import { getUser } from "@/prisma/requests";
 
 async function getVideoOfTheDay() {
     const dir = path.join(process.cwd(), "public/animated-background");
@@ -18,7 +19,8 @@ async function getVideoOfTheDay() {
 }
 
 export default async function Home() {
+    const user = await getUser(userId);
     const videoSrc = await getVideoOfTheDay();
 
-    return <HomePageClient videoSrc={videoSrc} />;
+    return <HomePageClient videoSrc={videoSrc} timeNextChest={user?.timeNextChest || new Date()} />;
 }

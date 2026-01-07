@@ -17,6 +17,14 @@ enum card_category {
   MOB
   EQUIPMENT
   ARTIFACT
+  FORTEMPLATE
+}
+
+enum GameMode {
+  ONE_V_ONE
+  IA_V_ONE
+  DONJON
+  VAGUES
 }
 
 model actions {
@@ -37,7 +45,7 @@ model actions {
 
 model cards {
   id             Int              @id @default(autoincrement())
-  name           String
+  name           String           @unique
   description    String
   category       card_category    @default(MOB)
   rarity         Int              @default(1)
@@ -56,39 +64,44 @@ model cards {
   attack2_action actions? @relation("cards_attack2", fields: [attack2], references: [id])
 
   collections    collection[]
+  deck_cards     deck_cards[]  // Relation many-to-many via table de liaison
 }
 
 model collection {
-  id        Int   @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   user_id   Int
-  card_id   Int
+  card_id   Int?
+  quantity  Int     @default(1)
   favorite  Boolean @default(false)
 
   // Relations
-  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  card cards @relation(fields: [card_id], references: [id])
-
-  deck_cards deck_cards[]
+  user user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  card cards? @relation(fields: [card_id], references: [id])
 }
 
 model decks {
-  id        Int    @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   user_id   Int
   name      String?
-  is_active Boolean?
+  is_active Boolean     @default(false)
 
   // Relations
-  user      user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  deckCards deck_cards[]
+  user       user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  deck_cards deck_cards[] // Les cartes de ce deck
 }
 
+// Table de liaison pour la relation many-to-many entre decks et cards
 model deck_cards {
-  id            Int   @id @default(autoincrement())
-  deck_id       Int
-  collection_id Int
+  id       Int @id @default(autoincrement())
+  deck_id  Int
+  card_id  Int
+  quantity Int @default(1) // Nombre d'exemplaires de cette carte
 
-  deck       decks      @relation(fields: [deck_id], references: [id], onDelete: Cascade)
-  collection collection @relation(fields: [collection_id], references: [id])
+  // Relations
+  deck decks @relation(fields: [deck_id], references: [id], onDelete: Cascade)
+  card cards @relation(fields: [card_id], references: [id], onDelete: Cascade)
+
+  @@unique([deck_id, card_id]) // Garde l'unique mais utilise quantity pour compter
 }
 
 model inventory {
@@ -99,24 +112,24 @@ model inventory {
   user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
-model point {
-  id      Int @id @default(autoincrement())
-  user_id Int @unique
-  oneVone Int
-  iaVone  Int
-
-  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@map("point")
-}
-
-model stat {
-  id      Int     @id @default(autoincrement())
-  user_id Int @unique
-  winRate Decimal @db.Decimal(5, 2)
-  nbParty Int
-
-  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+model game_stats {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  game_mode GameMode
+  
+  // Statistiques de jeu
+  nb_party  Int      @default(0)
+  victories Int      @default(0)
+  defeats   Int      @default(0)
+  
+  // Points gagnés dans ce mode
+  points    Int      @default(0)
+  
+  // Relations
+  user      user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  // Un utilisateur ne peut avoir qu'une seule entrée par mode de jeu
+  @@unique([user_id, game_mode])
 }
 
 model user {
@@ -130,6 +143,5 @@ model user {
   collections collection[]
   decks       decks[]
   inventory   inventory?
-  points      point?
-  stats       stat?
+  game_stats       game_stats[]
 }

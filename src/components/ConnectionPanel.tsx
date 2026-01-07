@@ -18,6 +18,7 @@ import { Eye, EyeOff } from "lucide-react"
 import { toast } from "react-toastify"
 // import { useUser } from "@/context/UserContext"
 import { useRouter } from "next/navigation"
+import Link from "next/link";
 
 export function ConnectionPanel() {
     const router = useRouter()
@@ -121,12 +122,21 @@ export function ConnectionPanel() {
                                 Annuler
                             </Button>
                         </DialogClose>
-                        <Button
+                        {/* <Button
                             type="submit"
                             className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black"
                         >
                             Se connecter
-                        </Button>
+                        </Button> */}
+                        <Link href="/home">
+                            <Button
+                                type="button"
+                                className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black"
+                                style={{ outlineWidth: "0.15rem", outlineOffset: "-1px" }}
+                            >
+                                Se connecter
+                            </Button>
+                        </Link>
                     </DialogFooter>
 
                     <DialogFooter className="mt-4 justify-center">

@@ -5,6 +5,8 @@ import { WalletCards } from "lucide-react";
 import Link from "next/link";
 import FightCard from "@/components/combats/FightCard";
 
+export const dynamic = 'force-dynamic';
+
 export default function Combats() {
     return (
         <main className="flex flex-col h-screen p-4 tsparticles
@@ -18,9 +20,9 @@ export default function Combats() {
             </header>
 
             <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4">
-                <FightCard bg="1v1" name="1v1" actions={[{ label: '1v1', link: 'one-v-one', modeName: '1v1' }, { label: '1vAI', link: 'one-v-ai', modeName: '1vAI'}]} />
-                <FightCard bg="donjon" name="Donjon" actions={[{ label: 'Entrer', link: 'donjon', modeName: 'Donjon'}]} />
-                <FightCard bg="1v1" name="Vagues" actions={[{ label: 'Commencer', link: 'vagues', modeName: 'Vagues'}]} />
+                <FightCard bg="1v1" name="1v1" actions={[{ label: '1v1', link: 'one-v-one', modeName: '1v1', modeEnum: 'ONE_V_ONE'}, { label: '1vAI', link: 'one-v-ai', modeName: '1vAI', modeEnum: 'IA_V_ONE' }]} />
+                <FightCard bg="donjon" name="Donjon" actions={[{ label: 'Entrer', link: 'donjon', modeName: 'Donjon', modeEnum: 'DONJON' }]} />
+                <FightCard bg="1v1" name="Vagues" actions={[{ label: 'Commencer', link: 'vagues', modeName: 'Vagues', modeEnum: 'VAGUES' }]} />
                 <FightCard isComing />
             </div>
 

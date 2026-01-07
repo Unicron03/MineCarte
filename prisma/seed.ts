@@ -7,27 +7,27 @@ type SeedActions = Awaited<ReturnType<typeof actions>>;
 export async function loadCardImages(cardName: string) {
     const basePath = path.join(process.cwd(), 'public', 'cards', cardName);
     
-    async function load(file: string) {
+    async function fileExists(file: string): Promise<boolean> {
         try {
-            return await fs.readFile(path.join(basePath, file));
+            await fs.access(path.join(basePath, file));
+            return true;
         } catch {
-            return null;
+            return false;
         }
     }
     
-    const main = await load('front.png');
-    const background = await load('back.png');
-    const third = await load('mid.png');
+    const mainExists = await fileExists('front.png');
+    const backgroundExists = await fileExists('back.png');
+    const thirdExists = await fileExists('mid.png');
     
-    if (!main || !background) {
+    if (!mainExists || !backgroundExists) {
         return loadCardImages('default');
-        // throw new Error(`Manque des images obligatoires pour la carte"${cardName}"`);
     }
     
     return {
         main_img: `/cards/${cardName}/front.png`,
         background_img: `/cards/${cardName}/back.png`,
-        third_img: third ? `/cards/${cardName}/mid.png` : null,
+        third_img: thirdExists ? `/cards/${cardName}/mid.png` : null,
     };
 }
 
@@ -629,11 +629,11 @@ async function cards(actions: SeedActions) {
     })
 
     const card_spider = await prisma.cards.upsert({
-        where: { id: 11, name: 'Spider' },
+        where: { id: 11, name: 'Araignée' },
         update: {},
         create: {
             id: 11,
-            name: 'Spider',
+            name: 'Araignée',
             description: "Elle sort de vos cauchemars pour vous hanter dans la vraie vie.",
             pv_durability: 20,
             cost: 0,
@@ -712,7 +712,7 @@ async function cards(actions: SeedActions) {
         where: { id: 16, name: 'Wither' },
         update: {},
         create: {
-            id: 15,
+            id: 16,
             name: 'Wither',
             description: "Né de la mort, il ne vit que pour tout détruire.",
             rarity: 2,

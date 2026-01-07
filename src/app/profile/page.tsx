@@ -1,17 +1,26 @@
 import Link from "next/link";
-import { ChevronLeft, Pencil, Unplug,  } from "lucide-react";
+import { ChevronLeft, Unplug } from "lucide-react";
 import { Separator } from "@/shadcn/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shadcn/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
+import {
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+    DialogHeader,
+    DialogTitle,
+} from "@/shadcn/ui/dialog";
 import { Button } from "@/shadcn/ui/button";
-import { userStats } from "../../../prisma/requests";
+import { getUser } from "../../../prisma/requests";
 import { userId } from "@/types";
+import EditPseudoDialog from "@/components/edit-pseudo-dialog";
+import DeleteUserDialog from "@/components/profile/delete-user-dialog";
 
 export const dynamic = 'force-dynamic';
 
 export default async function Profile() {
-    const stats = await userStats(userId);
+    const stats = await getUser(userId);
 
     return (
         <main className="flex flex-col h-screen p-4
@@ -39,10 +48,14 @@ export default async function Profile() {
                             <AvatarFallback>EN</AvatarFallback>
                         </Avatar>
 
-                        <span className="font-medium">Pseudo</span>
-                        <Button variant="link" size="icon">
-                            <Pencil />
-                        </Button>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium">{stats?.pseudo} (n°{stats?.id})</span>
+                                <EditPseudoDialog userId={userId} currentPseudo={stats?.pseudo || ""} />
+                            </div>
+
+                            <span className="text-gray-400">{stats?.email}</span>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -58,9 +71,7 @@ export default async function Profile() {
                     <button className="glass-nav w-120 !py-4 !px-6 after:!rounded-lg !rounded-lg flex flex-col items-start">
                         <span className="font-medium">Modifier le mot de passe</span>
                     </button>
-                    <button className="glass-nav w-120 !py-4 !px-6 after:!rounded-lg !rounded-lg flex flex-col items-start">
-                        <span className="font-medium">Supprimer le compte</span>
-                    </button>
+                    <DeleteUserDialog userId={userId} />
                 </div>
 
                 <div className="flex flex-col gap-4">
