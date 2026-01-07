@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 // --- Composants ---
 import Deck from "../../components/combats/Deck";
 import CardPVP from "@/components/PVP/CardPVP";
-import EffectDisplay from "@/components/PVP/EffectDisplay";
+// EffectDisplay supprimé car intégré dans LeftPanel
 import LeftPanel from "@/components/PVP/LeftPanel";
 import GameLogs from "@/components/PVP/GameLogs";
 import EndGameScreen from "@/components/PVP/EndGameScreen";
@@ -262,12 +262,17 @@ export default function GamePage() {
     const opponentDeckSize = opponent?.deck?.length || 0;
 
     return (
-        <div style={{ backgroundImage: "url('/img/backgrounPVP.jpg')" }} className="relative min-h-screen bg-cover flex flex-row justify-between p-4" > 
+        <div style={{ backgroundImage: "url('/img/backgrounPVP.jpg')" }} className="relative h-screen w-full bg-cover bg-center bg-no-repeat overflow-hidden flex flex-row justify-between p-4" > 
             {/* --- INDICATEUR DE TOUR --- */}
             <TurnIndicator isMyTurn={yourTurn} />
 
-            {/* --- PANEL GAUCHE --- */}
-            <LeftPanel me={me ?? null} opponent={opponent ?? null} onQuit={quitHandler} />
+            {/* --- PANEL GAUCHE (Maintenant divisé en deux blocs absolus) --- */}
+            <LeftPanel 
+                me={me ?? null} 
+                opponent={opponent ?? null} 
+                onQuit={quitHandler} 
+                onEffectClick={handleEffectClick}
+            />
         
             {/* --- CONTENU PRINCIPAL --- */}
             <div className="flex-1 flex flex-col items-center justify-between">
@@ -277,14 +282,8 @@ export default function GamePage() {
             
                 {/* Zone adversaire */}
                 <div className="w-full flex flex-col items-center ">
-                    <h2 className="text-lg font-mono text-white mb-2">Adversaire</h2>
 
-                    {/* Affichage des effets de l'adversaire */}
-                    <EffectDisplay 
-                        title="Effets Subis"
-                        effects={opponent?.effects}
-                        isSelf={false}
-                    />
+                    {/* Effets adversaire déplacés dans LeftPanel */}
                     
                     {/* Main adversaire */}
                     <Deck count={opponent?.hand?.length ?? 0} opponent={true} />
@@ -341,14 +340,8 @@ export default function GamePage() {
             
                 {/* Zone joueur */}
                 <div className="w-full flex flex-col items-center">
-                    <h2 className="text-lg font-mono text-yellow-400 mb-2">Vous</h2>
                     
-                    {/* Affichage de vos effets actifs */}
-                    <EffectDisplay 
-                        title="Vos Effets Actifs"
-                        effects={me?.effects}
-                        isSelf={true}
-                    />
+                    {/* Effets joueur déplacés dans LeftPanel */}
 
                     <div className="flex justify-center gap-16 mb-4">
                     {me?.board?.length ? (
@@ -386,7 +379,7 @@ export default function GamePage() {
                     </div>
             
                     {/* Mon Deck */} 
-                    <div style={{ position: 'absolute', right: '50px', bottom: '20px', width: '120px', height: `${180 + deckSize * 4}px` }}>
+                    <div style={{ position: 'absolute', left: '300px', bottom: '20px', width: '120px', height: `${180 + deckSize * 4}px` }}>
                         {Array.from({ length: deckSize }).map((_, index) => (
                             <img
                             key={index}
@@ -395,7 +388,7 @@ export default function GamePage() {
                             style={{
                                 position: 'absolute',
                                 top: `${index * 2}px`, // Décalage vertical
-                                right: `${index * 2}px`,
+                                right: `${index * 2}px`, // On garde le décalage interne vers la droite pour l'effet de pile
                                 width: '120px',
                                 height: '180px',
                                 zIndex: index,
