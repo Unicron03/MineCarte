@@ -359,6 +359,7 @@ export default function GamePage() {
                         >
                         <CardPVP
                             card={card}
+                            isPlayer={true}
                             overrides={{
                                 cost: card.cost,
                                 pv_durability: card.pv_durability,

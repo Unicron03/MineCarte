@@ -5,6 +5,7 @@ import { actionList } from "../../data";
 const CardPVP: React.FC<CardPVPProps> = ({
   card,
   clickable = false,
+  isPlayer = false,
   overrides,
   onTalentClick,
   onAttackClick,
@@ -43,6 +44,8 @@ const CardPVP: React.FC<CardPVPProps> = ({
   
   const imgSrc = `/card/${card.imageName}.png`;
   
+  const pvColor = isPlayer ? "bg-green-600" : "bg-red-600";
+
   return (
     <div 
       className={`relative w-40 h-60 bg-gray-900 rounded-xl border-2 ${borderColor} shadow-2xl flex flex-col overflow-hidden select-none ${clickable && onClick ? "cursor-pointer hover:scale-105 transition-transform" : ""}`}
@@ -70,7 +73,7 @@ const CardPVP: React.FC<CardPVPProps> = ({
           <span className="text-white font-bold text-lg">{finalCost}</span>
         </div>
         {isMob && finalVie !== undefined && (
-          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
+          <div className={`w-8 h-8 ${pvColor} rounded-full flex items-center justify-center border-2 border-white shadow-md z-20`}>
             <span className="text-white font-bold text-sm">{finalVie}</span>
           </div>
         )}

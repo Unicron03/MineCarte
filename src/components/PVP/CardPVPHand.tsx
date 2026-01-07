@@ -55,7 +55,7 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
           <span className="text-white font-bold text-lg">{card.cost}</span>
         </div>
         {isMob && card.pv_durability !== undefined && (
-          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
+          <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
             <span className="text-white font-bold text-sm">{card.pv_durability}</span>
           </div>
         )}

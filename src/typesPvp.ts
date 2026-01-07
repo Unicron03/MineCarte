@@ -35,6 +35,7 @@ export type InGameCard = {
 export type CardPVPProps = {
     card: InGameCard;
     clickable?: boolean;
+    isPlayer?: boolean;
     overrides?: {
         cost?: number;
         pv_durability?: number;
