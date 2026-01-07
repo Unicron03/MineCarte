@@ -17,6 +17,7 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
   const attack2Data = isMob ? actionList.find((a) => a.name === card.attack2) : undefined;
   const talentName = isMob ? card.talent : card.effet;
   const talentData = talentName ? actionList.find((a) => a.name === talentName) : undefined;
+  const isAutoActivate = talentData?.autoActivate === true;
 
   // Couleurs de bordure selon la catégorie
   let borderColor = "border-gray-600";
@@ -30,7 +31,7 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
     <div
       style={style}
       onClick={onClick}
-      className={`relative w-40 h-60 bg-gray-900 rounded-xl border-2 ${borderColor} shadow-2xl overflow-hidden flex flex-col select-none ${className || ""}`}
+      className={`relative w-40 h-60 bg-gray-900 rounded-xl border-2 ${borderColor} shadow-2xl flex flex-col overflow-hidden select-none ${className || ""}`}
     >
       {/* Image de fond */}
       <img
@@ -60,16 +61,16 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
         )}
       </div>
 
-      {/* Zone de description (Attaques / Talents) */}
-      <div className="relative z-10 flex-1 mt-2 mx-2 mb-2 bg-black/80 border border-white/10 rounded p-2 overflow-hidden flex flex-col gap-2">
+      {/* Zone de description (Attaques / Talents) - Style identique à CardPVP */}
+      <div className="relative z-10 h-28 mt-auto mx-2 mb-2 bg-black/80 border border-white/10 rounded p-2 overflow-y-auto flex flex-col gap-2 scrollbar-thin scrollbar-thumb-gray-500/40 scrollbar-track-transparent">
         
         {/* Talent / Effet */}
         {talentName && (
-          <div className="text-xs text-purple-300">
+          <div className={`w-full px-2 py-1 rounded text-[10px] text-left border border-purple-500/30 bg-purple-900/60 text-purple-100 ${isAutoActivate ? "italic" : ""}`}>
             <span className="font-bold block border-b border-purple-500/30 pb-0.5 mb-0.5">
-              {isMob ? "Talent" : "Effet"}: {talentName}
+              {isMob ? (isAutoActivate ? "Passif" : "Talent") : "Effet"}
             </span>
-            <p className="text-[9px] text-gray-300 leading-tight">{talentData?.description || "Aucune description"}</p>
+            {talentName}
           </div>
         )}
 
@@ -77,13 +78,19 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
         {isMob && (
           <>
             {attack1Data && (
-              <div className="text-xs text-red-300">
-                <span className="font-bold block"> {attack1Data.name} <span className="text-white">({attack1Data.damage} dmg | Coût: {attack1Data.cost})</span></span>
+              <div className="w-full px-2 py-1 rounded text-[10px] text-left border border-red-500/30 bg-red-900/60 text-red-100">
+                <span className="font-bold block border-b border-red-500/30 pb-0.5 mb-0.5">
+                  {attack1Data.name} <span className="text-white/80">({attack1Data.damage} dmg | Coût: {attack1Data.cost})</span>
+                </span>
+                <span className="opacity-80 italic">{attack1Data.description}</span>
               </div>
             )}
             {attack2Data && (
-              <div className="text-xs text-blue-300">
-                <span className="font-bold block"> {attack2Data.name} <span className="text-white">({attack2Data.damage} dmg | Coût: {attack2Data.cost})</span></span>
+              <div className="w-full px-2 py-1 rounded text-[10px] text-left border border-blue-500/30 bg-blue-900/60 text-blue-100">
+                <span className="font-bold block border-b border-blue-500/30 pb-0.5 mb-0.5">
+                  {attack2Data.name} <span className="text-white/80">({attack2Data.damage} dmg | Coût: {attack2Data.cost})</span>
+                </span>
+                <span className="opacity-80 italic">{attack2Data.description}</span>
               </div>
             )}
           </>
