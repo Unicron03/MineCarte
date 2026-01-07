@@ -308,7 +308,7 @@ export default function GamePage() {
                     </div>
                     
                     {/* Plateau adverse */}
-                    <div className="flex justify-center gap-16">
+                    <div className="flex justify-center gap-16 -mt-6">
                     {opponent?.board?.length ? (
                         opponent.board.map((card, i) => (
                         <div
@@ -343,7 +343,7 @@ export default function GamePage() {
                     
                     {/* Effets joueur déplacés dans LeftPanel */}
 
-                    <div className="flex justify-center gap-16 mb-4">
+                    <div className="flex justify-center gap-16 mb-17">
                     {me?.board?.length ? (
                         me.board.map((card, i) => {
                         const alreadyAttacked = card.hasAttacked ?? false;

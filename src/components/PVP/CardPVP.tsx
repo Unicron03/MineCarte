@@ -104,7 +104,7 @@ const CardPVP: React.FC<CardPVPProps> = ({
       )}
 
       {/* Zone de description (Boutons d'action) */}
-      <div className="relative z-10 flex-1 mt-2 mx-2 mb-2 bg-black/80 border border-white/10 rounded p-2 overflow-y-auto flex flex-col gap-2 scrollbar-thin scrollbar-thumb-gray-500/40 scrollbar-track-transparent">
+      <div className="relative z-10 h-28 mt-auto mx-2 mb-2 bg-black/80 border border-white/10 rounded p-2 overflow-y-auto flex flex-col gap-2 scrollbar-thin scrollbar-thumb-gray-500/40 scrollbar-track-transparent">
         {/* Talent / Effet */}
         {effetOuTalent && (
           <button
