@@ -378,7 +378,7 @@ export default function GamePage() {
                         <p className="text-sm text-gray-400">Aucune carte sur le board</p>
                     )}
                     </div>
-            
+
                     {/* Mon Deck */} 
                     <div style={{ position: 'absolute', left: '300px', bottom: '20px', width: '120px', height: `${180 + deckSize * 4}px` }}>
                         {Array.from({ length: deckSize }).map((_, index) => (

@@ -7,9 +7,10 @@ interface CardPVPHandProps {
   onClick?: () => void;
   style?: React.CSSProperties;
   className?: string;
+  hideStats?: boolean;
 }
 
-const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, className }) => {
+const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, className, hideStats }) => {
   const isMob = card.category === "mob";
   
   // Récupération des données complètes des actions
@@ -54,7 +55,7 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
         <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
           <span className="text-white font-bold text-lg">{card.cost}</span>
         </div>
-        {isMob && card.pv_durability !== undefined && (
+        {isMob && card.pv_durability !== undefined && !hideStats && (
           <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center border-2 border-white shadow-md z-20">
             <span className="text-white font-bold text-sm">{card.pv_durability}</span>
           </div>

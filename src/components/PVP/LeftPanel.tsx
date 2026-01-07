@@ -1,5 +1,6 @@
 import React from "react";
 import { Player } from "../../typesPvp";
+import DiscardPile from "./DiscardPile";
 
 interface LeftPanelProps {
   me: Player | null;
@@ -80,10 +81,24 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ me, opponent, onQuit, onEffectCli
             </div>
           )}
         </div>
+
+        {/* Défausse Adversaire (En dessous) */}
+        <DiscardPile 
+            cards={opponent?.discard || []} 
+            label="Défausse"
+            className="w-24 h-36 mx-auto shadow-xl"
+        />
       </div>
 
       {/* --- PANNEAU JOUEUR (Bas Gauche) --- */}
       <div className="absolute bottom-4 left-4 z-40 flex flex-col gap-2 w-64">
+        {/* Défausse Joueur (Au dessus) */}
+        <DiscardPile 
+            cards={me?.discard || []} 
+            label="Ma Défausse"
+            className="w-24 h-36 mx-auto shadow-xl"
+        />
+
         <div className="bg-black/80 backdrop-blur-sm border border-green-500/50 rounded-xl p-3 shadow-xl text-white">
           <div className="flex justify-between items-center mb-2 border-b border-green-500/30 pb-2">
             <h3 className="font-bold text-green-400 uppercase tracking-wider">Vous</h3>
