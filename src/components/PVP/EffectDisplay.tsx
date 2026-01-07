@@ -1,12 +1,5 @@
-// EffectDisplay.tsx
-
 import React from 'react';
-
-interface EffectDisplayProps {
-    title: string;
-    effects?: string[]; // Liste des descriptions d'effets déjà traduites
-    isSelf: boolean;    // true pour le joueur actuel (vert), false pour l'adversaire (rouge)
-}
+import { EffectDisplayProps } from '../../interfacePVP';
 
 const EffectDisplay: React.FC<EffectDisplayProps> = ({ title, effects, isSelf }) => {
     // Si la liste est vide ou non définie, le composant n'affiche rien.

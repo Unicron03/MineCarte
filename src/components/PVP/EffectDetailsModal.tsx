@@ -1,22 +1,8 @@
 import React from "react";
+import { EffectDetailsModalProps } from "../../interfacePVP";
 
-type EffectDetailsModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  description: string;
-  imageName?: string; // Nom de l'image pour l'icône (ex: "Burn_10" ou "armure")
-  type: "effect" | "equipment" | "talent";
-};
 
-const EffectDetailsModal: React.FC<EffectDetailsModalProps> = ({
-  isOpen,
-  onClose,
-  title,
-  description,
-  imageName,
-  type,
-}) => {
+const EffectDetailsModal: React.FC<EffectDetailsModalProps> = ({isOpen, onClose, title, description, imageName, type,}) => {
   if (!isOpen) return null;
 
   // Couleur de bordure selon le type

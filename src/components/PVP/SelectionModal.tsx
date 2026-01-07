@@ -1,26 +1,9 @@
 import React from "react";
 import CardPVP from "./CardPVP";
-import { InGameCard } from "../../typesPvp";
+import { SelectionModalProps } from "../../interfacePVP";
 
-type SelectionModalProps = {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  targets: (InGameCard & { boardIndex: number })[]; // On a besoin de l'index du plateau
-  onSelect: (targetIndex: number) => void;
-  onCancel: () => void;
-  borderColor?: string; // "border-yellow-500" ou "border-red-500"
-};
 
-const SelectionModal: React.FC<SelectionModalProps> = ({
-  isOpen,
-  title,
-  message,
-  targets,
-  onSelect,
-  onCancel,
-  borderColor = "border-gray-500",
-}) => {
+const SelectionModal: React.FC<SelectionModalProps> = ({isOpen, title, message, targets, onSelect, onCancel, borderColor = "border-gray-500",}) => {
   if (!isOpen) return null;
 
   return (

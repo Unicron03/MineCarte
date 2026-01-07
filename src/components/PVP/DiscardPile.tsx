@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import { InGameCard } from "../../typesPvp";
 import CardPVPHand from "./CardPVPHand";
+import { DiscardPileProps } from "../../interfacePVP";
 
-interface DiscardPileProps {
-  cards: InGameCard[];
-  style?: React.CSSProperties;
-  className?: string;
-  label?: string;
-}
 
 const DiscardPile: React.FC<DiscardPileProps> = ({ cards, style, className, label }) => {
   const [isOpen, setIsOpen] = useState(false);

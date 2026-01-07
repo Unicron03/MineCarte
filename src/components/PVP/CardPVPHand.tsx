@@ -1,14 +1,7 @@
 import React from "react";
-import { InGameCard } from "../../typesPvp";
 import { actionList } from "../../data";
+import { CardPVPHandProps } from "../../interfacePVP";
 
-interface CardPVPHandProps {
-  card: InGameCard;
-  onClick?: () => void;
-  style?: React.CSSProperties;
-  className?: string;
-  hideStats?: boolean;
-}
 
 const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, className, hideStats }) => {
   const isMob = card.category === "mob";

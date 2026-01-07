@@ -1,13 +1,7 @@
 import React from "react";
-import { InGameCard } from "../../typesPvp";
+import { PlayerHandProps } from "../../interfacePVP";
 import CardPVPHand from "./CardPVPHand";
 
-interface PlayerHandProps {
-  hand: InGameCard[];
-  onPlayCard: (index: number) => void;
-  isMyTurn: boolean;
-  selectionMode: 'none' | 'ally' | 'enemy';
-}
 
 const PlayerHand: React.FC<PlayerHandProps> = ({ hand, onPlayCard, isMyTurn, selectionMode }) => {
   const totalCards = hand.length;

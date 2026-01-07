@@ -1,13 +1,7 @@
 import React from "react";
-import { Player } from "../../typesPvp";
+import { LeftPanelProps } from "../../interfacePVP";
 import DiscardPile from "./DiscardPile";
 
-interface LeftPanelProps {
-  me: Player | null;
-  opponent: Player | null;
-  onQuit: () => void;
-  onEffectClick?: (effectName: string) => void;
-}
 
 const StatBadge: React.FC<{ label: string; value: number | string; color: string }> = ({ label, value, color }) => (
   <div className={`flex flex-col items-center justify-center w-12 h-12 bg-gray-800 border-2 ${color} rounded-lg shadow-md`}>

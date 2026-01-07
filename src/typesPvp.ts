@@ -31,22 +31,6 @@ export type InGameCard = {
       hasUsedTalent?: undefined;
 };
 
-// Props pour le composant CardPVP (Pvp)
-export type CardPVPProps = {
-    card: InGameCard;
-    clickable?: boolean;
-    isPlayer?: boolean;
-    overrides?: {
-        cost?: number;
-        pv_durability?: number;
-    };
-    onTalentClick?: () => void;
-    onAttackClick?: (attackName: string) => void;
-    onClick?: () => void;
-    onEffectClick?: (effectName: string) => void;
-    onEquipmentClick?: (equipment: InGameCard) => void;
-};
-
 // Type pour une action en attente de sélection de cible
 export type PendingAction = {
     type: "EQUIPMENT" | "OFFENSIVE_ARTIFACT" | "SUPPORT_ARTIFACT" | "SPELL" | "ATTACK";
