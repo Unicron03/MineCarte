@@ -15,7 +15,7 @@ export function transfertDamageToPlayer(state: CombatState, amount: number, oppo
 export function AttackOneMob(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string, attackerPlayer?: Player): { killed: boolean } | void {
 
     // --- Calcul des dégâts avec les bonnus de l'attaquant ---
-    const realDamage = getModifiedDamage(attacker, amount);
+    const realDamage = getModifiedDamage(attacker, amount, false);
 
     // --- Attaque directe sur joueur ---
     if (!target && opponent) {
@@ -100,15 +100,34 @@ export function heal(state: CombatState, target: InGameCard, amount: number): vo
 export function AttackAllMobs(io: Server, roomId: string, state: CombatState, attacker: InGameCard, amount: number, opponent: Player, attackerPlayer: Player): { killed: boolean } | void {
 
     // --- Calcul des dégâts réels avec les bonnus de l'attaquant ---
-    const realDamage = getModifiedDamage(attacker, amount);
+    // isAOE = true pour ne pas appliquer le bonus d'Arc à tout le monde
+    const realDamage = getModifiedDamage(attacker, amount, true);
+
+    // --- Gestion de l'Arc (Cible aléatoire pour le bonus) ---
+    const hasArc = attacker.equipment?.some(eq => eq.name === "Arc");
+    let arcTargetUuid: string | null = null;
+
+    if (hasArc) {
+        const mobs = opponent.board.filter(c => c.category === "mob");
+        if (mobs.length > 0) {
+            const randomMob = mobs[Math.floor(Math.random() * mobs.length)];
+            arcTargetUuid = randomMob.uuid;
+            state.log.push(`[Arc] Le tir de l'arc vise particulièrement ${randomMob.name} (+10 dégâts) !`);
+        }
+    }
 
     // --- Vérifier s'il y a des mobs sur le plateau adverse ---
     const hasMobs = opponent.board.some((c) => c.category === "mob");
 
     if (!hasMobs) {
         // --- Attaque directe sur le joueur ---
-        opponent.pv -= realDamage;
-        state.log.push(`${attacker.name} inflige ${realDamage} dégâts au joueur (aucun mob adverse) !`);
+        let damageToPlayer = realDamage;
+        if (hasArc) {
+            damageToPlayer += 10;
+            state.log.push(`[Arc] Tir précis sur le joueur (+10 dégâts) !`);
+        }
+        opponent.pv -= damageToPlayer;
+        state.log.push(`${attacker.name} inflige ${damageToPlayer} dégâts au joueur (aucun mob adverse) !`);
         return { killed: opponent.pv <= 0 };
     }
 
@@ -122,8 +141,14 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
                 continue;
             }
 
+            // --- Application du bonus Arc sur la cible spécifique ---
+            let damageForThisMob = realDamage;
+            if (hasArc && target.uuid === arcTargetUuid) {
+                damageForThisMob += 10;
+            }
+
             // --- gestion de l'armure ---
-            const finalDamage = applyArmorEffect(target, realDamage, state);
+            const finalDamage = applyArmorEffect(target, damageForThisMob, state);
 
             // --- Attaque sur mob ---
             target.pv_durability -= finalDamage;
@@ -159,7 +184,7 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
 export function attackEsquive(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string, attackerPlayer?: Player): { killed: boolean } | void {
 
     // --- Calcul des dégâts réels avec les bonnus de l'attaquant ---
-    const realDamage = getModifiedDamage(attacker, amount);
+    const realDamage = getModifiedDamage(attacker, amount, false);
 
     // --- Appliquer l'effet Esquive au lanceur ---
     if (attacker.category === "mob") {
@@ -266,7 +291,7 @@ export function voleEnergie(state: CombatState, attacker: InGameCard, target: In
 export function attackDirectPlayer(state: CombatState, attacker: InGameCard, amount: number, opponent: Player, io?: Server, roomId?: string): { killed: boolean } | void {
   
     // --- Calcul des dégâts avec les bonnus de l'attaquant ---
-    const realDamage = getModifiedDamage(attacker, amount);
+    const realDamage = getModifiedDamage(attacker, amount, false);
 
     // --- Attaque directe sur joueur ---
     opponent.pv -= realDamage;

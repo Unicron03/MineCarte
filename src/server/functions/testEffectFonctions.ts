@@ -95,7 +95,7 @@ export function hasInvisibility(target: InGameCard): boolean {
 
 
 // Calcule les dégâts sortants en fonction des effets de l'attaquant
-export function getModifiedDamage(attacker: InGameCard, baseDamage: number): number {
+export function getModifiedDamage(attacker: InGameCard, baseDamage: number, isAOE: boolean = false): number {
     let finalDamage = baseDamage;
 
     // Application du DoubleDamage
@@ -111,6 +111,11 @@ export function getModifiedDamage(attacker: InGameCard, baseDamage: number): num
     // Application Pomme Dorée (+10 dégâts)
     const goldenApple = attacker.effects?.find(e => e.startsWith("GoldenApple_"));
     if (goldenApple) {
+        finalDamage += 10;
+    }
+
+    // Application Arc (Equipment) - Seulement si ce n'est pas une AOE (géré séparément)
+    if (!isAOE && attacker.equipment && attacker.equipment.some(eq => eq.name === "Arc")) {
         finalDamage += 10;
     }
 

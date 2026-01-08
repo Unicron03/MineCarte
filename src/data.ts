@@ -44,6 +44,7 @@ export const actionList: Action[] = [
   { id: 40, name: "Bouclier", damage: 0, cost: 0, description: "Si le mob rattaché subit des attaques, inflige 10 PV au mob attaquant.", function: "shieldEffect", autoActivate: true },
   { id: 41, name: "Elitra", damage: 0, cost: 0, description: "Si le mob rattaché meurt, il est déposé dans votre main.", function: "elytraEffect", autoActivate: true },
   { id: 42, name: "Totem", damage: 0, cost: 0, description: "Si le mob meurt, il survit avec 5 PV et le Totem est détruit.", function: "totemEffect", autoActivate: true },
+  { id: 43, name: "Arc", damage: 0, cost: 0, description: "Ajoute 10 dégâts aux attaques. Sur attaque de zone, cible un seul ennemi aléatoire.", function: "bowEffect", autoActivate: true },
 ];
 
 
@@ -350,6 +351,14 @@ export const cardList: InGameCard[] = [
     imageName: "totem",
     effet: "Totem",
     cost: 4,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Arc",
+    imageName: "arc",
+    effet: "Arc",
+    cost: 2,
     category: "equipement",
   },
 ];
