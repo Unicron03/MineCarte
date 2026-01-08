@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { InGameCard, Player, CombatState } from "../../../typesPvp";
 import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./../testEffectFonctions";
-import { detachEquipment } from "./equipementFunction";
+import { detachEquipment, applySwordEffect } from "./equipementFunction";
 import { handleMobDeath } from "../gameLogic";
 
 // Transfère les dégâts excédentaires au joueur adverse
@@ -12,7 +12,7 @@ export function transfertDamageToPlayer(state: CombatState, amount: number, oppo
 }
 
 // Inflige des dégâts à une carte ou directement au joueur
-export function AttackOneMob(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player): { killed: boolean } | void {
+export function AttackOneMob(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string): { killed: boolean } | void {
 
     // --- Calcul des dégâts avec les bonnus de l'attaquant ---
     const realDamage = getModifiedDamage(attacker, amount);
@@ -21,6 +21,10 @@ export function AttackOneMob(state: CombatState, attacker: InGameCard, target: I
     if (!target && opponent) {
         opponent.pv -= realDamage;
         state.log.push(`${attacker.name} inflige ${realDamage} dégâts au joueur !`);
+        
+        // --- Effet Épée ---
+        applySwordEffect(state, attacker, opponent, io, roomId);
+        
         return { killed: opponent.pv <= 0 };
     }
 
@@ -48,6 +52,11 @@ export function AttackOneMob(state: CombatState, attacker: InGameCard, target: I
     // --- Transfert de dégâts ---
     if (target.pv_durability < 0 && opponent) {
         transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
+    }
+
+    // --- Effet Épée ---
+    if (opponent) {
+        applySwordEffect(state, attacker, opponent, io, roomId);
     }
 
     return { killed: target.pv_durability <= 0 };
@@ -122,11 +131,14 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
         }
     }
 
+    // --- Effet Épée (déclenché une fois après l'attaque de zone) ---
+    applySwordEffect(state, attacker, opponent, io, roomId);
+
     return { killed: false };
 }
 
 // Inflige des dégâts et applique "Esquive" au lanceur
-export function attackEsquive(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player): { killed: boolean } | void {
+export function attackEsquive(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string): { killed: boolean } | void {
 
     // --- Calcul des dégâts réels avec les bonnus de l'attaquant ---
     const realDamage = getModifiedDamage(attacker, amount);
@@ -144,6 +156,10 @@ export function attackEsquive(state: CombatState, attacker: InGameCard, target: 
     if (!target && opponent) {
         opponent.pv -= realDamage;
         state.log.push(`${attacker.name} inflige ${realDamage} dégâts au joueur !`);
+        
+        // --- Effet Épée ---
+        applySwordEffect(state, attacker, opponent, io, roomId);
+        
         return { killed: opponent.pv <= 0 };
     }
 
@@ -171,6 +187,11 @@ export function attackEsquive(state: CombatState, attacker: InGameCard, target: 
     // --- Transfert de dégâts si nécessaire ---
     if (target.pv_durability < 0 && opponent) {
       transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
+    }
+
+    // --- Effet Épée ---
+    if (opponent) {
+        applySwordEffect(state, attacker, opponent, io, roomId);
     }
 
     return { killed: target.pv_durability <= 0 };
@@ -214,7 +235,7 @@ export function voleEnergie(state: CombatState, attacker: InGameCard, target: In
 }
 
 // Attaque directe sur le joueur (ignore les mobs)
-export function attackDirectPlayer(state: CombatState, attacker: InGameCard, amount: number, opponent: Player): { killed: boolean } | void {
+export function attackDirectPlayer(state: CombatState, attacker: InGameCard, amount: number, opponent: Player, io?: Server, roomId?: string): { killed: boolean } | void {
   
     // --- Calcul des dégâts avec les bonnus de l'attaquant ---
     const realDamage = getModifiedDamage(attacker, amount);
@@ -222,6 +243,9 @@ export function attackDirectPlayer(state: CombatState, attacker: InGameCard, amo
     // --- Attaque directe sur joueur ---
     opponent.pv -= realDamage;
     state.log.push(`${attacker.name} inflige ${realDamage} dégâts directement au joueur !`);
+
+    // --- Effet Épée ---
+    applySwordEffect(state, attacker, opponent, io, roomId);
 
     return { killed: opponent.pv <= 0 };
 }

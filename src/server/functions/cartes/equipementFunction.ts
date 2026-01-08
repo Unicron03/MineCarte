@@ -1,5 +1,7 @@
+import { Server } from "socket.io";
 import type { Player, InGameCard, CombatState, EffectContext } from "../../../typesPvp";
 import { heal } from "./attackFunction"; 
+import { handleMobDeath } from "../gameLogic";
 
 // --- Identifiants d'Effets Temporaires ---
 export const EFFECT_IDS = {
@@ -52,4 +54,31 @@ export function applyPotionRegen(state: CombatState, player: Player): void {
             }
         }
     });
+}
+
+// Applique l'effet de l'Épée : inflige 5 dégâts à chaque mob adverse après attaque
+export function applySwordEffect(state: CombatState, attacker: InGameCard, opponent: Player, io?: Server, roomId?: string): void {
+    if (attacker.equipment && attacker.equipment.some((eq) => eq.name === "Épée")) {
+        state.log.push(`[Épée] L'épée de ${attacker.name} inflige 5 dégâts aux mobs adverses.`);
+        
+        // Parcours inversé pour gérer les suppressions (morts) sans décaler les index
+        for (let i = opponent.board.length - 1; i >= 0; i--) {
+            const card = opponent.board[i];
+            if (card.category === "mob" && card.pv_durability !== undefined) {
+                card.pv_durability -= 5;
+                
+                if (card.pv_durability <= 0) {
+                    if (io && roomId) {
+                        handleMobDeath(io, roomId, opponent, i, state.log);
+                    } else {
+                        // Fallback si IO n'est pas dispo (ex: appel depuis une fonction sans contexte socket complet)
+                        state.log.push(`${card.name} succombe aux blessures de l'Épée.`);
+                        if (card.equipment) opponent.discard.push(...card.equipment);
+                        opponent.discard.push(card);
+                        opponent.board.splice(i, 1);
+                    }
+                }
+            }
+        }
+    }
 }
