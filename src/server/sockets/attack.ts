@@ -4,7 +4,7 @@ import { actionList } from "../../data";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
 import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre } from "../functions/cartes/attackFunction";
 import { drawCard, checkRetourALEnvoyeur } from "../functions/cartes/talentFunction";
-import { hasInvisibility, isStunned } from "../functions/testEffectFonctions";
+import { hasInvisibility, isStunned, getAttackCost } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
 function getActionByName(name: string): Action | undefined {
@@ -16,13 +16,16 @@ function getActionByName(name: string): Action | undefined {
 // Fonction principale pour exécuter une action d'attaque ou de soin
 function executeAction(io: Server, roomId: string, state: CombatState, action: Action, attacker: InGameCard, target: InGameCard | null, player: Player, opponent: Player): { killed?: boolean; error?: string; msg?: string } | void | null {
 
-    let finalCost = action.cost;
+    let baseCost = action.cost;
 
     // --- Vérification de l'effet Cloche ---
     if (attacker.category === "mob" && attacker.effects?.some(e => e.startsWith("BellDiscount_"))) {
-        finalCost = 1;
+        baseCost = 1;
         state.log.push(`${attacker.name} attaque à coût réduit grâce à la Cloche !`);
     }
+
+    // --- Calcul du coût final avec équipements (ex: Botte célérité) ---
+    const finalCost = getAttackCost(attacker, baseCost);
 
     // --- Vérification de l'énergie ---
     if (player.energie < finalCost) {

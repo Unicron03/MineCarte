@@ -142,3 +142,12 @@ export function applyShieldEffect(state: CombatState, target: InGameCard, attack
         }
     }
 }
+
+// Calcule la réduction du coût d'attaque apportée par les équipements (ex: Botte célérité)
+export function getEquipmentAttackCostReduction(mob: InGameCard): number {
+    let reduction = 0;
+    if (mob.equipment && mob.equipment.some((eq) => eq.name === "Botte célérité")) {
+        reduction += 1;
+    }
+    return reduction;
+}

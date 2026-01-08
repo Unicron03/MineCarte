@@ -3,6 +3,7 @@ import { InGameCard, CombatState, Player } from "../../typesPvp";
 import { actionList } from "../../data";
 import { handleMobDeath, checkVillageGuardian } from "./gameLogic";
 import { soundDetection } from "./cartes/talentFunction";
+import { getEquipmentAttackCostReduction } from "./cartes/equipementFunction";
 
 // Calcule les dégâts finaux après application des effets de réduction des équipements.
 export function applyArmorEffect(target: InGameCard, initialDamage: number, state: CombatState): number {
@@ -120,6 +121,16 @@ export function getModifiedDamage(attacker: InGameCard, baseDamage: number, isAO
     }
 
     return finalDamage;
+}
+
+// Calcule le coût d'une attaque en tenant compte des équipements (ex: Botte célérité)
+export function getAttackCost(attacker: InGameCard, baseCost: number): number {
+    let finalCost = baseCost;
+
+    // Réduction via équipements (délégué à equipementFunction)
+    finalCost -= getEquipmentAttackCostReduction(attacker);
+
+    return Math.max(0, finalCost);
 }
 
 // Gère l'effet de brûlure (dégâts sur la durée)
