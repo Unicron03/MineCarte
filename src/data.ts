@@ -43,6 +43,7 @@ export const actionList: Action[] = [
   { id: 39, name: "Pioche", damage: 0, cost: 0, description: "Au début du tour, pioche une carte supplémentaire.", function: "pickaxeEffect", autoActivate: true },
   { id: 40, name: "Bouclier", damage: 0, cost: 0, description: "Si le mob rattaché subit des attaques, inflige 10 PV au mob attaquant.", function: "shieldEffect", autoActivate: true },
   { id: 41, name: "Elitra", damage: 0, cost: 0, description: "Si le mob rattaché meurt, il est déposé dans votre main.", function: "elytraEffect", autoActivate: true },
+  { id: 42, name: "Totem", damage: 0, cost: 0, description: "Si le mob meurt, il survit avec 5 PV et le Totem est détruit.", function: "totemEffect", autoActivate: true },
 ];
 
 
@@ -341,6 +342,14 @@ export const cardList: InGameCard[] = [
     imageName: "elitra",
     effet: "Elitra",
     cost: 3,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Totem",
+    imageName: "totem",
+    effet: "Totem",
+    cost: 4,
     category: "equipement",
   },
 ];

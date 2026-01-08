@@ -84,6 +84,26 @@ export function applySwordEffect(state: CombatState, attacker: InGameCard, oppon
     }
 }
 
+// Vérifie et applique l'effet du Totem d'immortalité
+export function checkTotemEffect(state: CombatState, mob: InGameCard, player: Player): boolean {
+    if (mob.equipment && mob.equipment.some((eq) => eq.name === "Totem")) {
+        const index = mob.equipment.findIndex((eq) => eq.name === "Totem");
+        if (index !== -1) {
+            const totem = mob.equipment[index];
+            
+            // Retrait du Totem et envoi à la défausse
+            mob.equipment.splice(index, 1);
+            player.discard.push(totem);
+
+            // Sauvetage du mob
+            mob.pv_durability = 5;
+            state.log.push(`[Totem] Le Totem d'immortalité se brise et sauve ${mob.name} ! (PV fixés à 5)`);
+            return true;
+        }
+    }
+    return false;
+}
+
 // Vérifie si un mob est équipé d'une Elitra
 export function hasElytra(mob: InGameCard): boolean {
     return mob.equipment ? mob.equipment.some((eq) => eq.name === "Elitra") : false;

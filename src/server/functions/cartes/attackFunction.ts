@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { InGameCard, Player, CombatState } from "../../../typesPvp";
 import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./../testEffectFonctions";
-import { detachEquipment, applySwordEffect, applyShieldEffect } from "./equipementFunction";
+import { detachEquipment, applySwordEffect, applyShieldEffect, checkTotemEffect } from "./equipementFunction";
 import { handleMobDeath } from "../gameLogic";
 
 // Transfère les dégâts excédentaires au joueur adverse
@@ -48,6 +48,11 @@ export function AttackOneMob(state: CombatState, attacker: InGameCard, target: I
     // --- Attaque sur mob ---
     target.pv_durability -= finalDamage;
     state.log.push(`${attacker.name} inflige ${finalDamage} dégâts à ${target.name}`);
+
+    // --- Effet Totem (Sauvetage) ---
+    if (target.pv_durability <= 0 && opponent) {
+        checkTotemEffect(state, target, opponent);
+    }
 
     // --- Transfert de dégâts ---
     if (target.pv_durability < 0 && opponent) {
@@ -124,6 +129,11 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
             target.pv_durability -= finalDamage;
             state.log.push(`${attacker.name} inflige ${finalDamage} dégâts à ${target.name}`);
 
+            // --- Effet Totem (Sauvetage) ---
+            if (target.pv_durability <= 0) {
+                checkTotemEffect(state, target, opponent);
+            }
+
             // --- Effet Bouclier (Riposte) ---
             applyShieldEffect(state, target, attacker, attackerPlayer, io, roomId);
 
@@ -191,6 +201,11 @@ export function attackEsquive(state: CombatState, attacker: InGameCard, target: 
     // --- Attaque sur mob ---
     target.pv_durability -= finalDamage;
     state.log.push(`${attacker.name} inflige ${finalDamage} dégâts à ${target.name}`);
+
+    // --- Effet Totem (Sauvetage) ---
+    if (target.pv_durability <= 0 && opponent) {
+        checkTotemEffect(state, target, opponent);
+    }
 
     // --- Transfert de dégâts si nécessaire ---
     if (target.pv_durability < 0 && opponent) {
