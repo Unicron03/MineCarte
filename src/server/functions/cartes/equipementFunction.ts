@@ -84,6 +84,11 @@ export function applySwordEffect(state: CombatState, attacker: InGameCard, oppon
     }
 }
 
+// Vérifie si un mob est équipé d'une Elitra
+export function hasElytra(mob: InGameCard): boolean {
+    return mob.equipment ? mob.equipment.some((eq) => eq.name === "Elitra") : false;
+}
+
 // Applique l'effet de la Pioche : pioche une carte au début du tour
 export function applyPickaxeEffect(state: CombatState, player: Player): void {
     player.board.forEach((card) => {

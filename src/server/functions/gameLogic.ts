@@ -3,7 +3,7 @@ import type { InGameCard, Player } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
-import { detachEquipment, applyPotionRegen, applyPickaxeEffect } from "./cartes/equipementFunction";
+import { detachEquipment, applyPotionRegen, applyPickaxeEffect, hasElytra } from "./cartes/equipementFunction";
 import { removeEnergyFromOpponent, applyCarapaceEffect, pressionPsychologique, checkWitherExplosionNoire, enchantementPuissant, levitation, encreNoire } from "./cartes/talentFunction";
 
 
@@ -606,10 +606,26 @@ export function handleMobDeath(io: Server, roomId: string, player: Player, mobIn
     const mob = player.board[mobIndex];
     if (!mob) return;
 
+    // Vérification de l'effet Elitra avant de détacher les équipements
+    const saveToHand = hasElytra(mob);
+
     detachEquipment(player, mob);
-    player.discard.push(mob);
+
+    if (saveToHand) {
+        // Réinitialisation du mob avant retour en main
+        if (mob.max_pv) mob.pv_durability = mob.max_pv;
+        mob.effects = [];
+        mob.hasAttacked = false;
+        mob.hasUsedTalent = false;
+
+        player.hand.push(mob);
+        logArray.push(`[Elitra] ${mob.name} s'envole et retourne dans votre main !`);
+    } else {
+        player.discard.push(mob);
+        logArray.push(`${mob.name} est mort !`);
+    }
+    
     player.board.splice(mobIndex, 1);
-    logArray.push(`${mob.name} est mort !`);
 
     // --- Talent Creeper : Pression Psychologique ---
     // S'active seulement si tué par un adversaire (killer présent et ID différent)

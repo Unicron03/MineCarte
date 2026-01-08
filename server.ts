@@ -44,6 +44,7 @@ const baseDeck1 = [
   createCard("Épée", 2, "equipement", 5, "Épée", null, null),
   createCard("Pioche", 2, "equipement", null, "Pioche", null, null),
   createCard("Bouclier", 1, "equipement", null, "Bouclier", null, null),
+  createCard("Elitra", 3, "equipement", null, "Elitra", null, null),
   //createCard("Potion", 2, "equipement", 10, "Potion", null, null),
   //createCard("Lit", 2, "artefact", null, "Lit", null, null),
   createCard("Livre", 1, "artefact", null, "Livre", null, null),
