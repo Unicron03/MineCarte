@@ -40,6 +40,7 @@ export const actionList: Action[] = [
   { id: 36, name: "Retour à l'envoyeur", damage: 0, cost: 0, description: "25% de chance que l'attaque revienne sur le lanceur.", function: "checkRetourALEnvoyeur", autoActivate: true },
   { id: 37, name: "Encre Noire", damage: 0, cost: 0, description: "La première attaque du prochain tour adverse est redirigée aléatoirement sur un de vos mobs.", function: "encreNoire", autoActivate: true },
   { id: 38, name: "Épée", damage: 0, cost: 0, description: "Après une attaque, inflige 5 PV à chaque mob adverse.", function: "swordEffect", autoActivate: true },
+  { id: 39, name: "Pioche", damage: 0, cost: 0, description: "Au début du tour, pioche une carte supplémentaire.", function: "pickaxeEffect", autoActivate: true },
 ];
 
 
@@ -313,6 +314,14 @@ export const cardList: InGameCard[] = [
     name: "Épée",
     imageName: "epee",
     effet: "Épée",
+    cost: 2,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Pioche",
+    imageName: "pioche",
+    effet: "Pioche",
     cost: 2,
     category: "equipement",
   },

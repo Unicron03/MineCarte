@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import type { Player, InGameCard, CombatState, EffectContext } from "../../../typesPvp";
 import { heal } from "./attackFunction"; 
 import { handleMobDeath } from "../gameLogic";
+import { drawCard } from "./talentFunction";
 
 // --- Identifiants d'Effets Temporaires ---
 export const EFFECT_IDS = {
@@ -81,4 +82,19 @@ export function applySwordEffect(state: CombatState, attacker: InGameCard, oppon
             }
         }
     }
+}
+
+// Applique l'effet de la Pioche : pioche une carte au début du tour
+export function applyPickaxeEffect(state: CombatState, player: Player): void {
+    player.board.forEach((card) => {
+        if (card.category === "mob" && card.equipment) {
+            // Vérifie si le mob a une Pioche équipée
+            const hasPickaxe = card.equipment.some((eq) => eq.name === "Pioche");
+            
+            if (hasPickaxe) {
+                state.log.push(`[Pioche] La pioche équipée sur ${card.name} permet de piocher une carte.`);
+                drawCard(state, player, 1);
+            }
+        }
+    });
 }

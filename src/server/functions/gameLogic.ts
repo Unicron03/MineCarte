@@ -3,7 +3,7 @@ import type { InGameCard, Player } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
-import { detachEquipment, applyPotionRegen } from "./cartes/equipementFunction";
+import { detachEquipment, applyPotionRegen, applyPickaxeEffect } from "./cartes/equipementFunction";
 import { removeEnergyFromOpponent, applyCarapaceEffect, pressionPsychologique, checkWitherExplosionNoire, enchantementPuissant, levitation, encreNoire } from "./cartes/talentFunction";
 
 
@@ -353,6 +353,10 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
 
     // --- appliquer la régénération de la potion ---
     applyPotionRegen(combatStateStart, current);
+    
+    // --- appliquer l'effet de la pioche ---
+    applyPickaxeEffect(combatStateStart, current);
+    
     combatStateStart.log.forEach((msg: string) => io.to(state.roomId).emit("log", msg));
 
     // --- Réinitialiser le statut d'attaque des mobs du joueur qui commence son tour ---

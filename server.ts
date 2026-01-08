@@ -42,6 +42,7 @@ const baseDeck1 = [
   //createCard("Armure", 2, "equipement", 10, null, null, null),
   createCard("Potion", 2, "equipement", 10, "Potion", null, null),
   createCard("Épée", 2, "equipement", 5, "Épée", null, null),
+  createCard("Pioche", 2, "equipement", null, "Pioche", null, null),
   //createCard("Potion", 2, "equipement", 10, "Potion", null, null),
   //createCard("Lit", 2, "artefact", null, "Lit", null, null),
   createCard("Livre", 1, "artefact", null, "Livre", null, null),
