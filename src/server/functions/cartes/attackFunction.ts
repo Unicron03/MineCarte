@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { InGameCard, Player, CombatState } from "../../../typesPvp";
 import { applyArmorEffect, hasEsquive, getModifiedDamage } from "./../testEffectFonctions";
-import { detachEquipment, applySwordEffect } from "./equipementFunction";
+import { detachEquipment, applySwordEffect, applyShieldEffect } from "./equipementFunction";
 import { handleMobDeath } from "../gameLogic";
 
 // Transfère les dégâts excédentaires au joueur adverse
@@ -12,7 +12,7 @@ export function transfertDamageToPlayer(state: CombatState, amount: number, oppo
 }
 
 // Inflige des dégâts à une carte ou directement au joueur
-export function AttackOneMob(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string): { killed: boolean } | void {
+export function AttackOneMob(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string, attackerPlayer?: Player): { killed: boolean } | void {
 
     // --- Calcul des dégâts avec les bonnus de l'attaquant ---
     const realDamage = getModifiedDamage(attacker, amount);
@@ -52,6 +52,11 @@ export function AttackOneMob(state: CombatState, attacker: InGameCard, target: I
     // --- Transfert de dégâts ---
     if (target.pv_durability < 0 && opponent) {
         transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
+    }
+
+    // --- Effet Bouclier (Riposte) ---
+    if (target && target.category === "mob") {
+        applyShieldEffect(state, target, attacker, attackerPlayer, io, roomId);
     }
 
     // --- Effet Épée ---
@@ -119,6 +124,9 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
             target.pv_durability -= finalDamage;
             state.log.push(`${attacker.name} inflige ${finalDamage} dégâts à ${target.name}`);
 
+            // --- Effet Bouclier (Riposte) ---
+            applyShieldEffect(state, target, attacker, attackerPlayer, io, roomId);
+
             if (target.pv_durability <= 0) {
 
                 // --- Transfert de dégâts---
@@ -138,7 +146,7 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
 }
 
 // Inflige des dégâts et applique "Esquive" au lanceur
-export function attackEsquive(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string): { killed: boolean } | void {
+export function attackEsquive(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string, attackerPlayer?: Player): { killed: boolean } | void {
 
     // --- Calcul des dégâts réels avec les bonnus de l'attaquant ---
     const realDamage = getModifiedDamage(attacker, amount);
@@ -189,6 +197,11 @@ export function attackEsquive(state: CombatState, attacker: InGameCard, target: 
       transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
     }
 
+    // --- Effet Bouclier (Riposte) ---
+    if (target && target.category === "mob") {
+        applyShieldEffect(state, target, attacker, attackerPlayer, io, roomId);
+    }
+
     // --- Effet Épée ---
     if (opponent) {
         applySwordEffect(state, attacker, opponent, io, roomId);
@@ -201,7 +214,7 @@ export function attackEsquive(state: CombatState, attacker: InGameCard, target: 
 export function damageAndDie(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, player: Player, opponent: Player): { killed: boolean } | void {
   
     // --- Infliger les dégâts ---
-    const result = AttackOneMob(state, attacker, target, amount, opponent);
+    const result = AttackOneMob(state, attacker, target, amount, opponent, undefined, undefined, player);
 
     // --- Le lanceur meurt instantanément ---
     const index = player.board.findIndex((c) => c.uuid === attacker.uuid);

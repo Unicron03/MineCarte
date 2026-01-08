@@ -98,3 +98,22 @@ export function applyPickaxeEffect(state: CombatState, player: Player): void {
         }
     });
 }
+
+// Applique l'effet du Bouclier : inflige 10 dégâts à l'attaquant si le porteur est attaqué
+export function applyShieldEffect(state: CombatState, target: InGameCard, attacker: InGameCard, attackerPlayer: Player | undefined, io?: Server, roomId?: string): void {
+    if (target.equipment && target.equipment.some((eq) => eq.name === "Bouclier")) {
+        state.log.push(`[Bouclier] Le bouclier de ${target.name} riposte et inflige 10 dégâts à ${attacker.name} !`);
+        
+        if (attacker.category === "mob" && attacker.pv_durability !== undefined) {
+            attacker.pv_durability -= 10;
+            
+            if (attacker.pv_durability <= 0 && attackerPlayer && io && roomId) {
+                 // Gestion de la mort de l'attaquant
+                 const attackerIndex = attackerPlayer.board.findIndex(c => c.uuid === attacker.uuid);
+                 if (attackerIndex !== -1) {
+                     handleMobDeath(io, roomId, attackerPlayer, attackerIndex, state.log);
+                 }
+            }
+        }
+    }
+}

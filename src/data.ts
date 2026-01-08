@@ -41,6 +41,7 @@ export const actionList: Action[] = [
   { id: 37, name: "Encre Noire", damage: 0, cost: 0, description: "La première attaque du prochain tour adverse est redirigée aléatoirement sur un de vos mobs.", function: "encreNoire", autoActivate: true },
   { id: 38, name: "Épée", damage: 0, cost: 0, description: "Après une attaque, inflige 5 PV à chaque mob adverse.", function: "swordEffect", autoActivate: true },
   { id: 39, name: "Pioche", damage: 0, cost: 0, description: "Au début du tour, pioche une carte supplémentaire.", function: "pickaxeEffect", autoActivate: true },
+  { id: 40, name: "Bouclier", damage: 0, cost: 0, description: "Si le mob rattaché subit des attaques, inflige 10 PV au mob attaquant.", function: "shieldEffect", autoActivate: true },
 ];
 
 
@@ -323,6 +324,14 @@ export const cardList: InGameCard[] = [
     imageName: "pioche",
     effet: "Pioche",
     cost: 2,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Bouclier",
+    imageName: "bouclier",
+    effet: "Bouclier",
+    cost: 1,
     category: "equipement",
   },
 ];
