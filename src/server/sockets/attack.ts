@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import { CombatState, Player, Action, InGameCard } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
-import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre } from "../functions/cartes/attackFunction";
+import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect } from "../functions/cartes/attackFunction";
 import { drawCard, checkRetourALEnvoyeur } from "../functions/cartes/talentFunction";
 import { hasInvisibility, isStunned, getAttackCost } from "../functions/testEffectFonctions";
 
@@ -77,6 +77,9 @@ function executeAction(io: Server, roomId: string, state: CombatState, action: A
         case "hurlementSombre":
             if (!action.damage) return;
             return hurlementSombre(state, attacker, target, action.damage, opponent);
+            
+        case "applyTankEffect":
+            return applyTankEffect(state, attacker);
     }
 }
 

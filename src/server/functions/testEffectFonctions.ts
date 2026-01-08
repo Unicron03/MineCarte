@@ -20,6 +20,16 @@ export function applyArmorEffect(target: InGameCard, initialDamage: number, stat
         if (index !== -1) target.effects.splice(index, 1);
     }
 
+    // --- Gestion Bon gros tank  ---
+    if (target.effects?.includes("Bon gros tank")) {
+        finalDamage = Math.floor(finalDamage * 0.7); // Réduction de 30%
+        state.log.push(`${target.name} absorbe une partie du choc ! (-30% dégâts)`);
+        
+        // Retrait de l'effet après consommation (une seule attaque)
+        const index = target.effects.indexOf("Bon gros tank");
+        if (index !== -1) target.effects.splice(index, 1);
+    }
+
     if (target.category === "mob" && target.equipment && target.equipment.length > 0) {
       
         // Vérification de la présence d'une armure

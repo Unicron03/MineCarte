@@ -46,6 +46,10 @@ export const actionList: Action[] = [
   { id: 42, name: "Totem", damage: 0, cost: 0, description: "Si le mob meurt, il survit avec 5 PV et le Totem est détruit.", function: "totemEffect", autoActivate: true },
   { id: 43, name: "Arc", damage: 0, cost: 0, description: "Ajoute 10 dégâts aux attaques. Sur attaque de zone, cible un seul ennemi aléatoire.", function: "bowEffect", autoActivate: true },
   { id: 44, name: "Botte célérité", damage: 0, cost: 0, description: "Réduit le coût des attaques du mob de 1.", function: "speedBootsEffect", autoActivate: true },
+  { id: 45, name: "Bon gros tank", damage: 0, cost: 2, description: "Réduit les dégâts de la prochaine attaque subie de 30%.", function: "applyTankEffect" },
+  { id: 46, name: "Esquive", damage: 0, cost: 0, description: "45% de chance d'éviter les dégâts d'une attaque.", function: "passive", autoActivate: true },
+  { id: 47, name: "Invisible", damage: 0, cost: 0, description: "Ne peut pas être ciblé par une attaque adverse.", function: "passive", autoActivate: true },
+  { id: 48, name: "Stun", damage: 0, cost: 0, description: "Étourdi : Ne peut pas attaquer ce tour-ci.", function: "passive", autoActivate: true },
 ];
 
 
@@ -310,6 +314,7 @@ export const cardList: InGameCard[] = [
     imageName: "poulpe",
     talent: "Encre Noire",
     attack1: "Morsure",
+    attack2: "Bon gros tank",
     pv_durability: 40,
     cost: 2,
     category: "mob",

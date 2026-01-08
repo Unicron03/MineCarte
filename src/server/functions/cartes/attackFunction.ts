@@ -325,3 +325,15 @@ export function hurlementSombre(state: CombatState, attacker: InGameCard, target
     }
     return result;
 }
+
+// Attaque défensive : Applique une réduction de dégâts de 30% pour la prochaine attaque reçue
+export function applyTankEffect(state: CombatState, attacker: InGameCard): void {
+    if (!attacker.effects) attacker.effects = [];
+    
+    if (!attacker.effects.includes("Bon gros tank")) {
+        attacker.effects.push("Bon gros tank");
+        state.log.push(`${attacker.name} se gonfle et prépare sa défense ! (-30% dégâts prochaine attaque)`);
+    } else {
+        state.log.push(`${attacker.name} est déjà en posture défensive.`);
+    }
+}
