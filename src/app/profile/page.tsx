@@ -4,17 +4,10 @@ import { Separator } from "@/shadcn/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shadcn/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
-import {
-    Dialog,
-    DialogContent,
-    DialogTrigger,
-    DialogHeader,
-    DialogTitle,
-} from "@/shadcn/ui/dialog";
 import { Button } from "@/shadcn/ui/button";
 import { getUser } from "../../../prisma/requests";
 import { userId } from "@/types";
-import EditPseudoDialog from "@/components/edit-pseudo-dialog";
+import EditPseudoDialog from "@/components/profile/edit-pseudo-dialog";
 import DeleteUserDialog from "@/components/profile/delete-user-dialog";
 
 export const dynamic = 'force-dynamic';

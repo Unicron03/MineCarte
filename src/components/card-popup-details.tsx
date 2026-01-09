@@ -36,7 +36,7 @@ async function fetchAttack(id: number | null) {
     return res.json();
 }
 
-type CardType = Prisma.cardsGetPayload<{}>;
+type CardType = Prisma.cardsGetPayload<Record<string, never>>;
 
 function CardPopupDetailsInner(
     { undescovered = true, favorite, quantity, rarity, card }:

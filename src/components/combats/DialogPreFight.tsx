@@ -26,7 +26,7 @@ type DeckWithCards = Prisma.decksGetPayload<{
     }
 }>;
 
-type UserStats = Prisma.game_statsGetPayload<{}>;
+type UserStats = Prisma.game_statsGetPayload<Record<string, never>>;
 
 export default function DialogPreFight({ 
     btnName, 

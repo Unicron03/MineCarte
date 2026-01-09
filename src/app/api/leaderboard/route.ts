@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getLeaderboard } from "@/prisma/requests";
-import { GameMode } from "../../../../generated/prisma";
+import { GameMode } from "../../../../generated/prisma/enums";
 
 export async function GET(request: Request) {
     try {

@@ -10,7 +10,7 @@ import ConfettiSides from "./particles/confetti-sides";
 import Confetti from "./particles/confetti";
 import { Prisma } from "../../generated/prisma/client";
 
-type DrawnCard = Prisma.cardsGetPayload<{}> & { 
+type DrawnCard = Prisma.cardsGetPayload<Record<string, never>> & { 
     isNew: boolean;
     quantity: number;
     favorite: boolean;

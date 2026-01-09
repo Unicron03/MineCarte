@@ -1,6 +1,6 @@
 import { Prisma } from "../generated/prisma/client";
 
-export const userId: number = 2;
+export const userId: number = 1;
 export const defaultNbCardGivenInChest: number = 5;
 export const defaultNbDecksPerUser: number = 10;
 export const defaultNbCardsPerDeck: number = 15;
@@ -42,7 +42,7 @@ export type GameState = {
     turnIndex: number;
 };
 
-export const backCard: Prisma.cardsGetPayload<{}> = {
+export const backCard: Prisma.cardsGetPayload<Record<string, never>> = {
     id: 0,
     name: "? ? ?",
     description: "Carte pas encore découverte !",

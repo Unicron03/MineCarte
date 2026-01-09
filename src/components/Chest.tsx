@@ -6,7 +6,7 @@ import CardOpeningDisplay from "./CardOpeningDisplay";
 import { Prisma } from "../../generated/prisma/client";
 import { userId } from "@/types";
 
-type DrawnCard = Prisma.cardsGetPayload<{}> & { 
+type DrawnCard = Prisma.cardsGetPayload<Record<string, never>> & { 
     isNew: boolean;
     quantity: number;
     favorite: boolean;

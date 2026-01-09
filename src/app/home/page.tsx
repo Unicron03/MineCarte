@@ -18,6 +18,8 @@ async function getVideoOfTheDay() {
     return `/animated-background/${files[index]}`;
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
     const user = await getUser(userId);
     const videoSrc = await getVideoOfTheDay();

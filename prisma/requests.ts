@@ -22,6 +22,13 @@ export async function getUser(id: number = 1) {
 	});
 }
 
+// Supprimer un utilisateur par ID
+export async function deleteUser(userId: number) {
+    return prisma.user.delete({
+        where: { id: userId }
+    });
+}
+
 // Récupérer toutes les stats d'un utilisateur
 export async function getAllUserStats(userId: number) {
     return prisma.game_stats.findMany({
