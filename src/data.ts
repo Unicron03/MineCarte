@@ -1,0 +1,378 @@
+import type { Action, InGameCard} from "./typesPvp";
+
+// === Liste des actions (exemples) ===
+export const actionList: Action[] = [
+   { id: 1, name: "Morsure", damage: 15, cost: 1, description: "Une morsure violente.", function: "AttackOneMob", requiresTarget: true },
+   { id: 2, name: "Affamé", damage: 5, cost: 0, description: "Inflige 5 PV à un mob adverse et retire une énergie à l'adversaire.", function: "voleEnergie", requiresTarget: true },
+   { id: 3, name: "Table de craft", damage: 3, cost: 1, description: "Réduit le coût de la prochaine carte de 3.", function: "applyEffect"},
+   { id: 4, name: "Enclume", damage: 0, cost: 1, description: "Récupère un équipement de la défausse (si disponible en surplus).", function: "anvilEffect" },
+   { id: 5, name: "Armure", damage: 0, cost: 2, description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.", function: "armure" },
+   { id: 6, name: "Coup d'ombre", damage: 10, cost: 2, description: "Inflige 10 PV à chaque mob adverse.", function: "AttackAllMobs" },
+   { id: 7, name: "Soin", damage: 10, cost: 2, description: "Soigne 10 PV à un mob", function: "heal", requiresTarget: true },
+   { id: 8, name: "Téléportation", damage: 0, cost: 0, description: "Pioche 1 cartes.", function: "drawCard" },
+   { id: 9, name: "Téléportation Furtive", damage: 30, cost: 3, description: "Inflige 30 PV à un mob de l'adversaire & A une chance d'esquiver tous les dégâts d'une attaque lors du prochain tour", function: "attackEsquive", requiresTarget: true },
+   { id: 10, name: "Explosion", damage: 60, cost: 0, description: "Inflige 60 PV et meurt instantanément ensuite.", function: "damageAndDie", requiresTarget: true },
+   { id: 11, name: "Gardien du Village", damage: 0, cost: 0, description: "Passif: Si un Villageois est présent, les dégâts sont doublés.", function: "passive", autoActivate: true },
+   { id: 12, name: "Tir de précision", damage: 8, cost: 0, description: "Inflige 8 PV à l'adversaire.", function: "attackDirectPlayer"},
+   { id: 13, name: "Potion", damage: 10, cost: 2, description: "Soigne le mob rattaché de 10 PV à chaque tour.", function: "potionRegen" },
+   { id: 14, name: "Lit", damage: 25, cost: 2, description: "Soigne votre joueur de 25 dégâts.", function: "healPlayer" },
+   { id: 15, name: "Livre", damage: 2, cost: 1, description: "Pioche 2 cartes.", function: "drawCardsEffect" },
+   { id: 16, name: "TNT", damage: 30, cost: 2, description: "Inflige 30 dégâts à une carte ennemie.", function: "applyArtifactDamage", requiresTarget: true, targetType: "enemy" },
+   { id: 17, name: "Lingot de fer", damage: 20, cost: 1, description: "Soigne 20 PV d'un Golem allié.", function: "healGolem", requiresTarget: true, targetType: "ally" },
+   { id: 18, name: "End Crystal", damage: 0, cost: 2, description: "Réduit de moitié la vie d'un mob adverse. (L'armure ne fonctionne pas)", function: "halveLifeEffect", requiresTarget: true, targetType: "enemy" },
+   { id: 19, name: "Ender Pearl", damage: 0, cost: 2, description: "Défausse une carte de votre plateau.", function: "discardOwnCard", requiresTarget: true, targetType: "ally" },
+   { id: 20, name: "Canne à pêche", damage: 0, cost: 1, description: "75% de chance de voler 2 énergies, 25% de chance d'en donner 2.", function: "fishingRodEffect" },
+   { id: 21, name: "Potion d'invisibilité", damage: 0, cost: 1, description: "Rend un mob invisible. Il ne peut pas être attaqué par l'adversaire au prochain tour.", function: "giveInvisibleEffect", requiresTarget: true, targetType: "ally" },
+   { id: 22, name: "Seau de lave", damage: 10, cost: 2, description: "Applique un malus de brûlure à une carte ennemie : elle perd 10 PV à chaque tour pendant 3 tours.", function: "applyBurnEffect", requiresTarget: true, targetType: "enemy" },
+   { id: 23, name: "Pomme dorée", damage: 10, cost: 2, description: "Soigne 10 PV et augmente les dégâts de 10 pendant 3 tours.", function: "applyGoldenAppleEffect", requiresTarget: true, targetType: "ally" },
+   { id: 24, name: "Table d'enchantement", damage: 0, cost: 2, description: "Pendant ce tour, tous les équipements coûtent 1 énergie.", function: "applyEnchantmentTableEffect" },
+   { id: 25, name: "Portail de l’End", damage: 30, cost: 2, description: "Soigne 30 PV d'un Enderman, Shulker ou Ender Dragon.", function: "healEndCreature", requiresTarget: true, targetType: "ally" },
+  { id: 26, name: "Détection Sonore", damage: 0, cost: 0, description: "Passif: Si un talent adverse est activé, le mob actionneur prend 10 PV.", function: "soundDetection", autoActivate: true },
+  { id: 27, name: "Cloche", damage: 0, cost: 2, description: "Si le Warden ciblé a moins de 50% de sa vie, ses attaques coûtent 1 au prochain tour.", function: "applyBellEffect", requiresTarget: true, targetType: "ally" },
+  { id: 28, name: "Hurlement Sombre", damage: 40, cost: 4, description: "Inflige 40 PV et étourdit la cible (ne peut pas attaquer au prochain tour).", function: "hurlementSombre", requiresTarget: true },
+  { id: 30, name: "Ralentissement calculé", damage: 1, cost: 0, description: "Retire 1 énergie à l'adversaire au début du tour.", function: "removeEnergyFromOpponent", autoActivate: true },
+  { id: 31, name: "Carapace Protectrice", damage: 0, cost: 0, description: "Réduit les dégâts de la première attaque subie de 50%.", function: "applyCarapaceEffect", autoActivate: true },
+  { id: 32, name: "Pression Psychologique", damage: 0, cost: 0, description: "Si le Creeper meurt d'une attaque adverse, il inflige 15 PV aux mobs adverses et 5 PV au joueur.", function: "pressionPsychologique", autoActivate: true },
+  { id: 33, name: "Explosion noire", damage: 0, cost: 0, description: "Passif: Dégâts x2 si PV <= 30%.", function: "checkWitherExplosionNoire", autoActivate: true },
+  { id: 34, name: "Enchantement puissant", damage: 0, cost: 0, description: "Se rajoute 5 PV (même au-delà de sa vie).", function: "enchantementPuissant", autoActivate: true },
+  { id: 35, name: "Lévitation", damage: 0, cost: 0, description: "Mélange une carte de la main de l'adversaire dans son deck.", function: "levitation", autoActivate: true },
+  { id: 36, name: "Retour à l'envoyeur", damage: 0, cost: 0, description: "25% de chance que l'attaque revienne sur le lanceur.", function: "checkRetourALEnvoyeur", autoActivate: true },
+  { id: 37, name: "Encre Noire", damage: 0, cost: 0, description: "La première attaque du prochain tour adverse est redirigée aléatoirement sur un de vos mobs.", function: "encreNoire", autoActivate: true },
+  { id: 38, name: "Épée", damage: 0, cost: 0, description: "Après une attaque, inflige 5 PV à chaque mob adverse.", function: "swordEffect", autoActivate: true },
+  { id: 39, name: "Pioche", damage: 0, cost: 0, description: "Au début du tour, pioche une carte supplémentaire.", function: "pickaxeEffect", autoActivate: true },
+  { id: 40, name: "Bouclier", damage: 0, cost: 0, description: "Si le mob rattaché subit des attaques, inflige 10 PV au mob attaquant.", function: "shieldEffect", autoActivate: true },
+  { id: 41, name: "Elitra", damage: 0, cost: 0, description: "Si le mob rattaché meurt, il est déposé dans votre main.", function: "elytraEffect", autoActivate: true },
+  { id: 42, name: "Totem", damage: 0, cost: 0, description: "Si le mob meurt, il survit avec 5 PV et le Totem est détruit.", function: "totemEffect", autoActivate: true },
+  { id: 43, name: "Arc", damage: 0, cost: 0, description: "Ajoute 10 dégâts aux attaques. Sur attaque de zone, cible un seul ennemi aléatoire.", function: "bowEffect", autoActivate: true },
+  { id: 44, name: "Botte célérité", damage: 0, cost: 0, description: "Réduit le coût des attaques du mob de 1.", function: "speedBootsEffect", autoActivate: true },
+  { id: 45, name: "Bon gros tank", damage: 0, cost: 2, description: "Réduit les dégâts de la prochaine attaque subie de 30%.", function: "applyTankEffect" },
+  { id: 46, name: "Esquive", damage: 0, cost: 0, description: "45% de chance d'éviter les dégâts d'une attaque.", function: "passive", autoActivate: true },
+  { id: 47, name: "Invisible", damage: 0, cost: 0, description: "Ne peut pas être ciblé par une attaque adverse.", function: "passive", autoActivate: true },
+  { id: 48, name: "Stun", damage: 0, cost: 0, description: "Étourdi : Ne peut pas attaquer ce tour-ci.", function: "passive", autoActivate: true },
+];
+
+
+// === Liste des cartes de combat (à récupérer de la bdd) ===
+export const cardList: InGameCard[] = [
+  // @ts-ignore
+  {
+    name: "Zombie",
+    imageName: "zombie",
+    attack1: "Morsure",
+    attack2: "Affamé",
+    pv_durability: 25,
+    cost: 1,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Enderman",
+    imageName: "enderman",
+    talent: "Téléportation",
+    attack1: "Coup d'ombre",
+    attack2: "Soin",
+    pv_durability: 25,
+    cost: 1,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Table de craft",
+    imageName: "creeper", 
+    effet: "Table de craft", 
+    cost: 1,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Enclume",
+    imageName: "tortue",
+    effet: "Enclume",
+    cost: 1,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Armure",
+    imageName: "armure",
+    effet: "Armure",
+    cost: 2,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Gast",
+    imageName: "Gast",
+    talent: "Retour à l'envoyeur",
+    attack1: "Téléportation Furtive",
+    attack2: "Explosion",
+    pv_durability: 25,
+    cost: 1,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Golem",
+    imageName: "golem",
+    talent: "Gardien du Village",
+    attack1: "Morsure", // Réutilisation d'une attaque basique pour l'exemple
+    attack2: "Affamé",
+    pv_durability: 100,
+    cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Villageois",
+    imageName: "villageois",
+    talent: "Soin",
+    pv_durability: 20,
+    cost: 1,
+    category: "mob",
+  },
+  // @ts-ignore
+ {    
+    name: "Potion",    
+    imageName: "potion",    
+    effet: "Potion",
+    cost: 2,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Lit",
+    imageName: "lit",
+    effet: "Lit",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Lingot de fer",
+    imageName: "lingot_fer", // Assurez-vous d'avoir une image ou mettez un placeholder
+    effet: "Lingot de fer",
+    cost: 1,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "End Crystal",
+    imageName: "end_crystal", // Assurez-vous d'avoir l'image ou un placeholder
+    effet: "End Crystal",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Ender Pearl",
+    imageName: "ender_pearl", // Assurez-vous d'avoir l'image ou un placeholder
+    effet: "Ender Pearl",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Canne à pêche",
+    imageName: "fishing_rod", // Assurez-vous d'avoir l'image ou un placeholder
+    effet: "Canne à pêche",
+    cost: 1,
+    category: "artefact",
+  },
+    // @ts-ignore
+  {
+    name: "Potion d'invisibilité",
+    imageName: "potion_invisibilite",
+    effet: "Potion d'invisibilité",
+    cost: 1,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Seau de lave",
+    imageName: "seau_lave",
+    effet: "Seau de lave",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Pomme dorée",
+    imageName: "pomme_doree",
+    effet: "Pomme dorée",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Table d'enchantement",
+    imageName: "table_enchantement",
+    effet: "Table d'enchantement",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Portail de l’End",
+    imageName: "portail_end",
+    effet: "Portail de l’End",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Cloche",
+    imageName: "cloche",
+    effet: "Cloche",
+    cost: 2,
+    category: "artefact",
+  },
+  // @ts-ignore
+  {
+    name: "Warden",
+    imageName: "warden",
+    talent: "Détection Sonore",
+    attack1: "Affamé",
+    pv_durability: 120,
+    cost: 4,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Warden",
+    imageName: "warden",
+    talent: "Détection Sonore",
+    attack1: "Morsure",
+    attack2: "Hurlement Sombre",
+    pv_durability: 150,
+    cost: 4,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Araignée",
+    imageName: "araignee",
+    talent: "Ralentissement calculé",
+    attack1: "Morsure",
+    pv_durability: 35,
+    cost: 2,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Tortue",
+    imageName: "tortue",
+    talent: "Carapace Protectrice",
+    attack1: "Morsure",
+    pv_durability: 60,
+    cost: 2,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Creeper",
+    imageName: "creeper",
+    talent: "Pression Psychologique",
+    attack1: "Explosion",
+    pv_durability: 40,
+    cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Wither",
+    imageName: "wither",
+    talent: "Explosion noire",
+    attack1: "Morsure",
+    pv_durability: 100,
+    cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Sorcière",
+    imageName: "sorciere",
+    talent: "Enchantement puissant",
+    attack1: "Soin",
+    pv_durability: 40,
+    cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Shulker",
+    imageName: "shulker",
+    talent: "Lévitation",
+    attack1: "Morsure",
+    pv_durability: 60,
+    cost: 3,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Poulpe",
+    imageName: "poulpe",
+    talent: "Encre Noire",
+    attack1: "Morsure",
+    attack2: "Bon gros tank",
+    pv_durability: 40,
+    cost: 2,
+    category: "mob",
+  },
+  // @ts-ignore
+  {
+    name: "Épée",
+    imageName: "epee",
+    effet: "Épée",
+    cost: 2,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Pioche",
+    imageName: "pioche",
+    effet: "Pioche",
+    cost: 2,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Bouclier",
+    imageName: "bouclier",
+    effet: "Bouclier",
+    cost: 1,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Elitra",
+    imageName: "elitra",
+    effet: "Elitra",
+    cost: 3,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Totem",
+    imageName: "totem",
+    effet: "Totem",
+    cost: 4,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Arc",
+    imageName: "arc",
+    effet: "Arc",
+    cost: 2,
+    category: "equipement",
+  },
+  // @ts-ignore
+  {
+    name: "Botte célérité",
+    imageName: "botte_celerite",
+    effet: "Botte célérité",
+    cost: 2,
+    category: "equipement",
+  },
+];
+

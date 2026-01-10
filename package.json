@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "concurrently -k -n NEXT,WS -c blue,magenta \"next dev\" \"ts-node --project tsconfig.server.json server.ts\"",
     "build": "next build",
     "start": "next start"
   },
@@ -62,8 +62,9 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "prisma": "^7.0.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "tw-animate-css": "^1.3.8",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }
