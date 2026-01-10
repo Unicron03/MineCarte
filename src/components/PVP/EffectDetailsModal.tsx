@@ -34,7 +34,15 @@ const EffectDetailsModal: React.FC<EffectDetailsModalProps> = ({isOpen, onClose,
         <div className="p-6 flex flex-col items-center gap-4">
           {imageName && (
             <div className="w-20 h-20 rounded-full border-4 border-gray-700 bg-gray-800 overflow-hidden shadow-inner">
-              <img src={`/cards/${imageName}.png`} alt={title} className="w-full h-full object-cover" />
+              <img 
+                src={`/cards/${imageName}.png`} 
+                alt={title} 
+                className="w-full h-full object-cover" 
+                onError={(e) => {
+                  e.currentTarget.src = "/cards/default.png";
+                  e.currentTarget.onerror = null;
+                }}
+              />
             </div>
           )}
           

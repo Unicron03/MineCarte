@@ -43,6 +43,10 @@ const DiscardPile: React.FC<DiscardPileProps> = ({ cards, style, className, labe
                   src={`/cards/${card.imageName}.png`}
                   alt={card.name}
                   className="w-full h-full object-cover opacity-90"
+                  onError={(e) => {
+                    e.currentTarget.src = "/cards/default.png";
+                    e.currentTarget.onerror = null;
+                  }}
                 />
               </div>
             );

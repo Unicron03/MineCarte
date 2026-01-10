@@ -22,6 +22,11 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
 
   const imgSrc = `/cards/${card.imageName}.png`;
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = "/cards/default.png";
+    e.currentTarget.onerror = null;
+  };
+
   return (
     <div
       style={style}
@@ -33,6 +38,7 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
         src={imgSrc}
         alt={card.name}
         className="absolute inset-0 w-full h-full object-cover opacity-60"
+        onError={handleImageError}
       />
 
       {/* En-tête : Coût et PV */}

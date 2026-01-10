@@ -12,12 +12,6 @@ const StatBadge: React.FC<{ label: string; value: number | string; color: string
 );
 
 const EffectBadge: React.FC<{ effect: string; onClick?: (e: string) => void }> = ({ effect, onClick }) => {
-  // Détermination de la couleur de fallback comme dans CardPVP
-  let fallbackColor = "#e74c3c"; // Default red
-  if (effect === "Esquive") fallbackColor = "#bdc3c7";
-  else if (effect === "Invisible") fallbackColor = "#a29bfe";
-  else if (effect.startsWith("Burn_")) fallbackColor = "#e67e22";
-  else if (effect.startsWith("GoldenApple_")) fallbackColor = "#f1c40f";
 
   return (
     <div
@@ -30,8 +24,8 @@ const EffectBadge: React.FC<{ effect: string; onClick?: (e: string) => void }> =
         alt={effect}
         className="w-full h-full object-cover"
         onError={(e) => {
-          (e.target as HTMLImageElement).style.display = 'none';
-          (e.target as HTMLImageElement).parentElement!.style.backgroundColor = fallbackColor;
+          e.currentTarget.src = "/cards/default.png";
+          e.currentTarget.onerror = null;
         }}
       />
     </div>

@@ -16,6 +16,10 @@ export const EquipmentBadge = ({ equipment }: { equipment?: InGameCard[] }) => {
                         src={`/cards/${eq.imageName}.png`}
                         alt={eq.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                            e.currentTarget.src = "/cards/default.png";
+                            e.currentTarget.onerror = null;
+                        }}
                     />
                 </div>
             ))}

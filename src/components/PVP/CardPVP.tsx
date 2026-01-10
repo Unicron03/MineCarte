@@ -35,6 +35,11 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
     
     const pvColor = isPlayer ? "bg-green-600" : "bg-red-600";
 
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        e.currentTarget.src = "/cards/default.png";
+        e.currentTarget.onerror = null;
+    };
+
     return (
         <div 
             className={`relative w-40 h-60 bg-gray-900 rounded-xl border-2 ${borderColor} shadow-2xl flex flex-col overflow-hidden select-none ${clickable && onClick ? "cursor-pointer hover:scale-105 transition-transform" : ""}`}
@@ -45,6 +50,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
                 src={imgSrc}
                 alt={card.name}
                 className="absolute inset-0 w-full h-full object-cover opacity-60"
+                onError={handleImageError}
             />
 
             {/* En-tete : Cout et PV */}
@@ -83,10 +89,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
                                 src={`/cards/${equip.imageName}.png`} 
                                 alt={equip.name}
                                 className="w-full h-full object-cover"
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).parentElement!.style.backgroundColor = "#3498db";
-                                }}
+                                onError={handleImageError}
                             />
                         </div>
                     ))}
@@ -178,10 +181,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
                               src={`/cards/${effect}.png`} 
                               alt={effect}
                               className="w-full h-full object-cover"
-                              onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
-                                  (e.target as HTMLImageElement).parentElement!.style.backgroundColor = effect === "Esquive" ? "#bdc3c7" : effect === "Invisible" ? "#a29bfe" : effect.startsWith("Burn_") ? "#e67e22" : effect.startsWith("GoldenApple_") ? "#f1c40f" : "#e74c3c";
-                              }}
+                              onError={handleImageError}
                           />
                         </div>
                     ))}
