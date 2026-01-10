@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { InGameCard } from "@/typesPvp";
 
 export const EquipmentBadge = ({ equipment }: { equipment?: InGameCard[] }) => {

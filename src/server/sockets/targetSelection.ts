@@ -228,7 +228,7 @@ export const targetSelectionSocket = (io: Server, socket: Socket, rooms: Map<str
 
     // --- Annulation de la sélection ---
     socket.on("cancelTarget", () => {
-        for (const [rid, state] of rooms.entries()) {
+        for (const [, state] of rooms.entries()) {
             const player = state.players.find((p) => p.id === socket.id);
             if (player) {
                 player.pendingAction = null;

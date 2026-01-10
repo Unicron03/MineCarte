@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 const Deck = ({ count = 0, opponent = false }) => {

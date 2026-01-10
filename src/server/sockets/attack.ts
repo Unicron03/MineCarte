@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { CombatState, Player, Action, InGameCard } from "../../typesPvp";
+import { CombatState, Player, Action, InGameCard, GameState } from "../../typesPvp";
 import { actionList } from "../../data";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
 import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect } from "../functions/cartes/attackFunction";
@@ -84,7 +84,7 @@ function executeAction(io: Server, roomId: string, state: CombatState, action: A
 }
 
 // Fonction utilitaire pour finaliser l'attaque
-function finalizeAttack(io: Server,  rooms: Map<string, any>,  roomId: string,  room: any, result: any,  state: CombatState,  targetOwner: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player) {
+function finalizeAttack(io: Server,  rooms: Map<string, GameState>,  roomId: string,  room: GameState, result: { killed?: boolean; error?: string; msg?: string } | void | null,  state: CombatState,  targetOwner: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player) {
   
     // Gestion de la mort d'une carte (attaque cible unique)
     if (result?.killed && target && targetIndex !== null && action.function !== "heal") { 
@@ -108,7 +108,7 @@ function finalizeAttack(io: Server,  rooms: Map<string, any>,  roomId: string,  
     checkVictory(io, room, rooms);
 }
 
-export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>) {
+export function attackSocket(io: Server, socket: Socket, rooms: Map<string, GameState>) {
 
     // --- Demande d'attaque ---
     socket.on("requestAttack", ({ roomId, attackerIndex, attackName }) => {
@@ -183,8 +183,8 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
         const state: CombatState = { log: [] };
         const result = executeAction(io, roomId, state, action, attacker, null, player, opponent);
         
-        if (result && (result as any).error) {
-            socket.emit("log", (result as any).msg);
+        if (result && (result as { error?: string; msg?: string }).error) {
+            socket.emit("log", (result as { error?: string; msg?: string }).msg);
             return;
         }
 
@@ -283,8 +283,8 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, any>
         // Note: On passe targetOwner comme "opponent" (le receveur des dégâts excédentaires) pour executeAction
         const result = executeAction(io, roomId, state, action, attacker, target, player, targetOwner);
         
-        if (result && (result as any).error) {
-            socket.emit("log", (result as any).msg);
+        if (result && (result as { error?: string; msg?: string }).error) {
+            socket.emit("log", (result as { error?: string; msg?: string }).msg);
             return;
         }
 

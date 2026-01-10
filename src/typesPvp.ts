@@ -37,7 +37,7 @@ export type PendingAction = {
     sourceHandIndex: number; // L'index de la carte jouée dans la main
     validTargetIndices: number[]; // Les index valides sur le plateau cible
     targetPlayerId: string; // L'ID du joueur ciblé
-    actionData?: any; // Données supplémentaires (montant dégâts, ...)
+    actionData?: Record<string, unknown>; // Données supplémentaires (montant dégâts, ...)
 };
 
 // Joueur (utilisé pour le pvp)

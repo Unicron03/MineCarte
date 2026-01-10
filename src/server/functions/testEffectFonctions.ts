@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { InGameCard, CombatState, Player } from "../../typesPvp";
 import { actionList } from "../../data";
-import { handleMobDeath, checkVillageGuardian } from "./gameLogic";
+import { handleMobDeath } from "./gameLogic";
 import { soundDetection } from "./cartes/talentFunction";
 import { getEquipmentAttackCostReduction } from "./cartes/equipementFunction";
 

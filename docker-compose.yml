@@ -6,6 +6,25 @@ services:
     container_name: minecarte-app
     ports:
       - "3000:3000"
+    command: npm run dev
+    environment:
+      - DATABASE_HOST=db
+      - DB_USER=${DB_USER?}
+      - DB_PASSWORD=${DB_PASSWORD?}
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME?}
+    depends_on:
+      - db
+    tty: true
+
+  websocket:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minecarte-ws
+    ports:
+      - "3002:3002"
+    command: npx ts-node --project tsconfig.server.json server.ts
     environment:
       - DATABASE_HOST=db
       - DB_USER=${DB_USER?}

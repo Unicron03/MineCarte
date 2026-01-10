@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import type { InGameCard, Player } from "../../typesPvp";
+import type { InGameCard, Player, GameState } from "../../typesPvp";
 import { actionList } from "../../data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
@@ -220,7 +220,7 @@ export function playEquipment(io: Server, roomId: string, player: Player, card: 
 }
 
 // --- Terminer le tour ---
-export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
+export function endTurn(io: Server, rooms: Map<string, GameState>, state: GameState) {
 
     // --- Récupérer le joueur qui termine son tour ---
     const playerEnding = state.players[state.turnIndex];
@@ -285,68 +285,70 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
         // --- DÉTECTION SONORE (WARDEN) ---
         // Si le Golem a son talent actif (DoubleDamage), le Warden réagit à chaque début de tour
         if (card.name === "Golem" && card.effects?.includes("DoubleDamage")) {
-            const opponent = state.players.find((p: any) => p.id !== current.id);
+            const opponent = state.players.find((p: Player) => p.id !== current.id);
             if (opponent) {
                 checkAndTriggerWarden(io, state.roomId, current, opponent, card);
             }
         }
 
-        // --- Talent Araignée (Ralentissement calculé) ---
-        // S'active à chaque début de tour
-        if (card.talent === "Ralentissement calculé") {
-            const opponent = state.players.find((p: any) => p.id !== current.id);
-            if (opponent) {
-                removeEnergyFromOpponent(io, state.roomId, current, opponent, card);
-                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+        if (card.category === "mob") {
+            // --- Talent Araignée (Ralentissement calculé) ---
+            // S'active à chaque début de tour
+            if (card.talent === "Ralentissement calculé") {
+                const opponent = state.players.find((p: Player) => p.id !== current.id);
+                if (opponent) {
+                    removeEnergyFromOpponent(io, state.roomId, current, opponent, card);
+                    checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+                }
             }
-        }
 
-        // --- Talent Tortue (Carapace Protectrice) ---
-        // S'active à chaque début de tour
-        if (card.talent === "Carapace Protectrice") {
-            const opponent = state.players.find((p: any) => p.id !== current.id);
-            if (opponent) {
-                applyCarapaceEffect(io, state.roomId, current, opponent, card);
-                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            // --- Talent Tortue (Carapace Protectrice) ---
+            // S'active à chaque début de tour
+            if (card.talent === "Carapace Protectrice") {
+                const opponent = state.players.find((p: Player) => p.id !== current.id);
+                if (opponent) {
+                    applyCarapaceEffect(io, state.roomId, current, opponent, card);
+                    checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+                }
             }
-        }
 
-        // --- Talent Wither (Explosion noire) ---
-        // Vérification à chaque début de tour
-        if (card.talent === "Explosion noire") {
-            const opponent = state.players.find((p: any) => p.id !== current.id);
-            if (opponent) {
-                checkWitherExplosionNoire(io, state.roomId, current, opponent, card);
+            // --- Talent Wither (Explosion noire) ---
+            // Vérification à chaque début de tour
+            if (card.talent === "Explosion noire") {
+                const opponent = state.players.find((p: Player) => p.id !== current.id);
+                if (opponent) {
+                    checkWitherExplosionNoire(io, state.roomId, current, opponent, card);
+                }
             }
-        }
 
-        // --- Talent Sorcière (Enchantement puissant) ---
-        // S'active à chaque début de tour
-        if (card.talent === "Enchantement puissant") {
-            const opponent = state.players.find((p: any) => p.id !== current.id);
-            if (opponent) {
-                enchantementPuissant(io, state.roomId, current, opponent, card);
-                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            // --- Talent Sorcière (Enchantement puissant) ---
+            // S'active à chaque début de tour
+            if (card.talent === "Enchantement puissant") {
+                const opponent = state.players.find((p: Player) => p.id !== current.id);
+                if (opponent) {
+                    enchantementPuissant(io, state.roomId, current, opponent, card);
+                    checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+                }
             }
-        }
 
-        // --- Talent Shulker (Lévitation) ---
-        // S'active à chaque début de tour
-        if (card.talent === "Lévitation") {
-            const opponent = state.players.find((p: any) => p.id !== current.id);
-            if (opponent) {
-                levitation(io, state.roomId, current, opponent, card);
-                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            // --- Talent Shulker (Lévitation) ---
+            // S'active à chaque début de tour
+            if (card.talent === "Lévitation") {
+                const opponent = state.players.find((p: Player) => p.id !== current.id);
+                if (opponent) {
+                    levitation(io, state.roomId, current, opponent, card);
+                    checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+                }
             }
-        }
 
-        // --- Talent Poulpe (Encre Noire) ---
-        // S'active à chaque début de tour
-        if (card.talent === "Encre Noire") {
-            const opponent = state.players.find((p: any) => p.id !== current.id);
-            if (opponent) {
-                encreNoire(io, state.roomId, current, opponent, card);
-                checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+            // --- Talent Poulpe (Encre Noire) ---
+            // S'active à chaque début de tour
+            if (card.talent === "Encre Noire") {
+                const opponent = state.players.find((p: Player) => p.id !== current.id);
+                if (opponent) {
+                    encreNoire(io, state.roomId, current, opponent, card);
+                    checkAndTriggerWarden(io, state.roomId, current, opponent, card);
+                }
             }
         }
     }
@@ -398,7 +400,7 @@ export function endTurn(io: Server, rooms: Map<string, any>, state: any) {
 }
 
 // --- Envoyer l'état du jeu ---
-export function sendGameState(io: Server, rooms: Map<string, any>, roomId: string) {
+export function sendGameState(io: Server, rooms: Map<string, GameState>, roomId: string) {
   
     // --- Récupération de l'état du jeu ---
     const state = rooms.get(roomId);
@@ -408,7 +410,7 @@ export function sendGameState(io: Server, rooms: Map<string, any>, roomId: strin
     for (const player of state.players) {
 
         // --- Récupérer l'adversaire ---
-        const opponent = state.players.find((p: any) => p.id !== player.id);
+        const opponent = state.players.find((p: Player) => p.id !== player.id);
 
         // --- Construction de l'état visible ---
         const visibleState = {
@@ -425,7 +427,6 @@ export function sendGameState(io: Server, rooms: Map<string, any>, roomId: strin
                   discard: player.discard,
                   pv: player.pv,
                   effects: player.effects,
-                  equipment: player.equipment,
                 },
                 opponent
                   ? {
@@ -437,7 +438,6 @@ export function sendGameState(io: Server, rooms: Map<string, any>, roomId: strin
                       discard: opponent.discard,
                       pv: opponent.pv,
                       effects: opponent.effects,
-                      equipment: opponent.equipment,
                     }
                   : null,
             ],
@@ -448,7 +448,18 @@ export function sendGameState(io: Server, rooms: Map<string, any>, roomId: strin
 }
 
 // --- Gérer le matchmaking ---
-export function handleMatchmaking(io: Server, socket: Socket, rooms: Map<string, any>, waitingPlayer: any, genToken: () => string, createPlayer: any, baseDeck1: any[], baseDeck2: any[], sendGameState: any, applyEnergyGain: any): any {
+export function handleMatchmaking(
+    io: Server, 
+    socket: Socket, 
+    rooms: Map<string, GameState>, 
+    waitingPlayer: { socketId: string; token: string; userId?: string } | null, 
+    genToken: () => string, 
+    createPlayer: (socketId: string, deck: InGameCard[], token: string, userId?: string) => Player, 
+    baseDeck1: InGameCard[], 
+    baseDeck2: InGameCard[], 
+    sendGameState: (io: Server, rooms: Map<string, GameState>, roomId: string) => void, 
+    applyEnergyGain: (player: Player, isSecondPlayer: boolean) => { gain: number; before: number; after: number }
+): { socketId: string; token: string; userId?: string } | null {
   
     // --- Si un joueur attend déjà ---
     if (waitingPlayer) {
@@ -467,7 +478,7 @@ export function handleMatchmaking(io: Server, socket: Socket, rooms: Map<string,
 
             // --- Création des joueurs ---
             const p1 = createPlayer(waitingPlayer.socketId, baseDeck1, token1, waitingPlayer.userId);
-            const p2 = createPlayer(socket.id, baseDeck2, token2, (socket as any).userId);
+            const p2 = createPlayer(socket.id, baseDeck2, token2, (socket as unknown as { userId: string }).userId);
 
             // --- Joueur 1 commence le premier tour ---
             p1.turnCount = 1;
@@ -500,7 +511,7 @@ export function handleMatchmaking(io: Server, socket: Socket, rooms: Map<string,
         } else {
 
             // --- Le joueur en attente s'est déconnecté ---
-            const newWaiting = { socketId: socket.id, token: genToken(), userId: (socket as any).userId };
+            const newWaiting = { socketId: socket.id, token: genToken(), userId: (socket as unknown as { userId: string }).userId };
             socket.emit("waiting");
             console.log(` Nouveau joueur en attente: ${socket.id}`);
             return newWaiting;
@@ -515,7 +526,7 @@ export function handleMatchmaking(io: Server, socket: Socket, rooms: Map<string,
 }
 
 // --- Gestion du gain d'énergie par tour ---
-export function applyEnergyGain(player: any, isSecondPlayer: boolean) {
+export function applyEnergyGain(player: Player, isSecondPlayer: boolean) {
 
     // --- Validation ---
     if (!player) throw new Error("applyEnergyGain: player manquant");
@@ -535,7 +546,7 @@ export function applyEnergyGain(player: any, isSecondPlayer: boolean) {
 }
 
 // --- Vérification de la victoire ---
-export function checkVictory(io: any, roomState: any, rooms: Map<string, any>) {
+export function checkVictory(io: Server, roomState: GameState, rooms: Map<string, GameState>) {
     
     // --- Vérification des points de vie ---
     const [p1, p2] = roomState.players;

@@ -71,7 +71,7 @@ export function pressionPsychologique(io: Server, roomId: string, deadCreeperOwn
     io.to(roomId).emit("log", `Le joueur adverse subit 5 dégâts.`);
 
     // Inflige 15 PV à chaque mob adverse
-    killerOpponent.board.forEach((card, index) => {
+    killerOpponent.board.forEach((card) => {
         if (card.category === "mob" && card.pv_durability !== undefined) {
             card.pv_durability -= 15;
             // Note: On ne gère pas la mort en chaîne ici pour simplifier, ou on pourrait appeler handleMobDeath récursivement

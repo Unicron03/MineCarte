@@ -24,7 +24,7 @@ const io = new Server(httpServer, {
 // --- Configuration ---
 const CHECK_INTERVAL_MS = 3000;
 const GRACE_MS = 5000;
-let waitingPlayer: Player | null = null;
+let waitingPlayer: { socketId: string; token: string; userId?: string } | null = null;
 const rooms: Map<string, GameState> = new Map();
 const userToRoom: Map<string, { roomId: string; playerIndex: number }> = new Map();
 
@@ -176,6 +176,6 @@ setInterval(() => {
 }, CHECK_INTERVAL_MS);
 
 // --- Lancement du serveur WebSocket ---
-httpServer.listen(3001, () => {
-  console.log(" Serveur WebSocket prêt sur http://localhost:3001");
+httpServer.listen(3002, () => {
+  console.log(" Serveur WebSocket prêt sur http://localhost:3002");
 });

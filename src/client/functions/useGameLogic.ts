@@ -58,7 +58,7 @@ export const useGameLogic = () => {
             setGameState(null);
         });
         
-        socket.on("roomInfo", (info: { roomId: string }) => {});
+        socket.on("roomInfo", () => {});
         
         socket.on("gameStart", () => {
             setLogs((prev) => [...prev, "La partie commence !"]);
@@ -171,7 +171,7 @@ export const useGameLogic = () => {
     // --- Fonctions de jeu (Handlers) ---
     const playCard = useCallback((cardIndex: number) => {
         if (endGameResult) return;
-        gameState && socket.emit("playCard", { roomId: gameState.roomId, cardIndex });
+        if (gameState) socket.emit("playCard", { roomId: gameState.roomId, cardIndex });
     }, [gameState, endGameResult, socket]);
 
 
@@ -264,7 +264,7 @@ export const useGameLogic = () => {
             return;
         }
         if (endGameResult) return;
-        gameState && socket.emit("endTurn", { roomId: gameState.roomId });
+        if (gameState) socket.emit("endTurn", { roomId: gameState.roomId });
     }, [attackSelection, endGameResult, gameState, socket]);
 
 

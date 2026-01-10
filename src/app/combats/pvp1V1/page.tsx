@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -28,7 +29,7 @@ import { InGameCard } from "@/typesPvp";
 
 export default function GamePage() {
     // On récupère les infos de base, mais on va surcharger la logique d'attaque
-    const { endGameResult, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler, cancelOffensiveArtifact } = useGameLogic();
+    const { endGameResult, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic();
     
     const router = useRouter(); 
     const socket = getSocket();
@@ -43,7 +44,7 @@ export default function GamePage() {
         actionType: string;
         cardName: string; 
         message: string;
-        targets: any[] 
+        targets: (InGameCard & { boardIndex: number })[] 
     } | null>(null);
 
     // --- État pour les alertes (ex: pas assez d'énergie) ---
@@ -62,7 +63,12 @@ export default function GamePage() {
         if (!socket) return;
 
         // Écoute générique de demande de sélection
-        socket.on("requestTargetSelection", (data: any) => {
+        socket.on("requestTargetSelection", (data: { 
+            actionType: string;
+            cardName: string; 
+            message: string;
+            targets: (InGameCard & { boardIndex: number })[] 
+        }) => {
             setSelectionModalData({ ...data, show: true });
         });
 
@@ -217,7 +223,7 @@ export default function GamePage() {
 
     // --- Gestionnaire de clic sur un équipement ---
     const handleEquipmentClick = (equipment: InGameCard) => {
-        let title = equipment.name;
+        const title = equipment.name;
         let description = "Aucune description.";
         
         // On cherche la description dans actionList via le nom ou l'effet
@@ -346,7 +352,6 @@ export default function GamePage() {
                     <div className="flex justify-center gap-16 mb-17">
                     {me?.board?.length ? (
                         me.board.map((card, i) => {
-                        const alreadyAttacked = card.hasAttacked ?? false;
                         return (
                         <div 
                             key={i} 
