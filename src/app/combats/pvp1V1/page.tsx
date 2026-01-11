@@ -26,6 +26,7 @@ import { useGameLogic } from "@/client/functions/useGameLogic";
 import SelectionModal from "@/components/PVP/SelectionModal";
 import { actionList } from "@/data";
 import { InGameCard } from "@/typesPvp";
+import { userId as dbUserId } from "@/types";
 
 export default function GamePage() {
     // On récupère les infos de base, mais on va surcharger la logique d'attaque
@@ -58,6 +59,47 @@ export default function GamePage() {
         imageName: string;
         type: "effect" | "equipment" | "talent";
     } | null>(null);
+
+    // --- État pour afficher le nom du deck (Debug) ---
+    const [activeDeckName, setActiveDeckName] = useState<string>("Chargement...");
+
+    // --- RECUPERATION DU DECK ACTIF (DEBUG) ---
+    useEffect(() => {
+        const fetchDeck = async () => {
+            console.log("=== CLIENT: UserID réel ===", dbUserId);
+
+            try {
+                // On appelle l'API Next.js pour récupérer le deck
+                const res = await fetch(`/api/pvp?userId=${dbUserId}`);
+                
+                if (!res.ok) {
+                    throw new Error(`Erreur API: ${res.status}`);
+                }
+
+                const data = await res.json();
+                console.log("=== DECK ACTIF RÉCUPÉRÉ (CLIENT) ===");
+                console.log(`Nom: ${data.name} (ID: ${data.id})`);
+                if (data.deck_cards && Array.isArray(data.deck_cards)) {
+                    console.log("Cartes :");
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    data.deck_cards.forEach((dc: any) => {
+                        console.log(` - ${dc.quantity}x ${dc.card.name}`);
+                    });
+                }
+                console.log("====================================");
+                
+                if (data && data.name) {
+                    setActiveDeckName(data.name);
+                } else {
+                    setActiveDeckName("Aucun deck trouvé");
+                }
+            } catch (err) {
+                console.error("Erreur lors de la récupération du deck :", err);
+                setActiveDeckName("Erreur récupération");
+            }
+        };
+        fetchDeck();
+    }, []);
 
     useEffect(() => {
         if (!socket) return;
@@ -271,6 +313,11 @@ export default function GamePage() {
         <div style={{ backgroundImage: "url('/img/backgroundPVP.jpg')" }} className="relative h-screen w-full bg-cover bg-center bg-no-repeat overflow-hidden flex flex-row justify-between p-4" > 
             {/* --- INDICATEUR DE TOUR --- */}
             <TurnIndicator isMyTurn={yourTurn} />
+
+            {/* --- AFFICHAGE DU DECK ACTIF (DEBUG) --- */}
+            <h1 className="absolute top-24 left-1/2 -translate-x-1/2 text-white text-2xl font-bold z-40 bg-black/50 px-4 py-2 rounded-lg">
+                Deck actif : {activeDeckName}
+            </h1>
 
             {/* --- PANEL GAUCHE (Maintenant divisé en deux blocs absolus) --- */}
             <LeftPanel 
