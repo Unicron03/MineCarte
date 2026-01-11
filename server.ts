@@ -1,4 +1,3 @@
-
 import { createServer } from "http";
 import { randomUUID } from "crypto";
 import { Server, Socket } from "socket.io";
@@ -13,7 +12,7 @@ import { quitSocket } from "./src/server/sockets/quit";
 import { disconnectSocket } from "./src/server/sockets/disconnect";
 import { targetSelectionSocket } from "./src/server/sockets/targetSelection";
 import { useTalentSocket } from "./src/server/sockets/useTalent";
-import type { GameState, Player } from "./src/typesPvp";
+import type { GameState, Player, InGameCard } from "./src/typesPvp";
 
 
 const httpServer = createServer();
@@ -24,51 +23,25 @@ const io = new Server(httpServer, {
 // --- Configuration ---
 const CHECK_INTERVAL_MS = 3000;
 const GRACE_MS = 5000;
-let waitingPlayer: { socketId: string; token: string; userId?: string } | null = null;
+let waitingPlayer: { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null = null;
 const rooms: Map<string, GameState> = new Map();
 const userToRoom: Map<string, { roomId: string; playerIndex: number }> = new Map();
 
 
-// --- Définition des decks de base ---
+// --- Définition des decks de base (Fallback) ---
 const baseDeck1 = [
   createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Gast", 1, "mob", 45, "Retour à l'envoyeur", "Morsure","Explosion"),
-  //createCard("Table de craft", 1, "artefact", null, "Table de craft", null, null),
-  //createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
   createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
-  //createCard("Villageois", 1, "mob", 15, null, "Tir de précision", null),
-  //createCard("Golem", 3, "mob", 55, "Gardien du Village", "Morsure", "Affamé"),
-  //createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
-  //createCard("Armure", 2, "equipement", 10, null, null, null),
-  //createCard("Potion", 2, "equipement", 10, "Potion", null, null),
-  //createCard("Épée", 2, "equipement", 5, "Épée", null, null),
   createCard("Pioche", 2, "equipement", null, "Pioche", null, null),
-  //createCard("Bouclier", 1, "equipement", null, "Bouclier", null, null),
-  //createCard("Elitra", 3, "equipement", null, "Elitra", null, null),
   createCard("Totem", 4, "equipement", null, "Totem", null, null),
   createCard("Arc", 2, "equipement", null, "Arc", null, null),
   createCard("Botte célérité", 2, "equipement", null, "Botte célérité", null, null),
-  //createCard("Potion", 2, "equipement", 10, "Potion", null, null),
-  //createCard("Lit", 2, "artefact", null, "Lit", null, null),
   createCard("Livre", 1, "artefact", null, "Livre", null, null),
   createCard("TNT", 2, "artefact", null, "TNT", null, null),
-  //createCard("Lingot de fer", 1, "artefact", null, "Lingot de fer", null, null),
-  //createCard("End Crystal", 2, "artefact", null, "End Crystal", null, null),
   createCard("Ender Pearl", 2, "artefact", null, "Ender Pearl", null, null),
-  //createCard("Canne à pêche", 1, "artefact", null, "Canne à pêche", null, null),
-  //createCard("Potion d'invisibilité", 1, "artefact", null, "Potion d'invisibilité", null, null),
-  //createCard("Seau de lave", 2, "artefact", null, "Seau de lave", null, null),
-  //createCard("Pomme dorée", 2, "artefact", null, "Pomme dorée", null, null),
-  //createCard("Table d'enchantement", 2, "artefact", null, "Table d'enchantement", null, null),
   createCard("Portail de l’End", 2, "artefact", null, "Portail de l’End", null, null),
-  //createCard("Enclume", 1, "artefact", null, "Enclume", null, null),
   createCard("Warden", 4, "mob", 150, "Détection Sonore", "Coup d'ombre", "Hurlement Sombre"),
-  //createCard("Cloche", 2, "artefact", null, "Cloche", null, null),
-  //createCard("Araignée", 2, "mob", 35, "Ralentissement calculé", "Morsure", null),
-  //createCard("Tortue", 2, "mob", 60, "Carapace Protectrice", "Morsure", null),
-  //createCard("Creeper", 3, "mob", 40, "Pression Psychologique", "Explosion", null),
-  //createCard("Wither", 3, "mob", 100, "Explosion noire", "Téléportation Furtive", null),
-  //createCard("Sorcière", 3, "mob", 40, "Enchantement puissant", "Soin", null),
   createCard("Shulker", 3, "mob", 60, "Lévitation", "Morsure", null),
   createCard("Poulpe", 2, "mob", 40, "Encre Noire", "Morsure", "Bon gros tank"),
 ];
@@ -82,9 +55,27 @@ io.on("connection", (socket: Socket) => {
   console.log("CONNECT:", socket.id);
 
     // --- Quand un joueur s'enregistre ---
-  socket.on("registerUser", ({ userId }) => {
+  socket.on("registerUser", ({ userId, deck }: { userId: string, deck?: any[] }) => {
     (socket as any).userId = userId;
     console.log(`User connecté: ${userId} (socket ${socket.id})`);
+
+    // --- Construction du deck joueur ---
+    let playerDeck: InGameCard[] = [];
+    if (deck && Array.isArray(deck)) {
+        console.log(`[Server] Deck reçu pour ${userId} (${deck.length} cartes)`);
+        playerDeck = deck.map((d) => createCard(
+            d.name,
+            d.cost,
+            d.category,
+            d.pv,
+            d.talent,
+            d.attack1,
+            d.attack2
+        ));
+    } else {
+        console.log(`[Server] Pas de deck reçu pour ${userId}, utilisation du deck par défaut.`);
+        playerDeck = [...baseDeck1];
+    }
 
     const existing = userToRoom.get(userId);
     if (existing) {
@@ -119,7 +110,8 @@ io.on("connection", (socket: Socket) => {
       io, socket, rooms, waitingPlayer,
       () => randomUUID(), // genToken function
       createPlayer,
-      baseDeck1, baseDeck2,
+      playerDeck, // Deck du joueur courant
+      baseDeck2, // Fallback deck (sera remplacé par le deck de l'adversaire dans handleMatchmaking)
       sendGameState,
       applyEnergyGain
     );

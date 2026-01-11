@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 // --- Types et datas ---
 import { InGameCard, GameState, AttackSelection } from "../../typesPvp";
 import { actionList } from "@/data";
+import { userId as dbUserId } from "@/types";
 
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket";
@@ -19,7 +20,8 @@ export function getOrCreateUserId(): string {
     return id;
 }
 
-export const useGameLogic = () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useGameLogic = (initialDeck: any[] | null) => {
     const socket = getSocket();
     const router = useRouter();
     const pathname = usePathname();
@@ -47,11 +49,20 @@ export const useGameLogic = () => {
 
     // --- Gestion des évènements Socket ---
     useEffect(() => {
-        socket.on("connect", () => {
+        if (!initialDeck) return; // Attendre que le deck soit chargé
+
+        const onConnect = () => {
             setMyId(socket.id ?? "");
             const userId = getOrCreateUserId();
-            socket.emit("registerUser", { userId, socketId: socket.id });
-        });
+            // On envoie le deck formaté au serveur
+            socket.emit("registerUser", { userId, socketId: socket.id, dbUserId, deck: initialDeck });
+        };
+
+        if (socket.connected) {
+            onConnect();
+        } else {
+            socket.on("connect", onConnect);
+        }
         
         socket.on("waiting", () => {
             setLogs((prev) => [...prev, "En attente d’un adversaire..."]);
@@ -111,7 +122,7 @@ export const useGameLogic = () => {
 
         return () => {
             // On retire tous les écouteur quand on quitte la page
-            socket.off("connect");
+            socket.off("connect", onConnect);
             socket.off("waiting");
             socket.off("roomInfo");
             socket.off("gameStart");
@@ -125,7 +136,7 @@ export const useGameLogic = () => {
             socket.off("draw");
             socket.off("opponentLeft");
         };
-    }, [socket]);
+    }, [socket, initialDeck]);
     
     // --- Déconnexion si on quitte la page ---
     useEffect(() => {

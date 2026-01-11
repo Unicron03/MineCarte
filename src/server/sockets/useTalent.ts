@@ -118,6 +118,10 @@ export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, G
                 success = true;
                 break;
 
+            case "defaultFunction":
+                socket.emit("error", "Cette fonction n'est pas implémentée.");
+                break;
+
             default:
                 socket.emit("error", "Effet non implémenté.");
                 break;

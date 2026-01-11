@@ -80,6 +80,9 @@ function executeAction(io: Server, roomId: string, state: CombatState, action: A
             
         case "applyTankEffect":
             return applyTankEffect(state, attacker);
+
+        case "defaultFunction":
+            return { error: "not_implemented", msg: "Cette fonction n'est pas implémentée." };
     }
 }
 

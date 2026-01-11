@@ -452,14 +452,14 @@ export function handleMatchmaking(
     io: Server, 
     socket: Socket, 
     rooms: Map<string, GameState>, 
-    waitingPlayer: { socketId: string; token: string; userId?: string } | null, 
+    waitingPlayer: { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null, 
     genToken: () => string, 
     createPlayer: (socketId: string, deck: InGameCard[], token: string, userId?: string) => Player, 
-    baseDeck1: InGameCard[], 
+    currentDeck: InGameCard[], 
     baseDeck2: InGameCard[], 
     sendGameState: (io: Server, rooms: Map<string, GameState>, roomId: string) => void, 
     applyEnergyGain: (player: Player, isSecondPlayer: boolean) => { gain: number; before: number; after: number }
-): { socketId: string; token: string; userId?: string } | null {
+): { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null {
   
     // --- Si un joueur attend déjà ---
     if (waitingPlayer) {
@@ -477,8 +477,8 @@ export function handleMatchmaking(
             const token2 = genToken();
 
             // --- Création des joueurs ---
-            const p1 = createPlayer(waitingPlayer.socketId, baseDeck1, token1, waitingPlayer.userId);
-            const p2 = createPlayer(socket.id, baseDeck2, token2, (socket as unknown as { userId: string }).userId);
+            const p1 = createPlayer(waitingPlayer.socketId, waitingPlayer.deck, token1, waitingPlayer.userId);
+            const p2 = createPlayer(socket.id, currentDeck, token2, (socket as unknown as { userId: string }).userId);
 
             // --- Joueur 1 commence le premier tour ---
             p1.turnCount = 1;
@@ -511,14 +511,14 @@ export function handleMatchmaking(
         } else {
 
             // --- Le joueur en attente s'est déconnecté ---
-            const newWaiting = { socketId: socket.id, token: genToken(), userId: (socket as unknown as { userId: string }).userId };
+            const newWaiting = { socketId: socket.id, token: genToken(), userId: (socket as unknown as { userId: string }).userId, deck: currentDeck };
             socket.emit("waiting");
             console.log(` Nouveau joueur en attente: ${socket.id}`);
             return newWaiting;
         }
     // --- Sinon, mettre le joueur actuel en attente ---
     } else {
-        const newWaiting = { socketId: socket.id, token: genToken() };
+        const newWaiting = { socketId: socket.id, token: genToken(), deck: currentDeck };
         socket.emit("waiting");
         console.log(` Joueur en attente: ${socket.id}`);
         return newWaiting;

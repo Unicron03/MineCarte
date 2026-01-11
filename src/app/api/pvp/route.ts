@@ -26,7 +26,13 @@ export async function GET(request: Request) {
             include: {
                 deck_cards: {
                     include: {
-                        card: true,
+                        card: {
+                            include: {
+                                talent_action: true,
+                                attack1_action: true,
+                                attack2_action: true,
+                            }
+                        },
                     },
                 },
             },
@@ -40,7 +46,13 @@ export async function GET(request: Request) {
                 include: {
                     deck_cards: {
                         include: {
-                            card: true,
+                            card: {
+                                include: {
+                                    talent_action: true,
+                                    attack1_action: true,
+                                    attack2_action: true,
+                                }
+                            },
                         },
                     },
                 },
@@ -54,7 +66,13 @@ export async function GET(request: Request) {
                 include: {
                     deck_cards: {
                         include: {
-                            card: true,
+                            card: {
+                                include: {
+                                    talent_action: true,
+                                    attack1_action: true,
+                                    attack2_action: true,
+                                }
+                            },
                         },
                     },
                 },
@@ -68,16 +86,6 @@ export async function GET(request: Request) {
 
         console.log(`[API PVP] Deck trouvé: ${deck.name} (ID: ${deck.id})`);
         
-        // --- Affichage du contenu du deck ---
-        if (deck.deck_cards && deck.deck_cards.length > 0) {
-            console.log("[API PVP] Contenu du deck :");
-            deck.deck_cards.forEach((dc) => {
-                console.log(` - ${dc.quantity}x ${dc.card.name} (Coût: ${dc.card.cost})`);
-            });
-        } else {
-            console.log("[API PVP] Ce deck est vide.");
-        }
-
         return NextResponse.json(deck);
 
     } catch (error) {
