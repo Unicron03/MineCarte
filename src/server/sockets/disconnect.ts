@@ -1,8 +1,8 @@
 import { Server, Socket } from "socket.io";
-import { GameState, Player, InGameCard } from "../../typesPvp";
+import { GameState, Player } from "../../typesPvp";
 
 // Gère la déconnexion d'un joueur
-export function disconnectSocket(io: Server, socket: Socket, rooms: Map<string, GameState>, userToRoom: Map<string, { roomId: string; playerIndex: number }>, waitingPlayer: { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null) {
+export function disconnectSocket(io: Server, socket: Socket, rooms: Map<string, GameState>, userToRoom: Map<string, { roomId: string; playerIndex: number }>, checkAndClearWaitingPlayer: () => void) {
 
     socket.on("disconnect", () => {
         console.log("DISCONNECT:", socket.id);
@@ -33,6 +33,6 @@ export function disconnectSocket(io: Server, socket: Socket, rooms: Map<string, 
         }
         
         // --- Retirer de la file d'attente si présent ---
-        if (waitingPlayer && waitingPlayer.socketId === socket.id) waitingPlayer = null;
+        checkAndClearWaitingPlayer();
     });
 }

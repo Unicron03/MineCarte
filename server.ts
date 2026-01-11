@@ -28,28 +28,6 @@ const rooms: Map<string, GameState> = new Map();
 const userToRoom: Map<string, { roomId: string; playerIndex: number }> = new Map();
 
 
-// --- Définition des decks de base (Fallback) ---
-const baseDeck1 = [
-  createCard("Zombie", 1, "mob", 25, null, "Morsure", "Affamé"),
-  createCard("Gast", 1, "mob", 45, "Retour à l'envoyeur", "Morsure","Explosion"),
-  createCard("Enderman", 1, "mob", 45, "Téléportation", "Coup d'ombre", "Soin"),
-  createCard("Pioche", 2, "equipement", null, "Pioche", null, null),
-  createCard("Totem", 4, "equipement", null, "Totem", null, null),
-  createCard("Arc", 2, "equipement", null, "Arc", null, null),
-  createCard("Botte célérité", 2, "equipement", null, "Botte célérité", null, null),
-  createCard("Livre", 1, "artefact", null, "Livre", null, null),
-  createCard("TNT", 2, "artefact", null, "TNT", null, null),
-  createCard("Ender Pearl", 2, "artefact", null, "Ender Pearl", null, null),
-  createCard("Portail de l’End", 2, "artefact", null, "Portail de l’End", null, null),
-  createCard("Warden", 4, "mob", 150, "Détection Sonore", "Coup d'ombre", "Hurlement Sombre"),
-  createCard("Shulker", 3, "mob", 60, "Lévitation", "Morsure", null),
-  createCard("Poulpe", 2, "mob", 40, "Encre Noire", "Morsure", "Bon gros tank"),
-];
-
-const baseDeck2 = [...baseDeck1];
-
-
-
 // --- Gestion des connexions ---
 io.on("connection", (socket: Socket) => {
   console.log("CONNECT:", socket.id);
@@ -74,7 +52,7 @@ io.on("connection", (socket: Socket) => {
         ));
     } else {
         console.log(`[Server] Pas de deck reçu pour ${userId}, utilisation du deck par défaut.`);
-        playerDeck = [...baseDeck1];
+        playerDeck = [];
     }
 
     const existing = userToRoom.get(userId);
@@ -111,7 +89,6 @@ io.on("connection", (socket: Socket) => {
       () => randomUUID(), // genToken function
       createPlayer,
       playerDeck, // Deck du joueur courant
-      baseDeck2, // Fallback deck (sera remplacé par le deck de l'adversaire dans handleMatchmaking)
       sendGameState,
       applyEnergyGain
     );
@@ -143,7 +120,11 @@ io.on("connection", (socket: Socket) => {
   quitSocket(io, socket, rooms);
 
   // --- Gestion de la déconnexion ---
-  disconnectSocket(io, socket, rooms, userToRoom, waitingPlayer);
+  disconnectSocket(io, socket, rooms, userToRoom, () => {
+    if (waitingPlayer && waitingPlayer.socketId === socket.id) {
+      waitingPlayer = null;
+    }
+  });
 
 });
 

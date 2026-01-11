@@ -28,10 +28,32 @@ import { actionList } from "@/data";
 import { InGameCard } from "@/typesPvp";
 import { userId as dbUserId } from "@/types";
 
+interface ApiDeckCard {
+    card: {
+        name: string;
+        cost: number;
+        category: string;
+        pv_durability: number;
+        talent_action?: { name: string };
+        attack1_action?: { name: string };
+        attack2_action?: { name: string };
+    };
+    quantity: number;
+}
+
+interface ServerDeckCard {
+    name: string;
+    cost: number;
+    category: string;
+    pv: number;
+    talent: string | null;
+    attack1: string | null;
+    attack2: string | null;
+}
+
 export default function GamePage() {
     // --- État pour le deck formaté ---
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [formattedDeck, setFormattedDeck] = useState<any[] | null>(null);
+    const [formattedDeck, setFormattedDeck] = useState<ServerDeckCard[] | null>(null);
 
     // On récupère les infos de base, mais on va surcharger la logique d'attaque
     const { endGameResult, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic(formattedDeck);
@@ -79,11 +101,10 @@ export default function GamePage() {
 
                 const data = await res.json();
                 
-                const deckForServer: any[] = [];
+                const deckForServer: ServerDeckCard[] = [];
 
                 if (data.deck_cards && Array.isArray(data.deck_cards)) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    data.deck_cards.forEach((dc: any) => {
+                    data.deck_cards.forEach((dc: ApiDeckCard) => {
                         
                         // Transformation pour createCard
                         // createCard(name, cost, category, pv, talent, attack1, attack2)
@@ -92,7 +113,7 @@ export default function GamePage() {
                         if (dc.card.category === "EQUIPMENT") category = "equipement";
                         else if (dc.card.category === "ARTIFACT") category = "artefact";
                         
-                        const cardDef = {
+                        const cardDef: ServerDeckCard = {
                             name: dc.card.name,
                             cost: dc.card.cost,
                             category: category,

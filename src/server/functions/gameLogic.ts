@@ -440,7 +440,7 @@ export function sendGameState(io: Server, rooms: Map<string, GameState>, roomId:
                       effects: opponent.effects,
                     }
                   : null,
-            ],
+            ].filter((p) => p !== null),
         };
         
         io.to(player.id).emit("updateState", visibleState);
@@ -455,14 +455,17 @@ export function handleMatchmaking(
     waitingPlayer: { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null, 
     genToken: () => string, 
     createPlayer: (socketId: string, deck: InGameCard[], token: string, userId?: string) => Player, 
-    currentDeck: InGameCard[], 
-    baseDeck2: InGameCard[], 
+    currentDeck: InGameCard[],  
     sendGameState: (io: Server, rooms: Map<string, GameState>, roomId: string) => void, 
     applyEnergyGain: (player: Player, isSecondPlayer: boolean) => { gain: number; before: number; after: number }
 ): { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null {
   
     // --- Si un joueur attend déjà ---
     if (waitingPlayer) {
+        // Empêcher de jouer contre soi-même (même socket)
+        if (waitingPlayer.socketId === socket.id) {
+            return waitingPlayer;
+        }
 
         // --- Vérifier la connexion du joueur en attente ---
         const waitingSock = io.sockets.sockets.get(waitingPlayer.socketId);
