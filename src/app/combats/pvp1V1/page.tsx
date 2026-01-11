@@ -27,29 +27,8 @@ import SelectionModal from "@/components/PVP/SelectionModal";
 import { actionList } from "@/data";
 import { InGameCard } from "@/typesPvp";
 import { userId as dbUserId } from "@/types";
+import { ServerDeckCard, ApiDeckCard } from "@/interfacePVP";
 
-interface ApiDeckCard {
-    card: {
-        name: string;
-        cost: number;
-        category: string;
-        pv_durability: number;
-        talent_action?: { name: string };
-        attack1_action?: { name: string };
-        attack2_action?: { name: string };
-    };
-    quantity: number;
-}
-
-interface ServerDeckCard {
-    name: string;
-    cost: number;
-    category: string;
-    pv: number;
-    talent: string | null;
-    attack1: string | null;
-    attack2: string | null;
-}
 
 export default function GamePage() {
     // --- État pour le deck formaté ---

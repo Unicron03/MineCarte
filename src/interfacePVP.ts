@@ -1,5 +1,30 @@
 import { InGameCard, Player } from "./typesPvp";
 
+// Format de carte reçu de l'API
+export interface ApiDeckCard {
+    card: {
+        name: string;
+        cost: number;
+        category: string;
+        pv_durability: number;
+        talent_action?: { name: string };
+        attack1_action?: { name: string };
+        attack2_action?: { name: string };
+    };
+    quantity: number;
+}
+
+// Format de carte attendu par le serveur
+export interface ServerDeckCard {
+    name: string;
+    cost: number;
+    category: string;
+    pv: number;
+    talent: string | null;
+    attack1: string | null;
+    attack2: string | null;
+}
+
 // Props pour le composant CardPVP
 export interface CardPVPProps {
     card: InGameCard;
