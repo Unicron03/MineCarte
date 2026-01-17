@@ -258,7 +258,7 @@ export default function GamePage() {
             description = `Cette unité subit ${dmg} dégâts à la fin de son tour.`;
         } else if (effectName === "Esquive") {
             title = "Esquive";
-            description = "La prochaine attaque subie sera ignorée.";
+            description = "45% de chance d'éviter les dégâts d'une attaque.";
         } else if (effectName === "Invisible") {
             title = "Invisibilité";
             description = "Cette unité ne peut pas être ciblée par des attaques adverses.";
