@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 // --- Composants ---
 import Deck from "@/components/PVP/Deck";
 import CardPVP from "@/components/PVP/CardPVP";
-// EffectDisplay supprimé car intégré dans LeftPanel
 import LeftPanel from "@/components/PVP/LeftPanel";
 import GameLogs from "@/components/PVP/GameLogs";
 import EndGameScreen from "@/components/PVP/EndGameScreen";
@@ -153,7 +152,11 @@ export default function GamePage() {
             // On filtre les messages qui semblent être des erreurs ou des avertissements
             const lowerMsg = message.toLowerCase();
             if (
-                lowerMsg.includes("pas assez d'énergie") ||
+                lowerMsg.includes("Pas assez d'énergie") ||
+                lowerMsg.includes("pas assez") ||
+                lowerMsg.includes("plus assez") ||
+                lowerMsg.includes("énergie insuffisante") ||
+                lowerMsg.includes("energie insuffisante") ||
                 lowerMsg.includes("impossible") ||
                 lowerMsg.includes("erreur") ||
                 lowerMsg.includes("ne pouvez pas") ||

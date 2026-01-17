@@ -6,7 +6,7 @@ const AlertPopup: React.FC<AlertPopupProps> = ({ message, isOpen, onClose }) => 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
             <div className="relative bg-gray-900 border-2 border-red-600 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.5)] p-6 max-w-md w-full mx-4 transform transition-all">
               
                 {/* Bouton Fermer (Croix) */}
