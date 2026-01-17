@@ -154,6 +154,7 @@ export default function GamePage() {
             if (
                 lowerMsg.includes("Pas assez d'énergie") ||
                 lowerMsg.includes("pas assez") ||
+                lowerMsg.includes("Pas assez") ||
                 lowerMsg.includes("plus assez") ||
                 lowerMsg.includes("énergie insuffisante") ||
                 lowerMsg.includes("energie insuffisante") ||
