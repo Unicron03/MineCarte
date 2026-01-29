@@ -2,20 +2,20 @@ import { prisma } from '@/lib/prisma';
 import { Prisma, GameMode } from '../generated/prisma/client';
 
 // Mettre à jour le pseudo d'un utilisateur
-export async function updateUserPseudo(userId: number, newPseudo: string) {
+export async function updateUserPseudo(userId: string, newPseudo: string) {
     return prisma.user.update({
         where: { id: userId },
-        data: { pseudo: newPseudo }
+        data: { name: newPseudo }
     });
 }
 
 // Retourne l'utilisateur par ID.
-export async function getUser(id: number = 1) {
+export async function getUser(id: string) {
 	return prisma.user.findUnique({
 		where: { id },
 		select: {
 			id: true,
-			pseudo: true,
+			name: true,
 			email: true,
 			timeNextChest: true,
 		}
@@ -23,21 +23,21 @@ export async function getUser(id: number = 1) {
 }
 
 // Supprimer un utilisateur par ID
-export async function deleteUser(userId: number) {
+export async function deleteUser(userId: string) {
     return prisma.user.delete({
         where: { id: userId }
     });
 }
 
 // Récupérer toutes les stats d'un utilisateur
-export async function getAllUserStats(userId: number) {
+export async function getAllUserStats(userId: string) {
     return prisma.game_stats.findMany({
         where: { user_id: userId }
     });
 }
 
 // Récupérer les stats pour un mode spécifique
-export async function getUserStatsForMode(userId: number, gameMode: string) {
+export async function getUserStatsForMode(userId: string, gameMode: string) {
     return prisma.game_stats.findUnique({
         where: {
             user_id_game_mode: {
@@ -62,7 +62,7 @@ export async function getLeaderboard(gameMode: GameMode, limit: number = 10) {
             user: {
                 select: {
                     id: true,
-                    pseudo: true
+                    name: true
                 }
             }
         }
@@ -70,7 +70,7 @@ export async function getLeaderboard(gameMode: GameMode, limit: number = 10) {
 }
 
 // Retourne toutes les cartes avec l'info si l'utilisateur les possède
-export async function getAllCardsWithUserCollection(userId?: number) {
+export async function getAllCardsWithUserCollection(userId?: string) {
 	const allCards = await prisma.cards.findMany({
 		orderBy: { id: 'asc' }
 	});
@@ -93,8 +93,7 @@ export async function getAllCardsWithUserCollection(userId?: number) {
 }
 
 // Retourne la collection d'un utilisateur par ID.
-export async function getUserCollection(id?: number)
-: Promise<Prisma.collectionGetPayload<{ include: { card: true } }>[]> {
+export async function getUserCollection(id?: string): Promise<Prisma.collectionGetPayload<{ include: { card: true } }>[]> {
 	return prisma.collection.findMany({
 		where: { user_id: id },
 		include: { card: true },
@@ -107,7 +106,7 @@ export async function getUserCollection(id?: number)
 }
 
 // Retourne les cartes favorites d'un utilisateur avec leur quantité
-export async function getUserFavoriteCards(userId?: number) {
+export async function getUserFavoriteCards(userId?: string) {
 	const favoriteCards = await prisma.collection.findMany({
 		where: { 
 			user_id: userId,
@@ -151,7 +150,7 @@ type DrawnCard = Prisma.cardsGetPayload<{}> & {
 };
 
 // Version optimisée - charge toutes les cartes une seule fois
-export async function drawCards(userId: number, amount: number): Promise<DrawnCard[]> {
+export async function drawCards(userId: string, amount: number): Promise<DrawnCard[]> {
     // Récupérer toutes les cartes par rareté en une seule fois
     const allCards = await prisma.cards.findMany({
         orderBy: { id: 'asc' }
@@ -228,7 +227,7 @@ export async function getAttackById(id?: number)
 }
 
 // Mets ou non une carte en favorite
-export async function setFavoriteCard(cardId: number, userId: number, isFavorite: boolean) {
+export async function setFavoriteCard(cardId: number, userId: string, isFavorite: boolean) {
 	const result = await prisma.collection.updateMany({
 		where: {
 			user_id: userId,
@@ -243,7 +242,7 @@ export async function setFavoriteCard(cardId: number, userId: number, isFavorite
 }
 
 // Récupérer les decks d'un utilisateur avec leurs cartes
-export async function getUserDecks(userId: number) {
+export async function getUserDecks(userId: string) {
     return prisma.decks.findMany({
         where: { user_id: userId },
         include: {
@@ -260,7 +259,7 @@ export async function getUserDecks(userId: number) {
 }
 
 // Crée un deck avec pour nom 'Deck n°[nombre de deck + 1]'
-export async function createDeck(userId: number) {
+export async function createDeck(userId: string) {
 	const lastDeck = await prisma.decks.findFirst({
         orderBy: {
             id: 'desc'
@@ -285,7 +284,7 @@ export async function createDeck(userId: number) {
 }
 
 // Supprime un deck par ID
-export async function deleteDeck(userId: number, deckId: number) {
+export async function deleteDeck(userId: string, deckId: number) {
 	return prisma.decks.delete({
 		where: { id: deckId, user_id: userId},
 	});
@@ -300,7 +299,7 @@ export async function renameDeck(deckId: number, newName: string) {
 }
 
 // Dupliquer un deck
-export async function duplicateDeck(userId: number, deckId: number) {
+export async function duplicateDeck(userId: string, deckId: number) {
     // Récupérer le deck original avec ses cartes
     const originalDeck = await prisma.decks.findUnique({
         where: { 
@@ -340,7 +339,7 @@ export async function duplicateDeck(userId: number, deckId: number) {
 }
 
 // Équiper un deck (désactive tous les autres decks de l'utilisateur)
-export async function equipDeck(userId: number, deckId: number) {
+export async function equipDeck(userId: string, deckId: number) {
     // Désactiver tous les decks de l'utilisateur
     await prisma.decks.updateMany({
         where: { user_id: userId },
@@ -358,7 +357,7 @@ export async function equipDeck(userId: number, deckId: number) {
 }
 
 // Récupérer le deck actif d'un utilisateur
-export async function getActiveDeck(userId: number) {
+export async function getActiveDeck(userId: string) {
     return prisma.decks.findFirst({
         where: { 
             user_id: userId,
@@ -376,6 +375,7 @@ export async function getActiveDeck(userId: number) {
 
 // Ajouter une carte au deck (ou incrémenter quantity si elle existe déjà)
 export async function addCardToDeck(deckId: number, cardId: number) {
+    // Vérifier d'abord la limite
     const existing = await prisma.deck_cards.findUnique({
         where: {
             deck_id_card_id: {
@@ -385,18 +385,24 @@ export async function addCardToDeck(deckId: number, cardId: number) {
         }
     });
 
-    if (existing) {
-        if (existing.quantity >= 2) {
-            throw new Error("Maximum 2 exemplaires de cette carte");
-        }
-        return prisma.deck_cards.update({
-            where: { id: existing.id },
-            data: { quantity: existing.quantity + 1 }
-        });
+    if (existing && existing.quantity >= 2) {
+        throw new Error("Maximum 2 exemplaires de cette carte");
     }
 
-    return prisma.deck_cards.create({
-        data: {
+    // Utiliser upsert pour éviter les race conditions
+    return prisma.deck_cards.upsert({
+        where: {
+            deck_id_card_id: {
+                deck_id: deckId,
+                card_id: cardId
+            }
+        },
+        update: {
+            quantity: {
+                increment: 1
+            }
+        },
+        create: {
             deck_id: deckId,
             card_id: cardId,
             quantity: 1

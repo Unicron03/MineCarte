@@ -9,7 +9,7 @@ export default function DeleteDeckButton({
     deckName,
     isActive
 }: { 
-    userId: number; 
+    userId: string; 
     deckId: number;
     deckName: string | null;
     isActive: boolean;

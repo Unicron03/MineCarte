@@ -20,7 +20,7 @@ import {
     AvatarFallback,
     AvatarImage,
 } from "@/shadcn/ui/avatar"
-import MarkdownViewer from "./MarkdownViewer";
+import MarkdownViewer from "./reader-viewer/MarkdownViewer";
 import { Info } from "lucide-react"
 
 export default function InfoPanel() {

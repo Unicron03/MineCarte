@@ -1,9 +1,9 @@
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import Footer from "@/components/Footer";
 import { WalletCards } from "lucide-react";
 import Link from "next/link";
-import FightCard from "@/components/combats/FightCard";
+import FightCard from "@/components/cards/FightCard";
 
 export const dynamic = 'force-dynamic';
 

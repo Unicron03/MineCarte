@@ -9,7 +9,7 @@ export default function EquipDeckButton({
     deckId,
     isActive
 }: { 
-    userId: number; 
+    userId: string; 
     deckId: number;
     isActive: boolean;
 }) {

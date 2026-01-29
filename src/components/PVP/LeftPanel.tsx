@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
-import { LeftPanelProps } from "../../interfacePVP";
+import { LeftPanelProps } from "../utils/interfacePVP";
 import DiscardPile from "./DiscardPile";
 
 

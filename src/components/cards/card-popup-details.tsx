@@ -13,11 +13,11 @@ import {
 import { Rating } from "@smastrom/react-rating";
 import Atropos from "atropos/react";
 import { Separator } from "@/shadcn/ui/separator";
-import AtroposCard from "./combats/cards/AtroposCard";
+import AtroposCard from "./AtroposCard";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Button } from "@/shadcn/ui/button";
 import { useState } from "react";
-import { Prisma } from "../../generated/prisma/client";
+import { Prisma } from "../../../generated/prisma/client";
 
 const queryClient = new QueryClient();
 

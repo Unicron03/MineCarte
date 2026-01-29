@@ -19,7 +19,7 @@ export async function POST(request: Request) {
         // Vérifier si le pseudo existe déjà
         const existingUser = await prisma.user.findFirst({
             where: {
-                pseudo: trimmedPseudo,
+                name: trimmedPseudo,
                 NOT: { id: userId }
             }
         });

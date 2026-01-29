@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { endTurn } from "../functions/gameLogic";
-import { GameState, Player } from "../../typesPvp";
+import { GameState, Player } from "../../components/utils/typesPvp";
 
 // Gère la fin de tour d'un joueur
 export function endTurnSocket(io: Server, socket: Socket, rooms: Map<string, GameState>) {

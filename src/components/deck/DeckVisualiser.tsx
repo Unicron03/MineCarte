@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { Prisma } from "../../generated/prisma/client";
-import { backCard } from "@/types";
+import { Prisma } from "../../../generated/prisma/client";
+import { backCard } from "@/components/utils/types";
 
 type DeckCardsWithCards = Prisma.deck_cardsGetPayload<{
     include: {

@@ -1,4 +1,4 @@
-import type { InGameCard, Player} from "../../typesPvp";
+import type { InGameCard, Player} from "../../components/utils/typesPvp";
 import { randomUUID } from "crypto";
 
 // Crée une carte en jeu

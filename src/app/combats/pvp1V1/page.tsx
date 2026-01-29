@@ -19,17 +19,18 @@ import TurnIndicator from "@/components/PVP/TurnIndicator";
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket"; 
 
-// --- Nouveau Hook ---
+// --- Hooks ---
 import { useGameLogic } from "@/client/functions/useGameLogic";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 import SelectionModal from "@/components/PVP/SelectionModal";
-import { actionList } from "@/data";
-import { InGameCard } from "@/typesPvp";
-import { userId as dbUserId } from "@/types";
-import { ServerDeckCard, ApiDeckCard } from "@/interfacePVP";
-
+import { actionList } from "@/components/utils/data";
+import { InGameCard } from "@/components/utils/typesPvp";
+import { ServerDeckCard, ApiDeckCard } from "@/components/utils/interfacePVP";
 
 export default function GamePage() {
+    const { userId } = useCurrentUser();
+    
     // --- État pour le deck formaté ---
     const [formattedDeck, setFormattedDeck] = useState<ServerDeckCard[] | null>(null);
 
@@ -67,11 +68,11 @@ export default function GamePage() {
     // --- RECUPERATION DU DECK ACTIF (DEBUG) ---
     useEffect(() => {
         const fetchDeck = async () => {
-            console.log("=== CLIENT: UserID réel ===", dbUserId);
+            console.log("=== CLIENT: UserID réel ===", userId);
 
             try {
                 // On appelle l'API Next.js pour récupérer le deck
-                const res = await fetch(`/api/pvp?userId=${dbUserId}`);
+                const res = await fetch(`/api/pvp?userId=${userId}`);
                 
                 if (!res.ok) {
                     throw new Error(`Erreur API: ${res.status}`);
@@ -115,7 +116,7 @@ export default function GamePage() {
             }
         };
         fetchDeck();
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         if (!socket) return;

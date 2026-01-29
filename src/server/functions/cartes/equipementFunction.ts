@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import type { Player, InGameCard, CombatState, EffectContext } from "../../../typesPvp";
+import type { Player, InGameCard, CombatState, EffectContext } from "../../../components/utils/typesPvp";
 import { heal } from "./attackFunction"; 
 import { handleMobDeath } from "../gameLogic";
 import { drawCard } from "./talentFunction";

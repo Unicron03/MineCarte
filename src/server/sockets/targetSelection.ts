@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
-import { GameState, Player, CombatState } from "../../typesPvp";
+import { GameState, Player, CombatState } from "../../components/utils/typesPvp";
 import { sendGameState } from "../functions/gameLogic";
-import { actionList } from "../../data";
+import { actionList } from "../../components/utils/data";
 import { applyArtifactDamage, healGolem, halveLifeEffect, discardOwnCard, giveInvisibleEffect, applyBurnEffect, applyGoldenAppleEffect, healEndCreature, applyBellEffect } from "../functions/cartes/artefactFunction";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 

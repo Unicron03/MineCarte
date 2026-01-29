@@ -1,6 +1,6 @@
 import React from "react";
 import CardPVP from "./CardPVP";
-import { SelectionModalProps } from "../../interfacePVP";
+import { SelectionModalProps } from "../utils/interfacePVP";
 
 
 const SelectionModal: React.FC<SelectionModalProps> = ({isOpen, title, message, targets, onSelect, onCancel, borderColor = "border-gray-500",}) => {

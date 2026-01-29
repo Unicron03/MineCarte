@@ -1,5 +1,5 @@
 import React from "react";
-import { EndGameScreenProps } from "../../interfacePVP";
+import { EndGameScreenProps } from "../utils/interfacePVP";
 
 const EndGameScreen: React.FC<EndGameScreenProps> = ({ result, onQuit }) => {
     const text =

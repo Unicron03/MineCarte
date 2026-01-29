@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Leaderboard from "@/components/leaderboard";
+import Leaderboard from "@/components/combats/leaderboard";
 import {
     Dialog,
     DialogContent,
@@ -10,11 +10,12 @@ import {
     DialogTitle,
 } from "@/shadcn/ui/dialog";
 import { Button } from "@/shadcn/ui/button";
-import DeckVisualiser from "../DeckVisualiser";
+import DeckVisualiser from "../deck/DeckVisualiser";
 import Image from "next/image";
 import Lighting from "../particles/Lighting";
 import { Prisma, GameMode } from "../../../generated/prisma/client";
-import { defaultNbCardsPerDeck } from "@/types";
+import { defaultNbCardsPerDeck } from "@/components/utils/types";
+import { toast } from "react-toastify";
 
 type DeckWithCards = Prisma.decksGetPayload<{
     include: {
@@ -56,7 +57,12 @@ export default function DialogPreFight({
         
         if (totalCards < defaultNbCardsPerDeck) {
             e.preventDefault();
-            alert(`Votre deck n'est pas complet ! Il contient ${totalCards}/${defaultNbCardsPerDeck} cartes. Complétez-le avant de combattre.`);
+            toast.error(`Votre deck n'est pas complet ! Il contient ${totalCards}/${defaultNbCardsPerDeck} cartes. Complétez-le avant de combattre.`, {
+                progressClassName: "fancy-progress-bar",
+                closeOnClick: true,
+                autoClose: 10000,
+                theme: localStorage.getItem("theme") || "light"
+            });
             return;
         }
     };
@@ -73,12 +79,12 @@ export default function DialogPreFight({
                 <Button className="glass-nav h-fit text-black dark:text-white text-2xl font-bold">{btnName}</Button>
             </DialogTrigger>
 
-            <DialogContent className="w-3/4 !max-w-screen h-3/4 !max-h-screen lg:max-w-screen-lg overflow-auto">
+            <DialogContent className="w-3/4 !max-w-screen h-3/4 !max-h-screen lg:max-w-screen-lg overflow-auto flex flex-col">
                 <DialogHeader>
-                    <DialogTitle className="self-center">Lancement du mode : {modeName} !</DialogTitle>
+                    <DialogTitle className="text-center">Lancement du mode : {modeName} !</DialogTitle>
                 </DialogHeader>
 
-                <div className="flex gap-8 h-full">
+                <div className="flex gap-8 flex-1">
                     <div className="w-1/2 h-full">
                         <Leaderboard gameMode={gameMode} />
                     </div>

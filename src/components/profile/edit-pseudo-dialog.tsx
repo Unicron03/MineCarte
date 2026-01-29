@@ -15,12 +15,13 @@ import { Button } from "@/shadcn/ui/button";
 import { Input } from "@/shadcn/ui/input";
 import { Label } from "@/shadcn/ui/label";
 import { Pencil } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function EditPseudoDialog({
     userId,
     currentPseudo
 }: {
-    userId: number;
+    userId: string;
     currentPseudo: string;
 }) {
     const [open, setOpen] = useState(false);
@@ -56,6 +57,14 @@ export default function EditPseudoDialog({
             if (response.ok) {
                 setOpen(false);
                 router.refresh();
+                toast.success("Pseudo mis à jour avec succès !",
+                    {
+                        progressClassName: "fancy-progress-bar",
+                        closeOnClick: true,
+                        autoClose: 3000,
+                        theme: localStorage.getItem("theme") || "light"
+                    }
+                );
             } else {
                 setError(data.error);
             }

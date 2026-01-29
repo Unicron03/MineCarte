@@ -1,8 +1,8 @@
 import type { Server, Socket } from "socket.io";
 import { playCard } from "../functions/gameLogic";
 import { sendGameState } from "../functions/gameLogic";
-import { actionList } from "../../data";
-import { GameState } from "../../typesPvp";
+import { actionList } from "../../components/utils/data";
+import { GameState } from "../../components/utils/typesPvp";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 
 

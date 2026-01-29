@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
-import { actionList } from "../../data";
-import { CardPVPHandProps } from "../../interfacePVP";
+import { actionList } from "../utils/data";
+import { CardPVPHandProps } from "../utils/interfacePVP";
 
 
 const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, className, hideStats }) => {

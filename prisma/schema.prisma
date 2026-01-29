@@ -28,29 +28,29 @@ enum GameMode {
 }
 
 model actions {
-  id            Int      @id @default(autoincrement())
-  name          String
-  description   String?
-  damage        Int?
-  cost          Int      @default(0)
-  multiTarget   Boolean  @default(false)
-  autoActivate  Boolean  @default(false)
-  function      Int
+  id           Int     @id @default(autoincrement())
+  name         String
+  description  String?
+  damage       Int?
+  cost         Int     @default(0)
+  multiTarget  Boolean @default(false)
+  autoActivate Boolean @default(false)
+  function     Int
 
   // Relations avec cards
-  cards_talent  cards[]  @relation("cards_talent")
-  cards_attack1 cards[]  @relation("cards_attack1")
-  cards_attack2 cards[]  @relation("cards_attack2")
+  cards_talent  cards[] @relation("cards_talent")
+  cards_attack1 cards[] @relation("cards_attack1")
+  cards_attack2 cards[] @relation("cards_attack2")
 }
 
 model cards {
-  id             Int              @id @default(autoincrement())
-  name           String           @unique
+  id             Int           @id @default(autoincrement())
+  name           String        @unique
   description    String
-  category       card_category    @default(MOB)
-  rarity         Int              @default(1)
+  category       card_category @default(MOB)
+  rarity         Int           @default(1)
   pv_durability  Int
-  cost           Int              @default(0)
+  cost           Int           @default(0)
   talent         Int?
   attack1        Int
   attack2        Int?
@@ -63,34 +63,35 @@ model cards {
   attack1_action actions  @relation("cards_attack1", fields: [attack1], references: [id])
   attack2_action actions? @relation("cards_attack2", fields: [attack2], references: [id])
 
-  collections    collection[]
-  deck_cards     deck_cards[]  // Relation many-to-many via table de liaison
+  collections collection[]
+  deck_cards  deck_cards[] // Relation many-to-many via table de liaison
 }
 
 model collection {
-  id        Int     @id @default(autoincrement())
-  user_id   Int
-  card_id   Int?
-  quantity  Int     @default(1)
-  favorite  Boolean @default(false)
+  id       Int     @id @default(autoincrement())
+  user_id  String
+  card_id  Int?
+  quantity Int     @default(1)
+  favorite Boolean @default(false)
 
   // Relations
-  user user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   card cards? @relation(fields: [card_id], references: [id])
 }
 
 model decks {
-  id        Int         @id @default(autoincrement())
-  user_id   Int
+  id        Int     @id @default(autoincrement())
+  user_id   String
   name      String?
-  is_active Boolean     @default(false)
+  is_active Boolean @default(false)
 
   // Relations
-  user       user         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
   deck_cards deck_cards[] // Les cartes de ce deck
 }
 
 // Table de liaison pour la relation many-to-many entre decks et cards
+
 model deck_cards {
   id       Int @id @default(autoincrement())
   deck_id  Int
@@ -101,47 +102,100 @@ model deck_cards {
   deck decks @relation(fields: [deck_id], references: [id], onDelete: Cascade)
   card cards @relation(fields: [card_id], references: [id], onDelete: Cascade)
 
-  @@unique([deck_id, card_id]) // Garde l'unique mais utilise quantity pour compter
+  // Garde l'unique mais utilise quantity pour compter
+  @@unique([deck_id, card_id])
 }
 
 model inventory {
   id      Int @id @default(autoincrement())
-  user_id Int @unique
+  user_id String @unique
   keys    Int
 
-  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model game_stats {
   id        Int      @id @default(autoincrement())
-  user_id   Int
+  user_id   String
   game_mode GameMode
-  
   // Statistiques de jeu
   nb_party  Int      @default(0)
   victories Int      @default(0)
   defeats   Int      @default(0)
-  
   // Points gagnés dans ce mode
   points    Int      @default(0)
-  
   // Relations
-  user      user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   // Un utilisateur ne peut avoir qu'une seule entrée par mode de jeu
   @@unique([user_id, game_mode])
 }
 
-model user {
-  id            Int       @id @default(autoincrement())
-  pseudo        String
+model User {
+  id            String    @id
+  name          String
   email         String
-  password      String
-  timeNextChest DateTime
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  timeNextChest DateTime  @default(now())
 
   // Relations
   collections collection[]
   decks       decks[]
   inventory   inventory?
-  game_stats       game_stats[]
+  game_stats  game_stats[]
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }

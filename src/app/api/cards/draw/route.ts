@@ -1,7 +1,7 @@
 import { drawCards } from "@/prisma/requests";
 import { NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma';
-import { defaultHoursTimeNextChest } from "@/types";
+import { defaultHoursTimeNextChest } from "@/components/utils/types";
 
 // Dans app/api/cards/draw/route.ts
 export async function POST(request: Request) {

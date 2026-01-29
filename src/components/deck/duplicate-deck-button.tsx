@@ -8,7 +8,7 @@ export default function DuplicateDeckButton({
     userId, 
     deckId,
 }: { 
-    userId: number; 
+    userId: string; 
     deckId: number;
 }) {
     const router = useRouter();

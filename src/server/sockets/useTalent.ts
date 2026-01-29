@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
-import { GameState } from "../../typesPvp";
-import { actionList } from "../../data";
+import { GameState } from "../../components/utils/typesPvp";
+import { actionList } from "../../components/utils/data";
 import { sendGameState } from "../functions/gameLogic";
 import { checkAndTriggerWarden } from "../functions/testEffectFonctions";
 

@@ -11,11 +11,12 @@ import {
     DialogTrigger,
 } from "@/shadcn/ui/dialog";
 import { Button } from "@/shadcn/ui/button";
+import { toast } from "react-toastify";
 
 export default function DeleteUserDialog({
     userId
 }: {
-    userId: number
+    userId: string
 }) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +34,14 @@ export default function DeleteUserDialog({
 
             if (response.ok) {
                 router.push('/');
-                alert("Compte supprimé avec succès.");
+                toast.success("Compte supprimé avec succès !",
+                    {
+                        progressClassName: "fancy-progress-bar",
+                        closeOnClick: true,
+                        autoClose: 3000,
+                        theme: localStorage.getItem("theme") || "light"
+                    }
+                );
             }
         } catch (error) {
             console.error("Erreur lors de la suppression de l'utilisateur:", error);

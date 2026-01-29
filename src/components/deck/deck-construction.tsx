@@ -1,9 +1,9 @@
 "use client";
 
-import { defaultNbCardsPerDeck } from "@/types"
+import { defaultNbCardsPerDeck } from "@/components/utils/types"
 import { Separator } from "@/shadcn/ui/separator"
 import { useState } from "react"
-import { Prisma } from "../../generated/prisma/client";
+import { Prisma } from "../../../generated/prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +26,7 @@ type CollectionWithCards = Prisma.collectionGetPayload<{
 export default function DeckConstruction({ deck, collection }: { deck: DeckWithCards, collection: CollectionWithCards }) {
     const [addCard, setAddCard] = useState<boolean>(false);
     const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const router = useRouter();
 
     // Calculer le nombre total de cartes en tenant compte des quantities
@@ -37,6 +38,9 @@ export default function DeckConstruction({ deck, collection }: { deck: DeckWithC
     );
 
     const handleRemoveCard = async (cardId: number) => {
+        if (isLoading) return;
+        
+        setIsLoading(true);
         try {
             const response = await fetch('/api/decks/removeCard', {
                 method: 'POST',
@@ -52,10 +56,15 @@ export default function DeckConstruction({ deck, collection }: { deck: DeckWithC
             }
         } catch (error) {
             console.error("Erreur lors de la suppression:", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleAddCard = async (cardId: number) => {
+        if (isLoading) return;
+        
+        setIsLoading(true);
         try {
             const response = await fetch('/api/decks/addCard', {
                 method: 'POST',
@@ -73,6 +82,8 @@ export default function DeckConstruction({ deck, collection }: { deck: DeckWithC
             }
         } catch (error) {
             console.error("Erreur lors de l'ajout:", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -82,8 +93,10 @@ export default function DeckConstruction({ deck, collection }: { deck: DeckWithC
                 {flattenedCards.map((deckCard, index) => (
                     <div 
                         key={`${deckCard.card.id}-${index}`} 
-                        className="relative w-32 h-44 cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => handleRemoveCard(deckCard.card.id)}
+                        className={`relative w-32 h-44 cursor-pointer hover:opacity-80 transition-opacity ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        onClick={() => !isLoading && handleRemoveCard(deckCard.card.id)}
                     >
                         <Image src={deckCard.card.background_img} alt={deckCard.card.name} className="absolute w-full h-full object-cover" fill />
                         {deckCard.card.third_img && <Image src={deckCard.card.third_img} alt={deckCard.card.name} className="absolute w-full h-full object-cover" fill />}
@@ -100,8 +113,12 @@ export default function DeckConstruction({ deck, collection }: { deck: DeckWithC
                 {Array.from({ length: defaultNbCardsPerDeck - totalCards }).map((_, index) => (
                     <div 
                         key={`empty-${index + totalCards}`}
-                        className={`relative w-32 h-44 border-2 border-dashed ${selectedSlot === index + totalCards ? "border-yellow-400" : "border-gray-400"} rounded-lg flex items-center justify-center text-gray-500 cursor-pointer hover:border-gray-300 transition-colors`}
-                        onClick={() => { setAddCard(true); setSelectedSlot(index + totalCards) }}
+                        className={`relative w-32 h-44 border-2 border-dashed ${
+                            selectedSlot === index + totalCards ? "border-yellow-400" : "border-gray-400"
+                        } rounded-lg flex items-center justify-center text-gray-500 ${
+                            isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-gray-300'
+                        } transition-colors`}
+                        onClick={() => !isLoading && (setAddCard(true), setSelectedSlot(index + totalCards))}
                     >
                         +
                     </div>
@@ -130,8 +147,10 @@ export default function DeckConstruction({ deck, collection }: { deck: DeckWithC
                                 return (
                                     <div
                                         key={collectionItem.card.id} 
-                                        className={`relative w-32 h-44 cursor-pointer hover:opacity-80 transition-opacity ${isMaxed ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        onClick={() => !isMaxed && handleAddCard(collectionItem.card!.id)}
+                                        className={`relative w-32 h-44 cursor-pointer hover:opacity-80 transition-opacity ${
+                                            isMaxed || isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
+                                        onClick={() => !isMaxed && !isLoading && handleAddCard(collectionItem.card!.id)}
                                     >
                                         <Image src={collectionItem.card.background_img} alt={collectionItem.card.name} className="absolute w-full h-full object-cover" fill />
                                         {collectionItem.card.third_img && <Image src={collectionItem.card.third_img} alt={collectionItem.card.name} className="absolute w-full h-full object-cover" fill />}

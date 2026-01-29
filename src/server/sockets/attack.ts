@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
-import { CombatState, Player, Action, InGameCard, GameState } from "../../typesPvp";
-import { actionList } from "../../data";
+import { CombatState, Player, Action, InGameCard, GameState } from "../../components/utils/typesPvp";
+import { actionList } from "../../components/utils/data";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
 import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect } from "../functions/cartes/attackFunction";
 import { drawCard, checkRetourALEnvoyeur } from "../functions/cartes/talentFunction";

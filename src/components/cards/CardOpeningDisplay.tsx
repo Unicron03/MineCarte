@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { backCard } from "@/types";
-import AtroposCard from "./combats/cards/AtroposCard";
+import { backCard } from "@/components/utils/types";
+import AtroposCard from "./AtroposCard";
 import { Button } from "@/shadcn/ui/button";
 import Link from "next/link";
 import CardPopupDetails from "./card-popup-details";
-import ConfettiSides from "./particles/confetti-sides";
-import Confetti from "./particles/confetti";
-import { Prisma } from "../../generated/prisma/client";
+import ConfettiSides from "@/components/particles/confetti-sides";
+import Confetti from "@/components/particles/confetti";
+import { Prisma } from "../../../generated/prisma/client";
 
 type DrawnCard = Prisma.cardsGetPayload<Record<string, never>> & { 
     isNew: boolean;

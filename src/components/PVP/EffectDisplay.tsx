@@ -1,5 +1,5 @@
 import React from 'react';
-import { EffectDisplayProps } from '../../interfacePVP';
+import { EffectDisplayProps } from '../utils/interfacePVP';
 
 const EffectDisplay: React.FC<EffectDisplayProps> = ({ title, effects, isSelf }) => {
     // Si la liste est vide ou non définie, le composant n'affiche rien.

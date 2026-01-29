@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertPopupProps } from "../../interfacePVP";
+import { AlertPopupProps } from "../utils/interfacePVP";
 
 
 const AlertPopup: React.FC<AlertPopupProps> = ({ message, isOpen, onClose }) => {

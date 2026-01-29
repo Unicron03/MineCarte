@@ -1,6 +1,5 @@
-import { Prisma } from "../generated/prisma/client";
+import { Prisma } from "../../../generated/prisma/client";
 
-export const userId: number = 2;
 export const defaultNbCardGivenInChest: number = 5;
 export const defaultNbDecksPerUser: number = 10;
 export const defaultNbCardsPerDeck: number = 15;

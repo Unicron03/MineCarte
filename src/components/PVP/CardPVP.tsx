@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
-import { CardPVPProps } from "../../interfacePVP";
-import { actionList } from "../../data";
+import { CardPVPProps } from "../utils/interfacePVP";
+import { actionList } from "../utils/data";
 
 const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = false, overrides, onTalentClick, onAttackClick, onClick, onEffectClick, onEquipmentClick}) => {
     const finalCost = overrides?.cost ?? card.cost ?? 0;

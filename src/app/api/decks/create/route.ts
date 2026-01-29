@@ -1,6 +1,6 @@
 import { createDeck, getUserDecks } from "@/prisma/requests";
 import { NextResponse } from "next/server";
-import { defaultNbDecksPerUser } from "@/types";
+import { defaultNbDecksPerUser } from "@/components/utils/types";
 
 export async function POST(request: Request) {
     try {

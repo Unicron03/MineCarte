@@ -1,5 +1,5 @@
 import { setFavoriteCard } from "@/prisma/requests";
-import { userId } from "@/types";
+import { getCurrentUserId } from "@/lib/get-user";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -27,6 +27,7 @@ export async function GET(
         // Convertir le paramètre favorite en boolean
         const favorite = favoriteStr === 'true' || favoriteStr === '1';
         
+        const userId = await getCurrentUserId();
         const result = await setFavoriteCard(cardId, userId, favorite);
         
         if (!result) {

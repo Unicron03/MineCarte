@@ -2,7 +2,7 @@
 
 import Atropos from "atropos/react";
 import Image from "next/image";
-import { Card } from "@/types";
+import { Card } from "@/components/utils/types";
 import { useEffect, useState, forwardRef, HTMLAttributes } from "react";
 
 interface AtroposCardProps extends HTMLAttributes<HTMLDivElement> {

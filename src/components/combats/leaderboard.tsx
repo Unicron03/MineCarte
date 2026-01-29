@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GameMode } from "../../generated/prisma/enums";
-import { userId } from "@/types";
+import { GameMode } from "../../../generated/prisma/enums";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 type Player = {
-    id: number;
+    id: string;
     name: string;
     points: number;
     victories: number;
@@ -16,6 +16,7 @@ type Player = {
 export default function Leaderboard({ gameMode }: { gameMode: GameMode }) {
     const [players, setPlayers] = useState<Player[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { userId } = useCurrentUser();
     
     useEffect(() => {
         const fetchLeaderboard = async () => {
@@ -52,9 +53,9 @@ export default function Leaderboard({ gameMode }: { gameMode: GameMode }) {
                     {players.map((player, index) => (
                         <li
                             key={player.id}
-                            className={`flex justify-between items-center bg-white/10 backdrop-blur-md rounded-xl p-3 mb-3 hover:bg-white/20 transition-all`
-                                + (player.id === userId && " " + "border-2 border-yellow-400")
-                            }
+                            className={`flex justify-between items-center bg-white/10 backdrop-blur-md rounded-xl p-3 mb-3 hover:bg-white/20 transition-all ${
+                                player.id === userId ? "border-2 border-yellow-400" : ""
+                            }`}
                         >
                             <div className="flex items-center gap-3">
                                 <span className="font-bold text-xl w-8">

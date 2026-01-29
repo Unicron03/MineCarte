@@ -1,5 +1,5 @@
 import React from "react";
-import { PlayerHandProps } from "../../interfacePVP";
+import { PlayerHandProps } from "../utils/interfacePVP";
 import CardPVPHand from "./CardPVPHand";
 
 

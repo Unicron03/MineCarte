@@ -1,4 +1,4 @@
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 
 export default async function CombatMode({ params }: { params: Promise<{ modeSlug: string }> }) {

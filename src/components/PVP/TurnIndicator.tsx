@@ -1,5 +1,5 @@
 import React from "react";
-import { TurnIndicatorProps } from "../../interfacePVP";
+import { TurnIndicatorProps } from "../utils/interfacePVP";
 
 
 const TurnIndicator: React.FC<TurnIndicatorProps> = ({ isMyTurn }) => {

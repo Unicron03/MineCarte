@@ -2,9 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 // --- Types et datas ---
-import { InGameCard, GameState, AttackSelection } from "../../typesPvp";
-import { actionList } from "@/data";
-import { userId as dbUserId } from "@/types";
+import { InGameCard, GameState, AttackSelection } from "../../components/utils/typesPvp";
+import { actionList } from "@/components/utils/data";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket";
@@ -22,6 +22,7 @@ export function getOrCreateUserId(): string {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useGameLogic = (initialDeck: any[] | null) => {
+    const { userId: dbUserId } = useCurrentUser();
     const socket = getSocket();
     const router = useRouter();
     const pathname = usePathname();
@@ -136,7 +137,7 @@ export const useGameLogic = (initialDeck: any[] | null) => {
             socket.off("draw");
             socket.off("opponentLeft");
         };
-    }, [socket, initialDeck]);
+    }, [socket, initialDeck, dbUserId]);
     
     // --- Déconnexion si on quitte la page ---
     useEffect(() => {

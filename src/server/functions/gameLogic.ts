@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
-import type { InGameCard, Player, GameState } from "../../typesPvp";
-import { actionList } from "../../data";
+import type { InGameCard, Player, GameState } from "../../components/utils/typesPvp";
+import { actionList } from "../../components/utils/data";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen, applyPickaxeEffect, hasElytra } from "./cartes/equipementFunction";

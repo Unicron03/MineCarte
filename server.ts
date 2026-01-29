@@ -12,7 +12,7 @@ import { quitSocket } from "./src/server/sockets/quit";
 import { disconnectSocket } from "./src/server/sockets/disconnect";
 import { targetSelectionSocket } from "./src/server/sockets/targetSelection";
 import { useTalentSocket } from "./src/server/sockets/useTalent";
-import type { GameState, Player, InGameCard } from "./src/typesPvp";
+import type { GameState, Player, InGameCard } from "./src/components/utils/typesPvp";
 
 
 const httpServer = createServer();

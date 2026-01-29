@@ -1,7 +1,7 @@
 import Footer from "@/components/Footer";
-import CardPopupDetails from "@/components/card-popup-details";
+import CardPopupDetails from "@/components/cards/card-popup-details";
 import { Heart } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import { getUserFavoriteCards, getUser } from "@/prisma/requests";
 
@@ -10,11 +10,8 @@ export const dynamic = 'force-dynamic';
 export default async function ShowcasePage({ params }: { params: Promise<{ userSlug: string }> }) {
     const { userSlug } = await params;
     
-    // Convertir userSlug (string) en nombre
-    const userId = parseInt(userSlug, 10);
-    
-    const stats = await getUser(userId);
-    const favoriteCards = await getUserFavoriteCards(userId);
+    const stats = await getUser(userSlug);
+    const favoriteCards = await getUserFavoriteCards(userSlug);
 
     return (
         <main className="flex flex-col h-screen p-4
@@ -24,7 +21,7 @@ export default async function ShowcasePage({ params }: { params: Promise<{ userS
                 <div></div> {/* Colonne gauche vide */}
                 
                 <div className="flex gap-4 justify-center">
-                    <span className="text-3xl font-medium">Vitrine de {stats?.pseudo}</span>
+                    <span className="text-3xl font-medium">Vitrine de {stats?.name}</span>
 
                     <div className="glass-nav flex items-center gap-2 cursor-pointer">
                         <Heart />

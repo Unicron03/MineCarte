@@ -3,7 +3,7 @@
 import { Button } from "@/shadcn/ui/button";
 import { useRouter } from "next/navigation";
 
-export default function CreateDeckButton({ userId }: { userId: number }) {
+export default function CreateDeckButton({ userId }: { userId: string }) {
     const router = useRouter();
 
     const handleCreateDeck = async () => {

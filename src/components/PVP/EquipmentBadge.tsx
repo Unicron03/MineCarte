@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import type { InGameCard } from "@/typesPvp";
+import type { InGameCard } from "@/components/utils/typesPvp";
 
 export const EquipmentBadge = ({ equipment }: { equipment?: InGameCard[] }) => {
     if (!equipment || equipment.length === 0) return null;

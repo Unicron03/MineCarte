@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
-import { EffectDetailsModalProps } from "../../interfacePVP";
+import { EffectDetailsModalProps } from "../utils/interfacePVP";
 
 
 const EffectDetailsModal: React.FC<EffectDetailsModalProps> = ({isOpen, onClose, title, description, imageName, type,}) => {

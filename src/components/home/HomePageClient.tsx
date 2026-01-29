@@ -1,10 +1,10 @@
 "use client";
 
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import Footer from "@/components/Footer";
-import { Video } from "@/components/VideoReader";
-import Chest from "@/components/Chest";
+import { Video } from "@/components/reader-viewer/VideoReader";
+import Chest from "../Chest";
 import { UserStar, Store, Smile, Key, Bolt } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";

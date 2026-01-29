@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { Player, CombatState, InGameCard } from "../../../typesPvp";
+import { Player, CombatState, InGameCard } from "../../../components/utils/typesPvp";
 import { handleMobDeath } from "../gameLogic";
 
 // Pioche une ou plusieurs cartes

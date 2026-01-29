@@ -1,7 +1,7 @@
 import Image from "next/image";
-import DialogPreFight from "./DialogPreFight";
+import DialogPreFight from "../combats/DialogPreFight";
 import { getActiveDeck, getUserStatsForMode } from "@/prisma/requests";
-import { userId } from "@/types";
+import { getCurrentUserId } from "@/lib/get-user";
 import { GameMode } from "../../../generated/prisma/client";
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +14,7 @@ type Action = {
 }
 
 export default async function FightCard({ bg, name, isComing, actions } : { bg?: string, name?: string, isComing?: boolean, actions?: Action[] }) {
+    const userId = await getCurrentUserId();
     const activeDeck = await getActiveDeck(userId);
 
     return (

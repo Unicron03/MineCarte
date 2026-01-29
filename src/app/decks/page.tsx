@@ -1,10 +1,10 @@
-import { ThemeToggle } from "@/components/ThemeToggle"
+import { ThemeToggle } from "@/components/theme/ThemeToggle"
 import InfoPanel from "@/components/InfoPanel"
 import Footer from "@/components/Footer"
 import { Button } from "@/shadcn/ui/button"
 import Image from "next/image"
 import { Check, CircleEllipsis } from "lucide-react"
-import { userId, defaultNbDecksPerUser, backCard, defaultNbCardsPerDeck } from "@/types"
+import { defaultNbDecksPerUser, backCard, defaultNbCardsPerDeck } from "@/components/utils/types"
 import {
     Drawer,
     DrawerClose,
@@ -22,22 +22,24 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/shadcn/ui/dropdown-menu"
-import DeckConstruction from "@/components/deck-construction"
+import DeckConstruction from "@/components/deck/deck-construction"
 import { getUserCollection, getUserDecks } from "@/prisma/requests";
 import CreateDeckButton from "@/components/deck/create-deck-button";
 import DeleteDeckButton from "@/components/deck/delete-deck-button";
 import RenameDeckDialog from "@/components/deck/rename-deck-dialog";
 import DuplicateDeckButton from "@/components/deck/duplicate-deck-button";
 import EquipDeckButton from "@/components/deck/equip-deck-button";
+import { getCurrentUserId } from "@/lib/get-user"
 
 export const dynamic = 'force-dynamic';
 
 export default async function DecksPage() {
+    const userId = await getCurrentUserId();
     const collection = await getUserCollection(userId);
     const userDecks = await getUserDecks(userId);
 
     return (
-        <main className="flex flex-col h-auto p-4 tsparticles
+        <main className="flex flex-col min-h-screen p-4 tsparticles
             bg-fixed bg-cover bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('/img/background_black.png')]
         ">
             <header className="flex justify-end items-center gap-4">
@@ -152,7 +154,7 @@ export default async function DecksPage() {
                 </div>
             </div>
 
-            <Footer className="sticky bottom-4"/>
+            <Footer className="mt-auto"/>
         </main>
     )
 }

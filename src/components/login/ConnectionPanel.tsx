@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react"
+import { useForm, zodResolver } from "@mantine/form"
 import { Button } from "@/shadcn/ui/button" 
 import {
     Dialog,
@@ -16,62 +16,72 @@ import { Input } from "@/shadcn/ui/input"
 import { Label } from "@/shadcn/ui/label"
 import { Eye, EyeOff } from "lucide-react"
 import { toast } from "react-toastify"
-// import { useUser } from "@/context/UserContext"
 import { useRouter } from "next/navigation"
-import Link from "next/link";
+import { ConnexionForm, connexionSchema } from "@/components/utils/schema"
+import { signIn } from "@/lib/auth-client"
+import { useState } from "react"
+import { useAuthPanel } from "./AuthPanelContext"
 
 export function ConnectionPanel() {
     const router = useRouter()
-    // const { setUser } = useUser()
-    const formRef = useRef<HTMLFormElement>(null)
+    const { openConnectionPanel, setOpenConnectionPanel, switchToInscription } = useAuthPanel()
     const [showPassword, setShowPassword] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        const formData = new FormData(formRef.current!)
-        const name = formData.get("name")
-        const password = formData.get("password")
+    const form = useForm<ConnexionForm>({
+        validate: zodResolver(connexionSchema),
+        initialValues: {
+            email: "",
+            password: "",
+        },
+    })
+
+    const handleSubmit = async (values: ConnexionForm) => {
+        setIsLoading(true)
 
         try {
-            const response = await fetch("http://localhost:3001/api/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ name, password }),
+            const { error } = await signIn.email({
+                email: values.email,
+                password: values.password,
             })
 
-            if (!response.ok) {
-                toast.error("Ces identifiants ne correspondent à aucuns utilisateur connu.", {
-                    progressClassName: "fancy-progress-bar", closeOnClick: true, autoClose: 10000, theme: localStorage.getItem("theme") || "light"
-                });
+            if (error) {
+                toast.error("Ces identifiants ne correspondent à aucun utilisateur connu.", {
+                    progressClassName: "fancy-progress-bar",
+                    closeOnClick: true,
+                    autoClose: 10000,
+                    theme: localStorage.getItem("theme") || "light"
+                })
                 return
             }
 
-            const user = await response.json()
-
-            if (user.role === "ADMIN") {
-                // setUser(user)
-                toast.success(
-                    <span>Connexion réussie. Bienvenue administrateur <strong>{user.name}</strong> 👋</span>, 
-                    { progressClassName: "fancy-progress-bar", closeOnClick: true, autoClose: 3000, theme: localStorage.getItem("theme") || "light" }
-                )
-                router.push("/ask")
-            } else {
-                // setUser(user)
-                toast.success(
-                    <span>Connexion réussie. Bienvenue utilisateur <strong>{user.name}</strong> 👋</span>, 
-                    { progressClassName: "fancy-progress-bar", closeOnClick: true, autoClose: 3000, theme: localStorage.getItem("theme") || "light" }
-                )
-                router.push("/ask")
-            }
+            toast.success(
+                <span>Connexion réussie. Bienvenue 👋</span>,
+                {
+                    progressClassName: "fancy-progress-bar",
+                    closeOnClick: true,
+                    autoClose: 3000,
+                    theme: localStorage.getItem("theme") || "light"
+                }
+            )
+            setOpenConnectionPanel(false)
+            router.push("/home")
+            router.refresh()
         } catch (error) {
             console.error("Erreur lors de la connexion :", error)
+            toast.error("Une erreur est survenue lors de la connexion.", {
+                progressClassName: "fancy-progress-bar",
+                closeOnClick: true,
+                autoClose: 10000,
+                theme: localStorage.getItem("theme") || "light"
+            })
+        } finally {
+            setIsLoading(false)
         }
     }
 
     return (
-        <Dialog>
+        <Dialog open={openConnectionPanel} onOpenChange={setOpenConnectionPanel}>
             <DialogTrigger asChild>
                 <Button className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black">
                     Se connecter
@@ -79,27 +89,36 @@ export function ConnectionPanel() {
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-[475px] h-fit bg-white dark:bg-black">
-                <form ref={formRef} onSubmit={handleSubmit}>
+                <form onSubmit={form.onSubmit(handleSubmit)}>
                     <DialogHeader>
                         <DialogTitle>Connexion</DialogTitle>
                         <DialogDescription className="text-[#a1a1a1]">
-                            Une super description.
+                            Connectez-vous pour accéder à votre collection MineCarte.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-5 my-4">
                         <div className="grid gap-3">
-                            <Label htmlFor="name-input">Identifiant</Label>
-                            <Input id="name-input" name="name" />
+                            <Label htmlFor="email-input">Adresse email</Label>
+                            <Input
+                                id="email-input"
+                                type="email"
+                                placeholder="super.exemple@gmail.com"
+                                {...form.getInputProps("email")}
+                            />
+                            {form.errors.email && (
+                                <span className="text-sm text-red-500">{form.errors.email}</span>
+                            )}
                         </div>
 
                         <div className="grid gap-3 relative">
                             <Label htmlFor="password-input">Mot de passe</Label>
                             <Input
                                 id="password-input"
-                                name="password"
                                 type={showPassword ? "text" : "password"}
+                                placeholder="Votre mot de passe"
                                 className="pr-10"
+                                {...form.getInputProps("password")}
                             />
                             <button
                                 type="button"
@@ -109,6 +128,9 @@ export function ConnectionPanel() {
                             >
                                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
                             </button>
+                            {form.errors.password && (
+                                <span className="text-sm text-red-500">{form.errors.password}</span>
+                            )}
                         </div>
                     </div>
 
@@ -118,25 +140,18 @@ export function ConnectionPanel() {
                                 type="button"
                                 className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black"
                                 style={{ outlineWidth: "0.15rem", outlineOffset: "-1px" }}
+                                disabled={isLoading}
                             >
                                 Annuler
                             </Button>
                         </DialogClose>
-                        {/* <Button
+                        <Button
                             type="submit"
                             className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black"
+                            disabled={isLoading}
                         >
-                            Se connecter
-                        </Button> */}
-                        <Link href="/home">
-                            <Button
-                                type="button"
-                                className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black"
-                                style={{ outlineWidth: "0.15rem", outlineOffset: "-1px" }}
-                            >
-                                Se connecter
-                            </Button>
-                        </Link>
+                            {isLoading ? "Connexion..." : "Se connecter"}
+                        </Button>
                     </DialogFooter>
 
                     <DialogFooter className="mt-4 justify-center">
@@ -144,7 +159,8 @@ export function ConnectionPanel() {
                             <Button
                                 variant="link"
                                 className="text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
-                                onClick={() => router.push("/register")}
+                                onClick={switchToInscription}
+                                type="button"
                             >
                                 Pas encore de compte ? Inscrivez-vous !
                             </Button>
@@ -152,7 +168,11 @@ export function ConnectionPanel() {
                             <Button
                                 variant="link"
                                 className="text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
-                                onClick={() => router.push("/reset-password")}
+                                onClick={() => {
+                                    setOpenConnectionPanel(false)
+                                    router.push("/reset-password")
+                                }}
+                                type="button"
                             >
                                 Mot de passe oublié ?
                             </Button>

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
         // Formater les données pour le frontend
         const formattedLeaderboard = leaderboard.map(player => ({
             id: player.user_id,
-            name: player.user.pseudo,
+            name: player.user.name,
             points: player.points,
             victories: player.victories,
             defeats: player.defeats,

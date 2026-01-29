@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
-import { InGameCard, CombatState, Player } from "../../typesPvp";
-import { actionList } from "../../data";
+import { InGameCard, CombatState, Player } from "../../components/utils/typesPvp";
+import { actionList } from "../../components/utils/data";
 import { handleMobDeath } from "./gameLogic";
 import { soundDetection } from "./cartes/talentFunction";
 import { getEquipmentAttackCostReduction } from "./cartes/equipementFunction";

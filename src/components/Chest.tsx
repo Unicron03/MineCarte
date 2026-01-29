@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import CardOpeningDisplay from "./CardOpeningDisplay";
+import CardOpeningDisplay from "./cards/CardOpeningDisplay";
 import { Prisma } from "../../generated/prisma/client";
-import { userId } from "@/types";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
+import { toast } from "react-toastify";
 
 type DrawnCard = Prisma.cardsGetPayload<Record<string, never>> & { 
     isNew: boolean;
@@ -16,7 +17,7 @@ export default function Chest({
     onOpeningChange,
     isAvailable,
     timeNextChest
-}: { 
+}: {
     onOpeningChange: (isOpen: boolean) => void;
     isAvailable: boolean;
     timeNextChest: Date;
@@ -25,8 +26,14 @@ export default function Chest({
     const [drawnCards, setDrawnCards] = useState<DrawnCard[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isDrawing, setIsDrawing] = useState(false);
+    const { userId, isLoading } = useCurrentUser();
 
     const drawCardsFromAPI = async (): Promise<DrawnCard[]> => {
+        if (!userId) {
+            alert("Erreur : utilisateur non connecté");
+            return [];
+        }
+
         setIsDrawing(true);
         
         try {
@@ -53,14 +60,23 @@ export default function Chest({
     };
 
     const handleChestClick = async () => {
+        if (isLoading || !userId) { // Vérifie isLoading ET userId
+            alert("Chargement en cours...");
+            return;
+        }
+
         if (!isAvailable) {
-            alert(`Le coffre n'est pas encore disponible ! Revenez à ${timeNextChest.toLocaleTimeString()}`);
+            toast.error(`Le coffre n'est pas encore disponible ! Revenez à ${timeNextChest.getHours()}h${timeNextChest.getMinutes().toString().padStart(2, '0')}m${timeNextChest.getSeconds().toString().padStart(2, '0')}s`, {
+                progressClassName: "fancy-progress-bar",
+                closeOnClick: true,
+                autoClose: 10000,
+                theme: localStorage.getItem("theme") || "light"
+            });
             return;
         }
 
         if (isDrawing) return;
 
-        // Activer le GIF d'ouverture
         setIsAnimated(true);
 
         const newDrawnCards = await drawCardsFromAPI();
@@ -88,16 +104,16 @@ export default function Chest({
                 width={400}
                 height={100}
                 className={`mb-8 z-9999 drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)] 
-                    ${isAvailable ? "animate-coffre cursor-pointer" : "cursor-not-allowed"}
-                    ${isDrawing ? "opacity-50 cursor-wait" : ""}
+                    ${isAvailable && !isLoading ? "animate-coffre cursor-pointer" : "cursor-not-allowed"}
+                    ${isDrawing || isLoading ? "opacity-50 cursor-wait" : ""}
                     ${!isAvailable ? "opacity-50 grayscale" : ""}
                 `}
                 onClick={handleChestClick}
             />
 
-            {isDrawing && (
+            {(isDrawing || isLoading) && (
                 <p className="text-center text-xl font-bold animate-pulse">
-                    Tirage en cours...
+                    {isLoading ? "Chargement..." : "Tirage en cours..."}
                 </p>
             )}
 

@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useState } from "react";
 import CardPVPHand from "./CardPVPHand";
-import { DiscardPileProps } from "../../interfacePVP";
+import { DiscardPileProps } from "../utils/interfacePVP";
 
 
 const DiscardPile: React.FC<DiscardPileProps> = ({ cards, style, className, label }) => {

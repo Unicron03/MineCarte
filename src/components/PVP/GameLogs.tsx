@@ -1,5 +1,5 @@
 import React from "react";
-import { GameLogsProps } from "../../interfacePVP";
+import { GameLogsProps } from "../utils/interfacePVP";
 
 const GameLogs: React.FC<GameLogsProps> = ({ logs }) => {
     return (
