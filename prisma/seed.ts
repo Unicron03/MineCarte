@@ -446,6 +446,34 @@ async function actions() {
         },
     });
 
+    const shulker_talent = await prisma.actions.create({
+        data: {
+            name: "Lévitation",
+            description: "Mélange une carte de la main de l'adversaire dans son deck.",
+            function: 29
+        },
+    });
+
+    const shulker_attack1 = await prisma.actions.create({
+        data: {
+            name: "Projectile de l'End",
+            description: "Inflige 10 PV à un mob aléatoire du plateau de l'adversaire & Inflige 10 PV à l'adversaire.",
+            damage: 10,
+            cost: 2,
+            function: 30
+        },
+    });
+
+    const shulker_attack2 = await prisma.actions.create({
+        data: {
+            name: "Protection dimensionnelle",
+            description: "Réduit de 50% toutes les attaques adverses du prochain tour de votre adversaire.",
+            damage: 0,
+            cost: 5,
+            function: 31
+        },
+    });
+
     return {
         skeleton_attack1, skeleton_attack2,
         dragon_talent, dragon_attack1, dragon_attack2,
@@ -466,7 +494,8 @@ async function actions() {
         snowgolem_attack1,
         squid_talent,
         cat_talent, cat_attack1,
-        egg_talent
+        egg_talent,
+        shulker_talent, shulker_attack1, shulker_attack2
     };
 }
 
@@ -779,6 +808,22 @@ async function cards(actions: SeedActions) {
             cost: 0,
             attack1: actions.egg_talent.id,
             ...(await loadCardImages('egg'))
+        }
+    })
+
+    const card_shulker = await prisma.cards.upsert({
+        where: { id: 21, name: 'Shulker' },
+        update: {},
+        create: {
+            id: 21,
+            name: 'Shulker',
+            description: "Caché dans sa boîte, il attend le moment parfait pour attaquer.",
+            pv_durability: 5,
+            cost: 0,
+            talent: actions.shulker_talent.id,
+            attack1: actions.shulker_attack1.id,
+            attack2: actions.shulker_attack2.id,
+            ...(await loadCardImages('shulker'))
         }
     })
 }
