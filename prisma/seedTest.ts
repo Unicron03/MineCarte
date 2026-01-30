@@ -1,86 +1,133 @@
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { auth } from '@/lib/auth'
 
 async function users() {
-    // Hasher les mots de passe
-    const hashedPassword = await bcrypt.hash('root', 10);
-
-    const alice = await prisma.user.create({
-        data: {
-            id: 'user-alice-1',
+    // Créer Alice via Better Auth
+    await auth.api.signUpEmail({
+        body: {
             email: 'alice@prisma.io',
+            password: 'azertyuiop',
             name: 'Alice',
-            emailVerified: true,
-            timeNextChest: new Date(),
-        },
-    });
-
-    // Créer le compte avec mot de passe pour Alice
-    await prisma.account.create({
-        data: {
-            id: 'account-alice-1',
-            accountId: 'alice@prisma.io',
-            providerId: 'credential',
-            userId: alice.id,
-            password: hashedPassword,
         }
     });
 
-    const john = await prisma.user.create({
-        data: {
-            id: 'user-john-2',
+    // Mettre à jour Alice avec l'ID personnalisé et emailVerified
+    const alice = await prisma.user.findUnique({ where: { email: 'alice@prisma.io' } });
+    if (alice) {
+        await prisma.user.update({
+            where: { id: alice.id },
+            data: { 
+                emailVerified: true,
+                timeNextChest: new Date(),
+            }
+        });
+        // Mettre à jour l'ID si nécessaire (optionnel)
+        // await prisma.user.update({ where: { id: alice.id }, data: { id: 'user-alice-1' } });
+    }
+
+    // Créer John via Better Auth
+    await auth.api.signUpEmail({
+        body: {
             email: 'john.doe@prisma.io',
+            password: 'azertyuiop',
             name: 'JohnMCLF',
-            emailVerified: true,
-            timeNextChest: new Date(),
-        },
-    });
-
-    // Créer le compte avec mot de passe pour John
-    await prisma.account.create({
-        data: {
-            id: 'account-john-2',
-            accountId: 'john.doe@prisma.io',
-            providerId: 'credential',
-            userId: john.id,
-            password: hashedPassword,
         }
     });
+
+    const john = await prisma.user.findUnique({ where: { email: 'john.doe@prisma.io' } });
+    if (john) {
+        await prisma.user.update({
+            where: { id: john.id },
+            data: { 
+                emailVerified: true,
+                timeNextChest: new Date(),
+            }
+        });
+    }
+
+    // Créer EVDP via Better Auth
+    await auth.api.signUpEmail({
+        body: {
+            email: 'enzo@gmail.com',
+            password: 'azertyuiop',
+            name: 'evdp',
+        }
+    });
+
+    const evdp = await prisma.user.findUnique({ where: { email: 'enzo@gmail.com' } });
+    if (evdp) {
+        await prisma.user.update({
+            where: { id: evdp.id },
+            data: { 
+                emailVerified: true,
+                timeNextChest: new Date(),
+            }
+        });
+    }
 
     console.log('✅ Users created');
 }
 
 async function collection() {
-    const collectionAlice = await prisma.collection.createMany({
+    // Récupérer les IDs réels des utilisateurs
+    const alice = await prisma.user.findUnique({ where: { email: 'alice@prisma.io' } });
+    const john = await prisma.user.findUnique({ where: { email: 'john.doe@prisma.io' } });
+    const evdp = await prisma.user.findUnique({ where: { email: 'enzo@gmail.com' } });
+
+    if (!alice || !john || !evdp) {
+        throw new Error('Users not found');
+    }
+
+    await prisma.collection.createMany({
         data: [
-            { user_id: 'user-alice-1', card_id: 2, favorite: true },
-            { user_id: 'user-alice-1', card_id: 3 },
-            { user_id: 'user-alice-1', card_id: 4 },
-            { user_id: 'user-alice-1', card_id: 5, favorite: true },
+            { user_id: alice.id, card_id: 2, favorite: true },
+            { user_id: alice.id, card_id: 3 },
+            { user_id: alice.id, card_id: 4 },
+            { user_id: alice.id, card_id: 5, favorite: true },
         ]
     });
 
-    const collectionJohn = await prisma.collection.createMany({
+    await prisma.collection.createMany({
         data: [
-            { user_id: 'user-john-2', card_id: 3 },
-            { user_id: 'user-john-2', card_id: 4 },
-            { user_id: 'user-john-2', card_id: 1, favorite: true },
-            { user_id: 'user-john-2', card_id: 8 },
-            { user_id: 'user-john-2', card_id: 9, favorite: true },
-            { user_id: 'user-john-2', card_id: 10, favorite: true },
-            { user_id: 'user-john-2', card_id: 11 },
-            { user_id: 'user-john-2', card_id: 12 },
+            { user_id: john.id, card_id: 3 },
+            { user_id: john.id, card_id: 4 },
+            { user_id: john.id, card_id: 1, favorite: true },
+            { user_id: john.id, card_id: 8 },
+            { user_id: john.id, card_id: 9, favorite: true },
+            { user_id: john.id, card_id: 10, favorite: true },
+            { user_id: john.id, card_id: 11 },
+            { user_id: john.id, card_id: 12 },
         ]
+    });
+
+    // Récupérer toutes les cartes existantes
+    const allCards = await prisma.cards.findMany({ select: { id: true } });
+
+    // Créer la collection complète pour EVDP
+    await prisma.collection.createMany({
+        data: allCards.map(card => ({
+            user_id: evdp.id,
+            card_id: card.id,
+            favorite: false,
+        }))
     });
 
     console.log('✅ Collections created');
 }
 
 async function userStats() {
-    const userStatsAlice = await prisma.game_stats.createMany({
+    const alice = await prisma.user.findUnique({ where: { email: 'alice@prisma.io' } });
+    const john = await prisma.user.findUnique({ where: { email: 'john.doe@prisma.io' } });
+    const evdp = await prisma.user.findUnique({ where: { email: 'enzo@gmail.com' } });
+
+    if (!alice || !john || !evdp) {
+        throw new Error('Users not found');
+    }
+
+    await prisma.game_stats.createMany({
         data: [
             {
-                user_id: 'user-alice-1',
+                user_id: alice.id,
                 game_mode: 'ONE_V_ONE',
                 nb_party: 10,
                 victories: 7,
@@ -88,7 +135,7 @@ async function userStats() {
                 points: 1500,
             },
             {
-                user_id: 'user-alice-1',
+                user_id: alice.id,
                 game_mode: 'IA_V_ONE',
                 nb_party: 5,
                 victories: 5,
@@ -96,7 +143,7 @@ async function userStats() {
                 points: 1000,
             },
             {
-                user_id: 'user-alice-1',
+                user_id: alice.id,
                 game_mode: 'DONJON',
                 nb_party: 2,
                 victories: 1,
@@ -106,10 +153,10 @@ async function userStats() {
         ]
     });
 
-    const userStatsJohn = await prisma.game_stats.createMany({
+    await prisma.game_stats.createMany({
         data: [
             {
-                user_id: 'user-john-2',
+                user_id: john.id,
                 game_mode: 'ONE_V_ONE',
                 nb_party: 25,
                 victories: 18,
@@ -117,7 +164,7 @@ async function userStats() {
                 points: 2300,
             },
             {
-                user_id: 'user-john-2',
+                user_id: john.id,
                 game_mode: 'IA_V_ONE',
                 nb_party: 12,
                 victories: 1,
@@ -125,7 +172,7 @@ async function userStats() {
                 points: 1800,
             },
             {
-                user_id: 'user-john-2',
+                user_id: john.id,
                 game_mode: 'DONJON',
                 nb_party: 5,
                 victories: 4,
@@ -135,13 +182,58 @@ async function userStats() {
         ]
     });
 
+    await prisma.game_stats.createMany({
+        data: [
+            {
+                user_id: evdp.id,
+                game_mode: 'ONE_V_ONE',
+                nb_party: 0,
+                victories: 0,
+                defeats: 0,
+                points: 0,
+            },
+            {
+                user_id: evdp.id,
+                game_mode: 'IA_V_ONE',
+                nb_party: 0,
+                victories: 0,
+                defeats: 0,
+                points: 0,
+            },
+            {
+                user_id: evdp.id,
+                game_mode: 'DONJON',
+                nb_party: 0,
+                victories: 0,
+                defeats: 0,
+                points: 0,
+            },
+            {
+                user_id: evdp.id,
+                game_mode: 'VAGUES',
+                nb_party: 0,
+                victories: 0,
+                defeats: 0,
+                points: 0,
+            },
+        ]
+    });
+
     console.log('✅ Game stats created');
 }
 
 async function decks() {
-    const deckAlice1 = await prisma.decks.create({
+    const alice = await prisma.user.findUnique({ where: { email: 'alice@prisma.io' } });
+    const john = await prisma.user.findUnique({ where: { email: 'john.doe@prisma.io' } });
+    const evdp = await prisma.user.findUnique({ where: { email: 'enzo@gmail.com' } });
+
+    if (!alice || !john || !evdp) {
+        throw new Error('Users not found');
+    }
+
+    await prisma.decks.create({
         data: {
-            user_id: 'user-alice-1',
+            user_id: alice.id,
             name: "Mon premier deck",
             is_active: true,
             deck_cards: {
@@ -154,9 +246,9 @@ async function decks() {
         }
     });
 
-    const deckAlice2 = await prisma.decks.create({
+    await prisma.decks.create({
         data: {
-            user_id: 'user-alice-1',
+            user_id: alice.id,
             name: "Deck secondaire",
             is_active: false,
             deck_cards: {
@@ -168,9 +260,9 @@ async function decks() {
         }
     });
 
-    const deckJohn1 = await prisma.decks.create({
+    await prisma.decks.create({
         data: {
-            user_id: 'user-john-2',
+            user_id: john.id,
             name: "Deck de John",
             is_active: true,
             deck_cards: {
@@ -180,6 +272,21 @@ async function decks() {
                     { card_id: 9, quantity: 1 },
                     { card_id: 10, quantity: 1 },
                     { card_id: 11, quantity: 1 },
+                ]
+            }
+        }
+    });
+
+    await prisma.decks.create({
+        data: {
+            user_id: evdp.id,
+            name: "Deck EVDP",
+            is_active: true,
+            deck_cards: {
+                create: [
+                    { card_id: 1, quantity: 1 },
+                    { card_id: 2, quantity: 1 },
+                    { card_id: 3, quantity: 1 },
                 ]
             }
         }

@@ -248,7 +248,13 @@ export async function getUserDecks(userId: string) {
         include: {
             deck_cards: {
                 include: {
-                    card: true
+                    card: {
+                        include: {
+                            talent_action: true,
+                            attack1_action: true,
+                            attack2_action: true,
+                        }
+                    },
                 }
             }
         },
@@ -366,7 +372,13 @@ export async function getActiveDeck(userId: string) {
         include: {
             deck_cards: {
                 include: {
-                    card: true
+                    card: {
+                        include: {
+                            talent_action: true,
+                            attack1_action: true,
+                            attack2_action: true,
+                        }
+                    },
                 }
             }
         }
