@@ -17,3 +17,20 @@ Veuillez suivre ces instructions afin d'éviter de tout casser :
 - Ajoutez les fichiers fusionné ```git add .```
 - Commitez les fichiers fusionné ```git commit -m "Fusion avec commit précèdent"```
 - Envoyez sur le dépôt distant ```git push```
+
+## Build du docker
+
+1. Lancer le build
+```
+docker compose up --build -d
+```
+
+2. AU CHOIX :
+- Initialiser la BDD **SANS** données de tests (compte fake, etc.) :
+```
+./init-build.bat
+```
+- Initialiser la BDD **AVEC** données de tests (compte fake, etc.) :
+```
+./init-build-test.bat
+```
