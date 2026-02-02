@@ -55,4 +55,5 @@ export const backCard: Prisma.cardsGetPayload<Record<string, never>> = {
     main_img: "/cards/transparent.png",
     background_img: "/cards/transparent.png",
     third_img: "/cards/back.png",
+    folder_name: "cards/default.png",
 }

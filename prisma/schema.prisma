@@ -57,6 +57,7 @@ model cards {
   main_img       String
   background_img String
   third_img      String?
+  folder_name    String
 
   // Relations
   talent_action  actions? @relation("cards_talent", fields: [talent], references: [id])

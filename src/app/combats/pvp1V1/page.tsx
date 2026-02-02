@@ -25,6 +25,7 @@ import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 import SelectionModal from "@/components/PVP/SelectionModal";
 import { actionList } from "@/components/utils/data";
+
 import { InGameCard } from "@/components/utils/typesPvp";
 import { ServerDeckCard, ApiDeckCard } from "@/components/utils/interfacePVP";
 
@@ -53,7 +54,7 @@ export default function GamePage() {
         targets: (InGameCard & { boardIndex: number })[] 
     } | null>(null);
 
-    // --- État pour les alertes (ex: pas assez d'énergie) ---
+    // --- État pour les alertes ---
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
      // --- État pour la modale de détails (Effets/Equipements) ---
@@ -65,13 +66,12 @@ export default function GamePage() {
         type: "effect" | "equipment" | "talent";
     } | null>(null);
 
-    // --- RECUPERATION DU DECK ACTIF (DEBUG) ---
+    // --- RECUPERATION DU DECK ACTIF ---
     useEffect(() => {
         const fetchDeck = async () => {
             console.log("=== CLIENT: UserID réel ===", userId);
 
             try {
-                // On appelle l'API Next.js pour récupérer le deck
                 const res = await fetch(`/api/pvp?userId=${userId}`);
                 
                 if (!res.ok) {
@@ -84,16 +84,13 @@ export default function GamePage() {
 
                 if (data.deck_cards && Array.isArray(data.deck_cards)) {
                     data.deck_cards.forEach((dc: ApiDeckCard) => {
-                        
-                        // Transformation pour createCard
-                        // createCard(name, cost, category, pv, talent, attack1, attack2)
-                        
                         let category = "mob";
                         if (dc.card.category === "EQUIPMENT") category = "equipement";
                         else if (dc.card.category === "ARTIFACT") category = "artefact";
                         
                         const cardDef: ServerDeckCard = {
                             name: dc.card.name,
+                            imageName: dc.card.folder_name,
                             cost: dc.card.cost,
                             category: category,
                             pv: dc.card.pv_durability,
@@ -102,7 +99,6 @@ export default function GamePage() {
                             attack2: dc.card.attack2_action?.name || null
                         };
 
-                        // Ajouter autant de fois que la quantité
                         for (let i = 0; i < dc.quantity; i++) {
                             deckForServer.push(cardDef);
                         }

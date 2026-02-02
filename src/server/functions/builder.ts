@@ -2,8 +2,8 @@ import type { InGameCard, Player} from "../../components/utils/typesPvp";
 import { randomUUID } from "crypto";
 
 // Crée une carte en jeu
-export const createCard = (name: string, cost: number,  category: "mob" | "equipement" | "artefact",  pv_durability: number | null,  talent: string | null,  attack1: string | null,  attack2: string | null): InGameCard => {
-    const base = { uuid: randomUUID(), name, imageName: name.toLowerCase(), cost};
+export const createCard = (name: string, imageName: string, cost: number,  category: "mob" | "equipement" | "artefact",  pv_durability: number | null,  talent: string | null,  attack1: string | null,  attack2: string | null): InGameCard => {
+    const base = { uuid: randomUUID(), name, imageName, cost};
 
     if (category === "mob") {
         const mobCard: InGameCard = {
