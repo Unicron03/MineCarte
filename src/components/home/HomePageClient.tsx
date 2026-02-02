@@ -48,6 +48,7 @@ export default function HomePageClient({
 
             if (diff <= 0) {
                 setTimeRemaining("Disponible !");
+                setIsAvailable(true);
                 return;
             }
 
@@ -55,6 +56,7 @@ export default function HomePageClient({
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
+            setIsAvailable(false);
             setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
         };
 
