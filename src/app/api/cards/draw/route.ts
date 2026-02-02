@@ -3,31 +3,98 @@ import { NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma';
 import { defaultHoursTimeNextChest } from "@/components/utils/types";
 
-// Dans app/api/cards/draw/route.ts
 export async function POST(request: Request) {
     try {
-        const { userId, amount } = await request.json();
+        const { userId, amount, useKeys = false } = await request.json();
         
-        // Vérifier le cooldown
+        // Vérifier le cooldown et les clés
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: { timeNextChest: true }
+            select: { 
+                timeNextChest: true, 
+                inventory: { 
+                    select: { keys: true } 
+                } 
+            }
         });
-        
-        if (user && user.timeNextChest > new Date()) {
-            const timeLeft = Math.ceil((user.timeNextChest.getTime() - Date.now()) / 1000 / 60);
+
+        if (!user) {
             return NextResponse.json(
-                { error: `Coffre disponible dans ${timeLeft} minute(s)` }, 
-                { status: 429 }
+                { error: "Utilisateur introuvable" }, 
+                { status: 404 }
+            );
+        }
+
+        const now = new Date();
+        const timeLeft = user.timeNextChest.getTime() - now.getTime();
+        const hoursLeft = Math.ceil(timeLeft / (1000 * 60 * 60));
+
+        // Si le coffre n'est pas encore disponible
+        if (timeLeft > 0) {
+            const hoursLeft = Math.ceil(timeLeft / (1000 * 60 * 60));
+            const keysNeeded = hoursLeft;
+            const userKeys = user.inventory?.keys || 0;
+
+            // Si l'utilisateur ne veut pas ou ne peut pas utiliser de clés
+            if (!useKeys) {
+                return NextResponse.json({
+                    error: `Coffre pas encore disponible. Revenez à ${user.timeNextChest.getHours()}h${user.timeNextChest.getMinutes().toString().padStart(2, '0')}m${user.timeNextChest.getSeconds().toString().padStart(2, '0')}s, ou partez gagner des clés au combat !`,
+                    canUseKeys: userKeys >= keysNeeded,
+                    keysNeeded,
+                    userKeys,
+                    hoursLeft
+                }, { status: 429 });
+            }
+
+            // Vérifier si l'utilisateur a assez de clés
+            if (userKeys < keysNeeded) {
+                return NextResponse.json({
+                    error: `Vous n'avez pas assez de clés. Il vous faut ${keysNeeded} clés mais vous n'en avez que ${userKeys}.`,
+                    keysNeeded,
+                    userKeys
+                }, { status: 400 });
+            }
+
+            // Utiliser les clés pour bypasser le cooldown
+            await prisma.inventory.update({
+                where: { user_id: userId },
+                data: {
+                    keys: {
+                        decrement: keysNeeded
+                    }
+                }
+            });
+        }
+        
+        // Tirer les cartes
+        const drawnCards = await drawCards(userId, amount);
+        
+        // Calculer le nouveau timeNextChest
+        // Si on a utilisé des clés, partir de maintenant + defaultHours
+        // Sinon, partir du timeNextChest actuel + defaultHours
+        let newTimeNextChest: Date;
+
+        if (timeLeft > 0 && useKeys) {
+            const hoursLeftExact = timeLeft / (1000 * 60 * 60);
+            const surplusHours = hoursLeft - hoursLeftExact;
+
+            newTimeNextChest = new Date(
+                now.getTime()
+                + defaultHoursTimeNextChest * 60 * 60 * 1000
+                - surplusHours * 60 * 60 * 1000
+            );
+        } else {
+            newTimeNextChest = new Date(
+                now.getTime() + defaultHoursTimeNextChest * 60 * 60 * 1000
             );
         }
         
-        const drawnCards = await drawCards(userId, amount);
-        
-        // Mettre à jour le cooldown (ex: 8)
+        // Mettre à jour le cooldown
         await prisma.user.update({
             where: { id: userId },
-            data: { timeNextChest: new Date(Date.now() + defaultHoursTimeNextChest * 60 * 60 * 1000) }
+            data: {
+                timeNextChest: newTimeNextChest
+            }
         });
         
         return NextResponse.json({ cards: drawnCards }, { status: 200 });
