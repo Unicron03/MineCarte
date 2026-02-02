@@ -8,7 +8,7 @@ export const defaultHoursTimeNextChest: number = 8;
 export type Card = {
     id: number;
     name: string;
-    description: string;
+    description: string | null;
     category: string;
     rarity: number;
     pv_durability: number;

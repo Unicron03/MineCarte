@@ -223,7 +223,9 @@ function CardPopupDetailsInner(
 
                             <Separator />
 
-                            <span>{card.description}</span>
+                            { card.description && card.description !== null &&
+                                <span>Description : {card.description}</span>
+                            }
                         </div>
                     </div>
                 </DialogContent>

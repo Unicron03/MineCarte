@@ -38,7 +38,9 @@ async function actions() {
             description: "Inflige 10 PV à un mob adverse.",
             damage: 10,
             cost: 1,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -48,7 +50,7 @@ async function actions() {
             description: "Inglige 8 PV à l'adversaire.",
             damage: 8,
             cost: 2,
-            function: 2
+            function_name: "attackDirectPlayer"
         },
     });
 
@@ -57,7 +59,7 @@ async function actions() {
             name: "Croissance légendaire",
             description: "Un oeuf de dragon doit doit être présent sur votre plateau pour poser cette carte.",
             autoActivate: true,
-            function: 4
+            function_name: "defaultFunction"
         },
     });
 
@@ -67,7 +69,7 @@ async function actions() {
             description: "Inflige 35 PV à chaque mob adverse.",
             damage: 35,
             cost: 4,
-            function: 3
+            function_name: "AttackAllMobs"
         },
     });
 
@@ -77,7 +79,9 @@ async function actions() {
             description: "Inflige 70 PV à un mob adverse.",
             damage: 70,
             cost: 6,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -85,7 +89,7 @@ async function actions() {
         data: {
             name: "Récupération d'élément",
             description: "Permet de piocher aléatoirement une carte de votre pioche à chaque tour. Cette carte ira dans votre main.",
-            function: 5
+            function_name: "drawCard"
         },
     });
 
@@ -95,7 +99,7 @@ async function actions() {
             description: "Inflige 10 PV à chaque mob adverse.",
             damage: 10,
             cost: 2,
-            function: 3
+            function_name: "AttackAllMobs"
         },
     });
 
@@ -105,7 +109,9 @@ async function actions() {
             description: "Inflige 30 PV à un mob adverse & A une chance d'esquiver tous les dégâts d'une attaque lors du prochain tour.",
             damage: 30,
             cost: 3,
-            function: 3
+            function_name: "attackEsquive",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -114,7 +120,7 @@ async function actions() {
             name: "Pression psychologique",
             description: "Si le Creeper meurt d'une attaque de l'adversaire, il inflige 15 PV à chaque mob adverse et 5 PV à l'adversaire.",
             autoActivate: true,
-            function: 7
+            function_name: "pressionPsychologique"
         },
     });
 
@@ -124,7 +130,9 @@ async function actions() {
             description: "Inflige 60 PV et meurt instantanément après l'attaque.",
             damage: 60,
             cost: 4,
-            function: 8
+            function_name: "damageAndDie",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -133,7 +141,7 @@ async function actions() {
             name: "Gardien du village",
             description: "Si un villageois est présent sur votre plateau, les attaques du golem sont multipliées par 2.",
             autoActivate: true,
-            function: 9
+            function_name: "passive"
         },
     });
 
@@ -143,7 +151,9 @@ async function actions() {
             description: "Inflige 25 PV à un mob adverse.",
             damage: 25,
             cost: 3,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -152,7 +162,7 @@ async function actions() {
             name: "Bon gros tank",
             description: "Lors du prochain tour, réduis les dégâts subis sur cette carte de 30%.",
             cost: 2,
-            function: 10
+            function_name: "applyTankEffect"
         },
     });
 
@@ -162,7 +172,9 @@ async function actions() {
             description: "Inflige 5 PV à un mob adverse pour chaque villageois présent sur le plateau (le votre et celui de votre adversaire).",
             damage: 5,
             cost: 1,
-            function: 11
+            function_name: "defaultFunction",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -171,7 +183,7 @@ async function actions() {
             name: "Appel à un ami",
             description: "Si une carte Golem est présent dans vos 5 prochaines cartes à piocher, vous récupérez cette carte dans votre main.",
             cost: 2,
-            function: 12
+            function_name: "defaultFunction"
         },
     });
 
@@ -181,7 +193,9 @@ async function actions() {
             description: "Inflige 10 PV à un mob adverse.",
             damage: 10,
             cost: 1,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -190,7 +204,9 @@ async function actions() {
             name: "Affamé",
             description: "Inflige 5 PV à un mob adverse & Retire 1 RedStone à l'adversaire.",
             cost: 2,
-            function: 13
+            function_name: "voleEnergie",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -200,7 +216,9 @@ async function actions() {
             description: "Inflige 5 PV à un mob adverse.",
             damage: 5,
             cost: 1,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -210,7 +228,9 @@ async function actions() {
             description: "Soigne un mob allié au choix de 10 PV.",
             damage: 10,
             cost: 1,
-            function: 13
+            function_name: "heal",
+            requiresTarget: true,
+            targetType: "ally"
         },
     });
 
@@ -218,7 +238,8 @@ async function actions() {
         data: {
             name: "Carapace protectrice",
             description: "Lors du prochain tour, réduit les dégâts de la première attaque adverse de 50%.",
-            function: 15
+            autoActivate: true,
+            function_name: "applyCarapaceEffect"
         },
     });
 
@@ -227,7 +248,7 @@ async function actions() {
             name: "Tortue géniale",
             description: "Lors du prochain tour, si la Tortue meurt d'une attaque, le joueur ne prend pas les dégâts superflus.",
             cost: 2,
-            function: 16
+            function_name: "applyTortueGenialeEffect"
         },
     });
 
@@ -236,7 +257,7 @@ async function actions() {
             name: "Flammes perpétuelles",
             description: "Si ce Blaze vient de lancer une attaque, il a 50% de chance d'envoyer une boule de feu infligeant 5 PV à l'adversaire.",
             autoActivate: true,
-            function: 17
+            function_name: "defaultFunction"
         },
     });
 
@@ -246,7 +267,7 @@ async function actions() {
             description: "Inflige 10 PV à tous les mobs adverses.",
             damage: 10,
             cost: 1,
-            function: 3
+            function_name: "AttackAllMobs"
         },
     });
 
@@ -254,7 +275,8 @@ async function actions() {
         data: {
             name: "Ralentissement calculé",
             description: "Retire 1 RedStone à l'adversaire.",
-            function: 18
+            autoActivate: true,
+            function_name: "removeEnergyFromOpponent"
         },
     });
 
@@ -264,7 +286,9 @@ async function actions() {
             description: "Inflige 10 PV à un mob adverse.",
             damage: 10,
             cost: 1,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -272,7 +296,8 @@ async function actions() {
         data: {
             name: "Détection sonore",
             description: "Si un talent adverse est activé, le mob actionneur prend 10 PV.",
-            function: 19
+            autoActivate: true,
+            function_name: "soundDetection"
         },
     });
 
@@ -282,7 +307,7 @@ async function actions() {
             description: "Inflige 25 PV à chaque mob adverse.",
             damage: 25,
             cost: 4,
-            function: 3
+            function_name: "AttackAllMobs"
         },
     });
 
@@ -292,7 +317,9 @@ async function actions() {
             description: "Inflige 40 PV à un mob adverse et l'étourdit au prochain tour.",
             damage: 40,
             cost: 4,
-            function: 20
+            function_name: "hurlementSombre",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -301,7 +328,7 @@ async function actions() {
             name: "Lien éternel",
             description: "Si 2 Gardien sont présents sur votre plateau, votre santé ne peut pas descendre en dessous de 10 PV après une attaque.",
             autoActivate: true,
-            function: 21
+            function_name: "defaultFunction"
         },
     });
 
@@ -311,7 +338,9 @@ async function actions() {
             description: "Inflige 15 PV à un mob adverse.",
             damage: 15,
             cost: 1,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -321,7 +350,9 @@ async function actions() {
             description: "Inflige 60 PV à un mob adverse.",
             damage: 60,
             cost: 5,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -329,7 +360,8 @@ async function actions() {
         data: {
             name: "Enchantement puissant",
             description: "Se rajoute 5 PV (même au-delà de sa vie).",
-            function: 22
+            autoActivate: true,
+            function_name: "enchantementPuissant"
         },
     });
 
@@ -339,7 +371,9 @@ async function actions() {
             description: "Vous soigne de 10 PV maximum.",
             damage: 10,
             cost: 2,
-            function: 23
+            function_name: "heal",
+            requiresTarget: true,
+            targetType: "ally"
         },
     });
 
@@ -349,7 +383,9 @@ async function actions() {
             description: "Inflige 20 PV à un mob adverse.",
             damage: 20,
             cost: 2,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -358,7 +394,7 @@ async function actions() {
             name: "Retour à l'envoyeur",
             description: "Une fois lancé, l'attaque du Ghast à 25% de chance de revenir sur lui-même.",
             autoActivate: true,
-            function: 22
+            function_name: "checkRetourALEnvoyeur"
         },
     });
 
@@ -368,7 +404,9 @@ async function actions() {
             description: "Inflige 40 PV à un mob adverse.",
             damage: 40,
             cost: 2,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -377,7 +415,7 @@ async function actions() {
             name: "Explosion noire",
             description: "Une fois que le Wither atteint 30% de ses PV, les dégâts de ses attaques sont multipliés par 2.",
             autoActivate: true,
-            function: 22
+            function_name: "checkWitherExplosionNoire"
         },
     });
 
@@ -387,7 +425,7 @@ async function actions() {
             description: "Inflige 25 PV à chaque mob adverse.",
             damage: 25,
             cost: 3,
-            function: 3
+            function_name: "AttackAllMobs"
         },
     });
 
@@ -397,7 +435,9 @@ async function actions() {
             description: "Inflige 45 dégâts à un mob adverse.",
             damage: 45,
             cost: 4,
-            function: 1
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -407,7 +447,7 @@ async function actions() {
             description: "Inflige 5 PV à chaque mob adverse.",
             damage: 5,
             cost: 0,
-            function: 3
+            function_name: "AttackAllMobs"
         },
     });
 
@@ -415,7 +455,8 @@ async function actions() {
         data: {
             name: "Encre noire",
             description: "La première attaque du prochain tour de votre adversaire sera attribué aléatoirement à l'un de vos mobs.",
-            function: 26
+            autoActivate: true,
+            function_name: "encreNoire"
         },
     });
 
@@ -423,7 +464,8 @@ async function actions() {
         data: {
             name: "Peur viscérale",
             description: "Défausse aléatoirement un Creeper sur le plateau de votre adversaire.",
-            function: 22
+            autoActivate: true,
+            function_name: "defaultFunction"
         },
     });
 
@@ -433,16 +475,9 @@ async function actions() {
             description: "Inflige aléatoirement entre 5 et 15 PV à un mob adverse.",
             damage: Math.floor(Math.random() * (15 - 5 + 1)) + 5, // (syntaxe : max - min)
             cost: 1,
-            function: 1
-        },
-    });
-
-    const egg_talent = await prisma.actions.create({
-        data: {
-            name: "Exigence légendaire",
-            description: "Si un Ender dragon est posé sur votre plateau, on défausse automatiquement cette carte.",
-            autoActivate: true,
-            function: 28
+            function_name: "AttackOneMob",
+            requiresTarget: true,
+            targetType: "enemy"
         },
     });
 
@@ -450,7 +485,7 @@ async function actions() {
         data: {
             name: "Lévitation",
             description: "Mélange une carte de la main de l'adversaire dans son deck.",
-            function: 29
+            function_name: "passive"
         },
     });
 
@@ -460,7 +495,7 @@ async function actions() {
             description: "Inflige 10 PV à un mob aléatoire du plateau de l'adversaire & Inflige 10 PV à l'adversaire.",
             damage: 10,
             cost: 2,
-            function: 30
+            function_name: "defaultFunction",
         },
     });
 
@@ -470,7 +505,307 @@ async function actions() {
             description: "Réduit de 50% toutes les attaques adverses du prochain tour de votre adversaire.",
             damage: 0,
             cost: 5,
-            function: 31
+            function_name: "defaultFunction",
+        },
+    });
+
+    const egg_talent = await prisma.actions.create({
+        data: {
+            name: "Exigence légendaire",
+            description: "Si un Ender dragon est posé sur votre plateau, on défausse automatiquement cette carte.",
+            autoActivate: true,
+            function_name: "defaultFunction"
+        },
+    });
+
+    // --- ARTEFACTS & EQUIPEMENTS ---
+    const craftingtable_effect = await prisma.actions.create({
+        data: {
+            name: "Table de craft",
+            description: "Réduit le coût de la prochaine carte de 3.",
+            damage: 3,
+            cost: 1,
+            function_name: "applyEffect"
+        },
+    });
+
+    const anvil_effect = await prisma.actions.create({
+        data: {
+            name: "Enclume",
+            description: "Récupère un équipement de la défausse (si disponible en surplus).",
+            cost: 1,
+            function_name: "anvilEffect"
+        },
+    });
+
+    const armor_effect = await prisma.actions.create({
+        data: {
+            name: "Armure",
+            description: "Permet de protégé le mob rattaché en soustrayant 10 dégâts à chaque attaque.",
+            cost: 2,
+            function_name: "armure"
+        },
+    });
+
+    const potion_effect = await prisma.actions.create({
+        data: {
+            name: "Soin",
+            description: "Soigne 10 PV à un mob",
+            damage: 10,
+            cost: 2,
+            function_name: "heal",
+            requiresTarget: true
+        },
+    });
+
+    const potion_regen_effect = await prisma.actions.create({
+        data: {
+            name: "Potion",
+            description: "Soigne le mob rattaché de 10 PV à chaque tour.",
+            damage: 10,
+            cost: 2,
+            function_name: "potionRegen"
+        },
+    });
+
+    const potion_player_effect = await prisma.actions.create({
+        data: {
+            name: "Lit",
+            description: "Soigne votre joueur de 25 dégâts.",
+            damage: 25,
+            cost: 2,
+            function_name: "healPlayer"
+        },
+    });
+
+    const book_effect = await prisma.actions.create({
+        data: {
+            name: "Livre",
+            description: "Pioche 2 cartes.",
+            damage: 2,
+            cost: 1,
+            function_name: "drawCardsEffect"
+        },
+    });
+
+    const tnt_effect = await prisma.actions.create({
+        data: {
+            name: "TNT",
+            description: "Inflige 30 dégâts à une carte ennemie.",
+            damage: 30,
+            cost: 2,
+            function_name: "applyArtifactDamage",
+            requiresTarget: true,
+            targetType: "enemy"
+        },
+    });
+
+    const ironingot_effect = await prisma.actions.create({
+        data: {
+            name: "Lingot de fer",
+            description: "Soigne 20 PV d'un Golem allié.",
+            damage: 20,
+            cost: 1,
+            function_name: "healGolem",
+            requiresTarget: true,
+            targetType: "ally"
+        },
+    });
+
+    const endcrsystal_effect = await prisma.actions.create({
+        data: {
+            name: "End Crystal",
+            description: "Réduit de moitié la vie d'un mob adverse. (L'armure ne fonctionne pas)",
+            cost: 2,
+            function_name: "halveLifeEffect",
+            requiresTarget: true,
+            targetType: "enemy"
+        },
+    });
+
+    const enderpearl_effect = await prisma.actions.create({
+        data: {
+            name: "Ender Pearl",
+            description: "Défausse une carte de votre plateau.",
+            cost: 2,
+            function_name: "discardOwnCard",
+            requiresTarget: true,
+            targetType: "ally"
+        },
+    });
+
+    const fishingrod_effect = await prisma.actions.create({
+        data: {
+            name: "Canne à pêche",
+            description: "75% de chance de voler 2 énergies, 25% de chance d'en donner 2.",
+            cost: 1,
+            function_name: "fishingRodEffect"
+        },
+    });
+
+    const invisibility_effect = await prisma.actions.create({
+        data: {
+            name: "Potion d'invisibilité",
+            description: "Rend un mob invisible. Il ne peut pas être attaqué par l'adversaire au prochain tour.",
+            cost: 1,
+            function_name: "giveInvisibleEffect",
+            requiresTarget: true,
+            targetType: "ally"
+        },
+    });
+
+    const lava_effect = await prisma.actions.create({
+        data: {
+            name: "Seau de lave",
+            description: "Applique un malus de brûlure à une carte ennemie : elle perd 10 PV à chaque tour pendant 3 tours.",
+            damage: 10,
+            cost: 2,
+            function_name: "applyBurnEffect",
+            requiresTarget: true,
+            targetType: "enemy"
+        },
+    });
+
+    const goldenapple_effect = await prisma.actions.create({
+        data: {
+            name: "Pomme dorée",
+            description: "Soigne 10 PV et augmente les dégâts de 10 pendant 3 tours.",
+            damage: 10,
+            cost: 2,
+            function_name: "applyGoldenAppleEffect",
+            requiresTarget: true,
+            targetType: "ally"
+        },
+    });
+
+    const enchanttable_effect = await prisma.actions.create({
+        data: {
+            name: "Table d'enchantement",
+            description: "Pendant ce tour, tous les équipements coûtent 1 énergie.",
+            cost: 2,
+            function_name: "applyEnchantmentTableEffect"
+        },
+    });
+
+    const endportal_effect = await prisma.actions.create({
+        data: {
+            name: "Portail de l’End",
+            description: "Soigne 30 PV d'un Enderman, Shulker ou Ender Dragon.",
+            damage: 30,
+            cost: 2,
+            function_name: "healEndCreature",
+            requiresTarget: true,
+            targetType: "ally"
+        },
+    });
+
+    const bell_effect = await prisma.actions.create({
+        data: {
+            name: "Cloche",
+            description: "Si le Warden ciblé a moins de 50% de sa vie, ses attaques coûtent 1 au prochain tour.",
+            cost: 2,
+            function_name: "applyBellEffect",
+            requiresTarget: true,
+            targetType: "ally"
+        },
+    });
+
+    const levitation_effect = await prisma.actions.create({
+        data: {
+            name: "Lévitation",
+            description: "Mélange une carte de la main de l'adversaire dans son deck.",
+            function_name: "levitation",
+            autoActivate: true
+        },
+    });
+
+    const sword_effect = await prisma.actions.create({
+        data: {
+            name: "Épée",
+            description: "Après une attaque, inflige 5 PV à chaque mob adverse.",
+            function_name: "swordEffect",
+            autoActivate: true
+        },
+    });
+
+    const pickaxe_effect = await prisma.actions.create({
+        data: {
+            name: "Pioche",
+            description: "Au début du tour, pioche une carte supplémentaire.",
+            function_name: "pickaxeEffect",
+            autoActivate: true
+        },
+    });
+
+    const shield_effect = await prisma.actions.create({
+        data: {
+            name: "Bouclier",
+            description: "Si le mob rattaché subit des attaques, inflige 10 PV au mob attaquant.",
+            function_name: "shieldEffect",
+            autoActivate: true
+        },
+    });
+
+    const elytra_effect = await prisma.actions.create({
+        data: {
+            name: "Elitra",
+            description: "Si le mob rattaché meurt, il est déposé dans votre main.",
+            function_name: "elytraEffect",
+            autoActivate: true
+        },
+    });
+
+    const totem_effect = await prisma.actions.create({
+        data: {
+            name: "Totem",
+            description: "Si le mob meurt, il survit avec 5 PV et le Totem est détruit.",
+            function_name: "totemEffect",
+            autoActivate: true
+        },
+    });
+
+    const bow_effect = await prisma.actions.create({
+        data: {
+            name: "Arc",
+            description: "Ajoute 10 dégâts aux attaques. Sur attaque de zone, cible un seul ennemi aléatoire.",
+            function_name: "bowEffect",
+            autoActivate: true
+        },
+    });
+
+    const speedboots_effect = await prisma.actions.create({
+        data: {
+            name: "Botte célérité",
+            description: "Réduit le coût des attaques du mob de 1.",
+            function_name: "speedBootsEffect",
+            autoActivate: true
+        },
+    });
+
+    const dodge_effect = await prisma.actions.create({
+        data: {
+            name: "Esquive",
+            description: "45% de chance d'éviter les dégâts d'une attaque.",
+            function_name: "passive",
+            autoActivate: true
+        },
+    });
+
+    const invisible_effect = await prisma.actions.create({
+        data: {
+            name: "Invisible",
+            description: "Ne peut pas être ciblé par une attaque adverse.",
+            function_name: "passive",
+            autoActivate: true
+        },
+    });
+
+    const stun_effect = await prisma.actions.create({
+        data: {
+            name: "Stun",
+            description: "Étourdi : Ne peut pas attaquer ce tour-ci.",
+            function_name: "passive",
+            autoActivate: true
         },
     });
 
@@ -494,8 +829,38 @@ async function actions() {
         snowgolem_attack1,
         squid_talent,
         cat_talent, cat_attack1,
+        shulker_talent, shulker_attack1, shulker_attack2,
         egg_talent,
-        shulker_talent, shulker_attack1, shulker_attack2
+        // Artefacts & équipements
+        craftingtable_effect,
+        anvil_effect,
+        armor_effect,
+        potion_effect,
+        potion_regen_effect,
+        potion_player_effect,
+        book_effect,
+        tnt_effect,
+        ironingot_effect,
+        endcrsystal_effect,
+        enderpearl_effect,
+        fishingrod_effect,
+        invisibility_effect,
+        lava_effect,
+        goldenapple_effect,
+        enchanttable_effect,
+        endportal_effect,
+        bell_effect,
+        levitation_effect,
+        sword_effect,
+        pickaxe_effect,
+        shield_effect,
+        elytra_effect,
+        totem_effect,
+        bow_effect,
+        speedboots_effect,
+        dodge_effect,
+        invisible_effect,
+        stun_effect
     };
 }
 
@@ -847,8 +1212,52 @@ async function cards(actions: SeedActions) {
             folder_name: 'shulker'
         }
     })
-}
 
+    const card_sword = await prisma.cards.upsert({
+        where: { id: 22, name: 'Épée' },
+        update: {},
+        create: {
+            id: 22,
+            name: 'Épée',
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 2,
+            attack1: actions.sword_effect.id,
+            ...(await loadCardImages('sword')),
+            folder_name: 'sword'
+        }
+    })
+
+    const card_pickaxe = await prisma.cards.upsert({
+        where: { id: 23, name: 'Pioche' },
+        update: {},
+        create: {
+            id: 23,
+            name: 'Pioche',
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 2,
+            attack1: actions.pickaxe_effect.id,
+            ...(await loadCardImages('pickaxe')),
+            folder_name: 'pickaxe'
+        }
+    })
+
+    const card_bow = await prisma.cards.upsert({
+        where: { id: 24, name: 'Arc' },
+        update: {},
+        create: {
+            id: 24,
+            name: 'Arc',
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 2,
+            attack1: actions.bow_effect.id,
+            ...(await loadCardImages('bow')),
+            folder_name: 'bow'
+        }
+    })
+}
 
 async function main() {
     // await prisma.actions.deleteMany({})
