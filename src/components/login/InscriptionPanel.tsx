@@ -49,7 +49,16 @@ export function InscriptionPanel() {
                 onRequest: () => {
                     // Loading déjà géré par isLoading
                 },
-                onSuccess: () => {
+                onSuccess: async (ctx) => {
+                    // Initialiser les données après inscription réussie
+                    if (ctx.data?.user?.id) {
+                        await fetch('/api/user/initialize', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId: ctx.data.user.id })
+                        });
+                    }
+
                     toast.success(
                         <span>Inscription réussie. Bienvenue 👋</span>,
                         {
@@ -59,6 +68,7 @@ export function InscriptionPanel() {
                             theme: localStorage.getItem("theme") || "light"
                         }
                     )
+
                     setOpenInscriptionPanel(false)
                     router.push("/home")
                     router.refresh()

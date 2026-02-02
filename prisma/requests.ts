@@ -18,6 +18,11 @@ export async function getUser(id: string) {
 			name: true,
 			email: true,
 			timeNextChest: true,
+            inventory: {
+                select: {
+                    keys: true
+                }
+            }
 		}
 	});
 }

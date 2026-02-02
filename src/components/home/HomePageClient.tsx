@@ -7,32 +7,50 @@ import { Video } from "@/components/reader-viewer/VideoReader";
 import Chest from "../Chest";
 import { UserStar, Store, Smile, Key, Bolt } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HomePageClient({ 
-    videoSrc, 
+    videoSrc,
+    initialUserKeys,
     timeNextChest 
 }: { 
     videoSrc: string | null;
+    initialUserKeys: number;
     timeNextChest: Date;
 }) {
+    const router = useRouter();
     const [isCardOpening, setCardOpening] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState("");
     const [isAvailable, setIsAvailable] = useState(false);
+    const [userKeys, setUserKeys] = useState(initialUserKeys);
+    const canTimerRunRef = useRef(true);
+
+    const handleKeysUpdate = () => {
+        canTimerRunRef.current = false;
+    };
+
+    const handleEndingTirage = () => {
+        canTimerRunRef.current = true;
+    };
+
+    useEffect(() => {
+        setUserKeys(initialUserKeys);
+    }, [initialUserKeys]);
 
     useEffect(() => {
         const updateTimer = () => {
+            if (!canTimerRunRef.current) return;
+
             const now = new Date();
             const nextChest = new Date(timeNextChest);
             const diff = nextChest.getTime() - now.getTime();
 
             if (diff <= 0) {
                 setTimeRemaining("Disponible !");
-                setIsAvailable(true);
                 return;
             }
 
-            setIsAvailable(false);
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
@@ -40,19 +58,14 @@ export default function HomePageClient({
             setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
         };
 
-        // Mettre à jour immédiatement
         updateTimer();
-
-        // Mettre à jour toutes les secondes
         const interval = setInterval(updateTimer, 1000);
 
-        // Nettoyer l'intervalle au démontage
         return () => clearInterval(interval);
     }, [timeNextChest]);
 
     return (
         <main className="flex flex-col h-screen p-4 tsparticles">
-            {/* Header */}
             <header className="flex">
                 <div className="glass-nav">
                     <Smile className="m-2"/>
@@ -67,14 +80,18 @@ export default function HomePageClient({
                 </div>
             </header>
 
-            {/* Vidéo */}
             <div>
                 {videoSrc && <Video src={videoSrc} />}
             </div>
 
-            {/* Zone Coffre - prend tout l'espace restant */}
             <div className="flex-1 flex flex-col justify-center items-center">
-                <Chest onOpeningChange={setCardOpening} isAvailable={isAvailable} timeNextChest={timeNextChest} />
+                <Chest 
+                    onOpeningChange={setCardOpening}
+                    isAvailable={isAvailable}
+                    userKeys={userKeys}
+                    onKeysUpdate={handleKeysUpdate}
+                    onEndingTirage={handleEndingTirage}
+                />
 
                 <div className="glass-nav flex gap-4 items-center px-4 text-base font-medium">
                     <span className={timeRemaining === "Disponible !" ? "text-green-400 font-bold" : ""}>
@@ -82,7 +99,7 @@ export default function HomePageClient({
                     </span>
                     <div className="glass-highlight flex gap-2 rounded-full px-2 py-1.5">
                         <Key/>
-                        <span>25</span>
+                        <span>{userKeys}</span>
                     </div>
                 </div>
             </div>
