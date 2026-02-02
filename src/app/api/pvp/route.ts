@@ -11,16 +11,11 @@ export async function GET(request: Request) {
     console.log(`[API PVP] Recherche de deck pour UserID: ${userId} (Param reçu: ${userIdParam})`);
 
     try {
-        // 1. Essayer de récupérer le deck ACTIF de l'utilisateur
         let deck = await getActiveDeck(userId);
-
-        // 2. Fallback : Si aucun deck actif, prendre le premier deck de l'utilisateur
         if (!deck) {
             console.log(`[API PVP] Aucun deck actif pour UserID ${userId}. Recherche d'un deck quelconque...`);
             deck = await getUserDecks(userId).then(decks => decks[0]);
         }
-
-        // 3. Fallback ultime : Prendre le premier deck de la base de données (pour le débug)
         if (!deck) {
             console.log(`[API PVP] Aucun deck trouvé pour UserID ${userId}. Recherche d'un deck global...`);
             deck = await prisma.decks.findFirst({

@@ -43,6 +43,7 @@ io.on("connection", (socket: Socket) => {
         console.log(`[Server] Deck reçu pour ${userId} (${deck.length} cartes)`);
         playerDeck = deck.map((d) => createCard(
             d.name,
+            d.imageName,
             d.cost,
             d.category,
             d.pv,

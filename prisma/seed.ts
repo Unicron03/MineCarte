@@ -511,7 +511,8 @@ async function cards(actions: SeedActions) {
             cost: 1,
             attack1: actions.skeleton_attack1.id,
             attack2: actions.skeleton_attack2.id,
-            ...(await loadCardImages('skeleton'))
+            ...(await loadCardImages('skeleton')),
+            folder_name: 'skeleton'
         }
     })
 
@@ -528,7 +529,8 @@ async function cards(actions: SeedActions) {
             talent: actions.dragon_talent.id,
             attack1: actions.dragon_attack1.id,
             attack2: actions.dragon_attack2.id,
-            ...(await loadCardImages('dragon'))
+            ...(await loadCardImages('dragon')),
+            folder_name: 'dragon'
         }
     })
 
@@ -545,7 +547,8 @@ async function cards(actions: SeedActions) {
             talent: actions.enderman_talent.id,
             attack1: actions.enderman_attack1.id,
             attack2: actions.enderman_attack2.id,
-            ...(await loadCardImages('enderman'))
+            ...(await loadCardImages('enderman')),
+            folder_name: 'enderman'
         }
     })
 
@@ -561,7 +564,8 @@ async function cards(actions: SeedActions) {
             cost: 3,
             talent: actions.creeper_talent.id,
             attack1: actions.creeper_attack1.id,
-            ...(await loadCardImages('creeper'))
+            ...(await loadCardImages('creeper')),
+            folder_name: 'creeper'
         }
     })
 
@@ -578,7 +582,8 @@ async function cards(actions: SeedActions) {
             talent: actions.golem_talent.id,
             attack1: actions.golem_attack1.id,
             attack2: actions.golem_attack2.id,
-            ...(await loadCardImages('golem'))
+            ...(await loadCardImages('golem')),
+            folder_name: 'golem'
         }
     })
 
@@ -593,7 +598,8 @@ async function cards(actions: SeedActions) {
             cost: 1,
             attack1: actions.villager_attack1.id,
             attack2: actions.villager_attack2.id,
-            ...(await loadCardImages('villager'))
+            ...(await loadCardImages('villager')),
+            folder_name: 'villager'
         }
     })
 
@@ -608,7 +614,8 @@ async function cards(actions: SeedActions) {
             cost: 1,
             attack1: actions.zombie_attack1.id,
             attack2: actions.zombie_attack2.id,
-            ...(await loadCardImages('zombie'))
+            ...(await loadCardImages('zombie')),
+            folder_name: 'zombie'
         }
     })
 
@@ -623,7 +630,8 @@ async function cards(actions: SeedActions) {
             cost: 0,
             attack1: actions.axolotl_attack1.id,
             attack2: actions.axolotl_attack2.id,
-            ...(await loadCardImages('axolotl'))
+            ...(await loadCardImages('axolotl')),
+            folder_name: 'axolotl'
         }
     })
 
@@ -638,7 +646,8 @@ async function cards(actions: SeedActions) {
             cost: 3,
             talent: actions.turtle_talent.id,
             attack1: actions.turtle_attack1.id,
-            ...(await loadCardImages('turtle'))
+            ...(await loadCardImages('turtle')),
+            folder_name: 'turtle'
         }
     })
 
@@ -653,7 +662,8 @@ async function cards(actions: SeedActions) {
             cost: 2,
             talent: actions.blaze_talent.id,
             attack1: actions.blaze_attack1.id,
-            ...(await loadCardImages('blaze'))
+            ...(await loadCardImages('blaze')),
+            folder_name: 'blaze'
         }
     })
 
@@ -668,7 +678,8 @@ async function cards(actions: SeedActions) {
             cost: 0,
             talent: actions.spider_talent.id,
             attack1: actions.spider_attack1.id,
-            ...(await loadCardImages('spider'))
+            ...(await loadCardImages('spider')),
+            folder_name: 'spider'
         }
     })
 
@@ -678,14 +689,15 @@ async function cards(actions: SeedActions) {
         create: {
             id: 12,
             name: 'Warden',
-            description: "Même aveugle il ressent chaque mouvement... Ayez le malheur de le réveiller et il vous traquera jusqu'à la mort.",
+            description: "Même aveugle il ressent chaque mouvement...",
             rarity: 3,
             pv_durability: 80,
             cost: 8,
             talent: actions.warden_talent.id,
             attack1: actions.warden_attack1.id,
             attack2: actions.warden_attack2.id,
-            ...(await loadCardImages('warden'))
+            ...(await loadCardImages('warden')),
+            folder_name: 'warden'
         }
     })
 
@@ -701,7 +713,8 @@ async function cards(actions: SeedActions) {
             talent: actions.guardian_talent.id,
             attack1: actions.guardian_attack1.id,
             attack2: actions.guardian_attack2.id,
-            ...(await loadCardImages('guardian'))
+            ...(await loadCardImages('guardian')),
+            folder_name: 'guardian'
         }
     })
 
@@ -718,7 +731,8 @@ async function cards(actions: SeedActions) {
             talent: actions.witch_talent.id,
             attack1: actions.witch_attack1.id,
             attack2: actions.witch_attack2.id,
-            ...(await loadCardImages('witch'))
+            ...(await loadCardImages('witch')),
+            folder_name: 'witch'
         }
     })
 
@@ -728,12 +742,13 @@ async function cards(actions: SeedActions) {
         create: {
             id: 15,
             name: 'Ghast',
-            description: "Ses pleurs résonnent dans le Nether, suivis de flammes dévastatrices.",
+            description: "Ses pleurs résonnent dans le Nether.",
             pv_durability: 45,
             cost: 2,
             talent: actions.ghast_talent.id,
             attack1: actions.ghast_attack1.id,
-            ...(await loadCardImages('ghast'))
+            ...(await loadCardImages('ghast')),
+            folder_name: 'ghast'
         }
     })
 
@@ -750,7 +765,8 @@ async function cards(actions: SeedActions) {
             talent: actions.wither_talent.id,
             attack1: actions.wither_attack1.id,
             attack2: actions.wither_attack2.id,
-            ...(await loadCardImages('wither'))
+            ...(await loadCardImages('wither')),
+            folder_name: 'wither'
         }
     })
 
@@ -760,11 +776,12 @@ async function cards(actions: SeedActions) {
         create: {
             id: 17,
             name: 'Golem de neige',
-            description: "Créé pour défendre avec légèreté, il combat avec un coeur de glace.",
+            description: "Créé pour défendre avec légèreté.",
             pv_durability: 20,
             cost: 0,
             attack1: actions.snowgolem_attack1.id,
-            ...(await loadCardImages('snowgolem'))
+            ...(await loadCardImages('snowgolem')),
+            folder_name: 'snowgolem'
         }
     })
 
@@ -774,11 +791,12 @@ async function cards(actions: SeedActions) {
         create: {
             id: 18,
             name: 'Poulpe',
-            description: "Paisible créature des océans, mais dangereuse quand elle se sent piégée.",
+            description: "Paisible créature des océans.",
             pv_durability: 20,
             cost: 0,
             attack1: actions.squid_talent.id,
-            ...(await loadCardImages('squid'))
+            ...(await loadCardImages('squid')),
+            folder_name: 'squid'
         }
     })
 
@@ -788,12 +806,13 @@ async function cards(actions: SeedActions) {
         create: {
             id: 19,
             name: 'Chat',
-            description: "Sous ses airs CHATrmants, se glisse un véritable démon ! MIAAAAAOUUUUU, pennez garde à Miche-Miche.",
+            description: "Sous ses airs CHATrmants...",
             pv_durability: 15,
             cost: 0,
             attack1: actions.cat_talent.id,
             attack2: actions.cat_attack1.id,
-            ...(await loadCardImages('cat'))
+            ...(await loadCardImages('cat')),
+            folder_name: 'cat'
         }
     })
 
@@ -803,11 +822,12 @@ async function cards(actions: SeedActions) {
         create: {
             id: 20,
             name: 'Oeuf de dragon',
-            description: "Un oeuf mystique qui, selon la légende, se transformerait en une créature vengeresse.",
+            description: "Un oeuf mystique...",
             pv_durability: 5,
             cost: 0,
             attack1: actions.egg_talent.id,
-            ...(await loadCardImages('egg'))
+            ...(await loadCardImages('egg')),
+            folder_name: 'egg'
         }
     })
 
@@ -817,16 +837,18 @@ async function cards(actions: SeedActions) {
         create: {
             id: 21,
             name: 'Shulker',
-            description: "Caché dans sa boîte, il attend le moment parfait pour attaquer.",
+            description: "Caché dans sa boîte.",
             pv_durability: 5,
             cost: 0,
             talent: actions.shulker_talent.id,
             attack1: actions.shulker_attack1.id,
             attack2: actions.shulker_attack2.id,
-            ...(await loadCardImages('shulker'))
+            ...(await loadCardImages('shulker')),
+            folder_name: 'shulker'
         }
     })
 }
+
 
 async function main() {
     // await prisma.actions.deleteMany({})

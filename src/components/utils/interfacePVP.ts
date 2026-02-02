@@ -4,6 +4,7 @@ import { InGameCard, Player } from "./typesPvp";
 export interface ApiDeckCard {
     card: {
         name: string;
+        folder_name: string;
         cost: number;
         category: string;
         pv_durability: number;
@@ -17,6 +18,7 @@ export interface ApiDeckCard {
 // Format de carte attendu par le serveur
 export interface ServerDeckCard {
     name: string;
+    imageName: string;
     cost: number;
     category: string;
     pv: number;

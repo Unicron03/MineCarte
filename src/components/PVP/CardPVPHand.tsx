@@ -20,7 +20,7 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
   else if (card.category === "artefact") borderColor = "border-yellow-500";
   else if (card.category === "equipement") borderColor = "border-blue-500";
 
-  const imgSrc = `/cards/${card.imageName}/${card.imageName}.png`;
+  const imgSrc = `/cards/${card.imageName}/all.png`;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = "/cards/default.png";

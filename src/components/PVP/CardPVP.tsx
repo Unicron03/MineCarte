@@ -31,7 +31,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
     else if (card.category === "artefact") borderColor = "border-yellow-500";
     else if (card.category === "equipement") borderColor = "border-blue-500";
     
-    const imgSrc = `/cards/${card.imageName}/${card.imageName}.png`;
+    const imgSrc = `/cards/${card.imageName}/all.png`;
     
     const pvColor = isPlayer ? "bg-green-600" : "bg-red-600";
 
@@ -86,7 +86,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
                           }}
                         >
                             <img 
-                                src={`/cards/${equip.imageName}/${equip.imageName}.png`} 
+                                src={`/cards/${equip.imageName}/all.png`} 
                                 alt={equip.name}
                                 className="w-full h-full object-cover"
                                 onError={handleImageError}
@@ -178,7 +178,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
                             }}
                         >
                           <img 
-                              src={`/cards/${effect}/${effect}.png`} 
+                              src={`/cards/${effect}/all.png`} 
                               alt={effect}
                               className="w-full h-full object-cover"
                               onError={handleImageError}

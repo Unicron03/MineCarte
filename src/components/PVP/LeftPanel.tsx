@@ -20,7 +20,7 @@ const EffectBadge: React.FC<{ effect: string; onClick?: (e: string) => void }> =
       title={effect}
     >
       <img
-        src={`/cards/${effect}/${effect}.png`}
+        src={`/cards/${effect}/all.png`}
         alt={effect}
         className="w-full h-full object-cover"
         onError={(e) => {
