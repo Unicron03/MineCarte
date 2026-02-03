@@ -96,7 +96,7 @@ export default function HomePageClient({
                 />
 
                 <div className="glass-nav flex gap-4 items-center px-4 text-base font-medium">
-                    <span className={timeRemaining === "Disponible !" ? "text-green-400 font-bold" : ""}>
+                    <span id="spanTimeNextChest" className={timeRemaining === "Disponible !" ? "text-green-400 font-bold" : ""}>
                         {timeRemaining || "Chargement..."}
                     </span>
                     <div className="glass-highlight flex gap-2 rounded-full px-2 py-1.5">

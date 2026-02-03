@@ -1,9 +1,11 @@
 import { Prisma } from "../../../generated/prisma/client";
+import localFont from 'next/font/local';
 
 export const defaultNbCardGivenInChest: number = 5;
 export const defaultNbDecksPerUser: number = 10;
 export const defaultNbCardsPerDeck: number = 15;
 export const defaultHoursTimeNextChest: number = 8;
+export const myFont = localFont({ src: '../../app/fonts/Minecrafter.Reg.ttf' });
 
 export type Card = {
     id: number;
