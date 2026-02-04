@@ -34,3 +34,9 @@ docker compose up --build -d
 ```
 ./init-build-test.bat
 ```
+
+## Lancer les tests
+
+```
+npm run test
+```
