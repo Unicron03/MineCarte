@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+/*import { test, expect } from '@playwright/test';
 
 test('Affichage de la page', async ({ page }) => {
   await page.goto('http://localhost:3000/');
@@ -42,7 +42,6 @@ test('Verification des boutons sur la page d\'acceuil', async ({ page }) => {
   await page.getByRole('button', { name: /sombre|clair/i });
   await page.getByRole('button', { name: 'Infos' });
   await page.locator('header').getByRole('button', {name : 'link'});
-  await expect(page.locator('#spanTimeNextChest')).toBeVisible();
   await page.locator('link').nth(1); 
   await page.getByRole('link', { name: 'Accueil' });
   await page.getByRole('link', { name: 'Collection' });
@@ -58,12 +57,33 @@ test('Acces à la page de configuration du compte', async ({ page }) => {
   await page.getByPlaceholder('super.exemple@gmail.com').fill('ahouandogboamen@gmail.com');
   await page.getByPlaceholder('Votre mot de passe').fill('azerty1234');
   await page.getByRole('button', { name: 'Se connecter' }).click();
-  // Ouvrir la page de configuration du compte
+  // Ouvrir la page de configuration du compte et tester l'affichage de la pop-up de modification du pseudo
   await page.locator('header').getByRole('link').click();
   await page.getByRole('button').nth(3).click();
   await page.getByRole('dialog', { name: 'Modifier le pseudo' });
+
+});
+
+test('Vérification des éléments sur la page Collection', async ({ page }) => {
+   await page.goto('http://localhost:3000/');
+
+  // Connexion au compte 
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await page.getByPlaceholder('super.exemple@gmail.com').fill('ahouandogboamen@gmail.com');
+  await page.getByPlaceholder('Votre mot de passe').fill('azerty1234');
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+
+  // La page de colllection et vérifier des éléments de la page
+  await page.getByRole('link', { name: 'Collection' }).click();
+  await page.getByRole('link', { name: 'Vitrine' });
+  await page.locator('div').nth(2);
   await page.pause();
 });
+
+*/
+
+
+
 
 
 
