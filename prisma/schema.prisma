@@ -35,7 +35,9 @@ model actions {
   cost         Int     @default(0)
   multiTarget  Boolean @default(false)
   autoActivate Boolean @default(false)
-  function     Int
+  function_name String
+  requiresTarget Boolean @default(false)
+  targetType    String?
 
   // Relations avec cards
   cards_talent  cards[] @relation("cards_talent")

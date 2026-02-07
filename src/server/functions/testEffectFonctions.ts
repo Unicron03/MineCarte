@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { InGameCard, CombatState, Player } from "../../components/utils/typesPvp";
-import { actionList } from "../../components/utils/data";
+import { getActionList } from "../../../server";
 import { handleMobDeath } from "./gameLogic";
 import { soundDetection } from "./cartes/talentFunction";
 import { getEquipmentAttackCostReduction } from "./cartes/equipementFunction";
@@ -67,7 +67,7 @@ export function applyCraftTableEffect(player: Player, card: InGameCard, io: Serv
 
     // Si l'effet est trouvé, on applique la réduction de coût
     if (craftEffectIndex !== undefined && craftEffectIndex !== -1) {
-        const effectAction = actionList.find((a) => a.name === craftEffectName);
+        const effectAction = getActionList().find((a) => a.name === craftEffectName);
 
         // 'damage' dans cet effet représente la réduction de coût
         const reduction = effectAction?.damage || 0;

@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, GameState } from "../../components/utils/typesPvp";
-import { actionList } from "../../components/utils/data";
+import { getActionList } from "../../../server";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen, applyPickaxeEffect, hasElytra } from "./cartes/equipementFunction";
@@ -63,7 +63,7 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         applyCraftTableEffect(player, found, io, roomId, true);
 
         if (found.effet) {
-            const action = actionList.find(a => a.name === found.effet);
+            const action = getActionList().find(a => a.name === found.effet);
             if (action) {
                 if (action.function === "healPlayer") {
                     const combatState = { log: [] as string[] };
@@ -167,7 +167,7 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
 
         // --- DÉTECTION SONORE (WARDEN) ---
         // Si le mob joué a un talent auto-actif (ex: Golem), cela déclenche le Warden adverse
-        const action = actionList.find(a => a.name === found.talent);
+        const action = getActionList().find(a => a.name === found.talent);
         // Exception pour le Gast : Son talent "Retour à l'envoyeur" est passif mais ne se déclenche qu'à l'attaque, pas à la pose
         if (action && action.autoActivate && found.talent !== "Retour à l'envoyeur") {
              checkAndTriggerWarden(io, roomId, player, opponent, cardToPlay);

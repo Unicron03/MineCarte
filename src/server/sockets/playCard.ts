@@ -1,7 +1,7 @@
 import type { Server, Socket } from "socket.io";
 import { playCard } from "../functions/gameLogic";
 import { sendGameState } from "../functions/gameLogic";
-import { actionList } from "../../components/utils/data";
+import { getActionList } from "../../../server";
 import { GameState } from "../../components/utils/typesPvp";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 
@@ -82,7 +82,7 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
         // --- Gérer les artefacts qui nécessitent une cible ---
         if (card.category === "artefact") {
             const actionName = card.effet || card.name;
-            const actionDef = actionList.find((a) => a.name === actionName);
+            const actionDef = getActionList().find((a) => a.name === actionName);
 
             // --- Si l'action nécessite une cible ---
             if (actionDef && actionDef.requiresTarget) {

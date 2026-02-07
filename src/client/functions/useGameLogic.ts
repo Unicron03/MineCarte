@@ -3,7 +3,9 @@ import { usePathname, useRouter } from "next/navigation";
 
 // --- Types et datas ---
 import { InGameCard, GameState, AttackSelection } from "../../components/utils/typesPvp";
-import { actionList } from "@/components/utils/data";
+import { setActionList } from "@/client/store/actionStore";
+import { getActionList } from "@/client/store/actionStore";
+
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 // --- Lib ---
@@ -35,6 +37,22 @@ export const useGameLogic = (initialDeck: any[] | null) => {
     const [yourTurn, setYourTurn] = useState(false);
     const [usedAttacks, setUsedAttacks] = useState<number[]>([]);
     const [attackSelection, setAttackSelection] = useState<AttackSelection | null>(null);
+
+
+
+    useEffect(() => {
+    socket.on("actionList", (actions) => {
+        console.log("Actions reçues du serveur:", actions);
+        setActionList(actions);
+    });
+
+    return () => {
+        socket.off("actionList");
+    };
+    }, [socket]);
+
+
+
 
     // --- Persistence: usedAttacks ---
     useEffect(() => {
@@ -191,7 +209,7 @@ export const useGameLogic = (initialDeck: any[] | null) => {
         if (!gameState) return;
         if (endGameResult) return;
 
-        const action = actionList.find((a) => a.name === attackName);
+        const action = getActionList().find((a) => a.name === attackName);
         const opponentBoard = gameState.players.find((p) => p.id !== myId)?.board ?? [];
 
         if (usedAttacks.includes(attackerIndex)) return; 

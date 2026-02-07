@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { InGameCard, Player, CombatState, Action } from "../../../components/utils/typesPvp";
-import { applyArmorEffect } from "./../testEffectFonctions";
+import { applyArmorEffect } from "../testEffectFonctions";
 import { handleMobDeath } from "../gameLogic";
 import { drawCard } from "./talentFunction";
 import { transfertDamageToPlayer } from "./attackFunction";

@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { GameState } from "../../components/utils/typesPvp";
-import { actionList } from "../../components/utils/data";
+import { getActionList } from "../../../server";
 import { sendGameState } from "../functions/gameLogic";
 import { checkAndTriggerWarden } from "../functions/testEffectFonctions";
 
@@ -57,7 +57,7 @@ export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, G
         }
 
         // --- Récupérer la définition de l'action ---
-        const actionDef = actionList.find((a) => a.name === card.talent);
+        const actionDef = getActionList().find((a) => a.name === card.talent);
         if (!actionDef) {
             socket.emit("error", "Action inconnue.");
             return;

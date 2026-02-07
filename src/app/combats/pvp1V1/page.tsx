@@ -24,7 +24,8 @@ import { useGameLogic } from "@/client/functions/useGameLogic";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 import SelectionModal from "@/components/PVP/SelectionModal";
-import { actionList } from "@/components/utils/data";
+import { getActionList } from "@/client/store/actionStore";
+
 
 import { InGameCard } from "@/components/utils/typesPvp";
 import { ServerDeckCard, ApiDeckCard } from "@/components/utils/interfacePVP";
@@ -265,7 +266,7 @@ export default function GamePage() {
             description = "Bonus de dégâts et régénération.";
         } else {
             // 2. Chercher dans la liste des actions/cartes
-            const action = actionList.find(a => a.name === effectName || a.function === effectName);
+            const action = getActionList().find(a => a.name === effectName || a.function === effectName);
             if (action) {
                 title = action.name;
                 description = action.description || description;
@@ -287,7 +288,7 @@ export default function GamePage() {
         let description = "Aucune description.";
         
         // On cherche la description dans actionList via le nom ou l'effet
-        const action = actionList.find(a => a.name === equipment.name || (equipment.category !== "mob" && a.name === equipment.effet));
+        const action = getActionList().find(a => a.name === equipment.name || (equipment.category !== "mob" && a.name === equipment.effet));
         
         if (action) {
             description = action.description || description;

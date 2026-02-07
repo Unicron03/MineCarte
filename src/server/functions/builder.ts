@@ -1,8 +1,58 @@
-import type { InGameCard, Player} from "../../components/utils/typesPvp";
+import type { InGameCard, Player, Action } from "../../components/utils/typesPvp";
 import { randomUUID } from "crypto";
 
+
+
+type PrismaAction = {
+  id: number;
+  name: string;
+  description: string | null;
+  damage: number | null;
+  cost: number;
+  autoActivate: boolean;
+  requiresTarget: boolean;
+  targetType: "ally" | "enemy" | null;
+  function_name: string;
+};
+
+
+export function buildActionList(prismaActions: PrismaAction[]): Action[] {
+  console.log("🟦 [Builder] Reçu depuis Prisma :", prismaActions);
+
+  const actions = prismaActions.map((action, index) => {
+    const built = {
+      id: action.id,
+      name: action.name,
+      damage: action.damage ?? 0,
+      cost: action.cost ?? 0,
+      description: action.description ?? "",
+      function: action.function_name,
+      requiresTarget: action.requiresTarget,
+      targetType: action.targetType ?? undefined,
+      autoActivate: action.autoActivate,
+    };
+
+    console.log(`🟩 [Builder] Action #${index}`, built);
+    return built;
+  });
+
+  console.log("🟨 [Builder] Liste finale :", actions);
+  return actions;
+}
+
+
+
 // Crée une carte en jeu
-export const createCard = (name: string, imageName: string, cost: number,  category: "mob" | "equipement" | "artefact",  pv_durability: number | null,  talent: string | null,  attack1: string | null,  attack2: string | null): InGameCard => {
+export const createCard = (
+  name: string, 
+  imageName: string, 
+  cost: number,  
+  category: "mob" | "equipement" | "artefact",  
+  pv_durability: number | null,  
+  talent: string | null,  
+  attack1: string | null,  
+  attack2: string | null
+): InGameCard => {
     const base = { uuid: randomUUID(), name, imageName, cost};
 
     if (category === "mob") {
@@ -18,13 +68,21 @@ export const createCard = (name: string, imageName: string, cost: number,  categ
         return mobCard;
     }
 
-    const otherCard: InGameCard = { ...base, category, effet: talent ?? undefined };
+    const otherCard: InGameCard = { 
+      ...base, 
+      category, 
+      effet: talent ?? undefined 
+    };
     return otherCard;
 };
 
-
 // Créer un joueur
-export function createPlayer( socketId: string, deck: InGameCard[], token: string, userId?: string): Player {
+export function createPlayer(
+  socketId: string, 
+  deck: InGameCard[], 
+  token: string, 
+  userId?: string
+): Player {
   const shuffled = [...deck].sort(() => Math.random() - 0.5);
 
   // Pioche initiale de 3 cartes
