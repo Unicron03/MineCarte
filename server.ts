@@ -12,6 +12,7 @@ import { quitSocket } from "./src/server/sockets/quit";
 import { disconnectSocket } from "./src/server/sockets/disconnect";
 import { targetSelectionSocket } from "./src/server/sockets/targetSelection";
 import { useTalentSocket } from "./src/server/sockets/useTalent";
+import { appliquerResultatMatch } from "./src/server/functions/gestionVictoire";
 import type { GameState, Player, InGameCard, Action } from "./src/components/utils/typesPvp";
 
 
@@ -86,9 +87,11 @@ async function initializeServer() {
     socket.emit("actionList", actionList);
 
     // --- Quand un joueur s'enregistre ---
-    socket.on("registerUser", ({ userId, deck }: { userId: string, deck?: any[] }) => {
-      (socket as any).userId = userId;
-      console.log(`User connecté: ${userId} (socket ${socket.id})`);
+    socket.on("registerUser", ({ userId, dbUserId, deck }: { userId: string, dbUserId?: string, deck?: any[] }) => {
+      // On priorise l'ID de la base de données s'il existe
+      const finalUserId = dbUserId || userId;
+      (socket as any).userId = finalUserId;
+      console.log(`User connecté: ${finalUserId} (socket ${socket.id})`);
 
       // --- Construction du deck joueur ---
       let playerDeck: InGameCard[] = [];
@@ -109,7 +112,8 @@ async function initializeServer() {
           playerDeck = [];
       }
 
-      const existing = userToRoom.get(userId);
+      // 1. Vérifier si le joueur est déjà en jeu (Reconnexion)
+      const existing = userToRoom.get(finalUserId);
       if (existing) {
         const { roomId, playerIndex } = existing;
         const state = rooms.get(roomId);
@@ -132,9 +136,18 @@ async function initializeServer() {
             io.to(socket.id).emit("opponentTurn");
           }
 
-          console.log(` ${userId} reconnecté à ${roomId}`);
+          console.log(` ${finalUserId} reconnecté à ${roomId}`);
           return;
         }
+      }
+
+      // 2. Vérifier si le joueur est déjà en file d'attente (Évite double défaite)
+      if (waitingPlayer && waitingPlayer.userId === finalUserId) {
+        console.log(`[Server] ${finalUserId} est déjà en file d'attente (mise à jour socket)`);
+        waitingPlayer.socketId = socket.id;
+        waitingPlayer.deck = playerDeck; // Mise à jour du deck au cas où
+        // On ne réapplique PAS la défaite ici
+        return;
       }
 
       waitingPlayer = handleMatchmaking(
@@ -142,6 +155,7 @@ async function initializeServer() {
         () => randomUUID(), // genToken function
         createPlayer,
         playerDeck, // Deck du joueur courant
+        finalUserId, // <-- Ajout crucial pour suivre le joueur en attente
         sendGameState,
         applyEnergyGain
       );
@@ -149,7 +163,7 @@ async function initializeServer() {
       for (const [roomId, state] of rooms.entries()) {
         state.players.forEach((p: Player, i: number) => {
           if (p.id === socket.id) {
-            userToRoom.set(userId, { roomId, playerIndex: i });
+            userToRoom.set(finalUserId, { roomId, playerIndex: i });
           }
         });
       }
@@ -158,9 +172,9 @@ async function initializeServer() {
     playCardSocket(io, socket, rooms);
     targetSelectionSocket(io, socket, rooms);
     useTalentSocket(io, socket, rooms);
-    attackSocket(io, socket, rooms);
-    endTurnSocket(io, socket, rooms);
-    quitSocket(io, socket, rooms);
+    attackSocket(io, socket, rooms, userToRoom);
+    endTurnSocket(io, socket, rooms, userToRoom);
+    quitSocket(io, socket, rooms, userToRoom);
 
     // --- Gestion de la déconnexion ---
     disconnectSocket(io, socket, rooms, userToRoom, () => {
@@ -180,8 +194,12 @@ async function initializeServer() {
         if (!connected && p._disconnectedAt && (now - p._disconnectedAt > GRACE_MS)) {
           const opponent = state.players.find((x: any) => x.id !== p.id);
           if (opponent) {
-            io.to(opponent.id).emit("victory", { reason: "opponent_disconnected" });
-            io.to(opponent.id).emit("log", "Votre adversaire est parti. Vous avez gagné !");
+            // L'adversaire gagne (compense sa défaite initiale)
+            appliquerResultatMatch(opponent.userId, true).then((result) => {
+              console.log(`[Server] Victoire appliquée à ${opponent.userId} (adversaire déconnecté)`);
+              io.to(opponent.id).emit("victory", { reason: "opponent_disconnected", ...result });
+              io.to(opponent.id).emit("log", "Votre adversaire est parti. Vous avez gagné !");
+            });
           }
           rooms.delete(roomId);
           if (p.userId) userToRoom.delete(p.userId);

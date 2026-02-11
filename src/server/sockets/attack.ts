@@ -87,7 +87,7 @@ function executeAction(io: Server, roomId: string, state: CombatState, action: A
 }
 
 // Fonction utilitaire pour finaliser l'attaque
-function finalizeAttack(io: Server,  rooms: Map<string, GameState>,  roomId: string,  room: GameState, result: { killed?: boolean; error?: string; msg?: string } | void | null,  state: CombatState,  targetOwner: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player) {
+function finalizeAttack(io: Server,  rooms: Map<string, GameState>,  roomId: string,  room: GameState, result: { killed?: boolean; error?: string; msg?: string } | void | null,  state: CombatState,  targetOwner: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player, userToRoom: Map<string, { roomId: string; playerIndex: number }>) {
   
     // Gestion de la mort d'une carte (attaque cible unique)
     if (result?.killed && target && targetIndex !== null && action.function !== "heal") { 
@@ -108,10 +108,10 @@ function finalizeAttack(io: Server,  rooms: Map<string, GameState>,  roomId: str
 
     state.log.forEach((msg) => io.to(roomId).emit("log", msg));
     sendGameState(io, rooms, roomId);
-    checkVictory(io, room, rooms);
+    checkVictory(io, room, rooms, userToRoom);
 }
 
-export function attackSocket(io: Server, socket: Socket, rooms: Map<string, GameState>) {
+export function attackSocket(io: Server, socket: Socket, rooms: Map<string, GameState>, userToRoom: Map<string, { roomId: string; playerIndex: number }>) {
 
     // --- Demande d'attaque ---
     socket.on("requestAttack", ({ roomId, attackerIndex, attackName }) => {
@@ -196,7 +196,7 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, Game
         }
 
         // --- Finalisation de l'attaque ---
-        finalizeAttack(io, rooms, roomId, room, result, state, opponent, null, null, action, player);
+        finalizeAttack(io, rooms, roomId, room, result, state, opponent, null, null, action, player, userToRoom);
     });
 
     // Exécution de l'attaque après sélection de la cible
@@ -296,7 +296,7 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, Game
         }
 
         // --- Finalisation de l'attaque ---
-        finalizeAttack(io, rooms, roomId, room, result, state, targetOwner, target, finalTargetIndex, action, player);
+        finalizeAttack(io, rooms, roomId, room, result, state, targetOwner, target, finalTargetIndex, action, player, userToRoom);
     });
 
 }

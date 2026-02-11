@@ -37,7 +37,7 @@ export default function GamePage() {
     const [formattedDeck, setFormattedDeck] = useState<ServerDeckCard[] | null>(null);
 
     // On récupère les infos de base, mais on va surcharger la logique d'attaque
-    const { endGameResult, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic(formattedDeck);
+    const { endGameResult, endGameData, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic(formattedDeck);
     
     const router = useRouter(); 
     const socket = getSocket();
@@ -317,9 +317,15 @@ export default function GamePage() {
         return (
             <EndGameScreen 
                 result={endGameResult} 
+                data={endGameData || undefined}
                 onQuit={() => {
                     closeSocket();
-                    router.push("/");
+                    // Force la redirection si le router ne répond pas immédiatement
+                    router.push("/combats");
+                    // Fallback au cas où
+                    setTimeout(() => {
+                        window.location.href = "/combats";
+                    }, 500);
                 }} 
             />
         );

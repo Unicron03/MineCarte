@@ -31,6 +31,7 @@ export const useGameLogic = (initialDeck: any[] | null) => {
     
     // --- États du composant ---
     const [endGameResult, setEndGameResult] = useState<"win" | "lose" | "draw" | null>(null);
+    const [endGameData, setEndGameData] = useState<{ pointsChange?: number; keysChange?: number } | null>(null);
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [myId, setMyId] = useState<string>("");
     const [logs, setLogs] = useState<string[]>([]);
@@ -119,13 +120,15 @@ export const useGameLogic = (initialDeck: any[] | null) => {
             setGameState(state);
         });
 
-        socket.on("victory", () => {
+        socket.on("victory", (data) => {
             setEndGameResult("win");
+            setEndGameData(data);
             setLogs(prev => [...prev, "Vous avez gagné !"]);
         });
 
-        socket.on("defeat", () => {
+        socket.on("defeat", (data) => {
             setEndGameResult("lose");
+            setEndGameData(data);
             setLogs(prev => [...prev, "Vous avez perdu..."]);
         });
 
@@ -186,7 +189,7 @@ export const useGameLogic = (initialDeck: any[] | null) => {
                 if (confirmQuit) {
                     socket.emit("quit", { roomId: gameState.roomId });
                     closeSocket();
-                    router.push("/");
+                    router.push("/combats");
                 } else {
                     window.history.pushState(null, "", window.location.href);
                 }
@@ -300,11 +303,11 @@ export const useGameLogic = (initialDeck: any[] | null) => {
 
     const quitHandler = useCallback(() => {
         if (gameState?.roomId) {
+            // On notifie le serveur de l'abandon. Le serveur répondra avec un événement "defeat",
+            // qui déclenchera l'affichage de l'écran de fin de partie.
             socket.emit("quit", { roomId: gameState.roomId });
         }
-        closeSocket();
-        router.push("/");
-    }, [gameState?.roomId, socket, router]);
+    }, [gameState?.roomId, socket]);
 
     const cancelOffensiveArtifact = useCallback(() => {
         socket.emit("cancelOffensiveArtifact");
@@ -317,6 +320,7 @@ export const useGameLogic = (initialDeck: any[] | null) => {
     return {
         // États
         endGameResult,
+        endGameData,
         gameState,
         myId,
         logs,
