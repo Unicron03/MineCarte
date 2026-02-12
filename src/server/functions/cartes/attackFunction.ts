@@ -5,9 +5,21 @@ import { detachEquipment, applySwordEffect, applyShieldEffect, checkTotemEffect 
 import { handleMobDeath } from "../gameLogic";
 import { hasInvisibility } from "../testEffectFonctions";
 
+// Vérifie et applique la réduction de dégâts (Protection Dimensionnelle)
+function applyDamageReduction(damage: number, defender?: Player): number {
+    if (defender && defender.effects?.some(e => e.startsWith("ProtectionDimensionnelle"))) {
+        return Math.floor(damage * 0.5);
+    }
+    return damage;
+}
+
 // Transfère les dégâts excédentaires au joueur adverse
 export function transfertDamageToPlayer(state: CombatState, amount: number, opponent: Player,sourceName: string, target?: InGameCard): void {
-    if (amount <= 0) return;
+
+     // --- Application de la réduction de dégâts (Protection Dimensionnelle) ---
+    const reducedAmount = applyDamageReduction(amount, opponent);
+    
+    if (reducedAmount <= 0) return;
 
     // --- Effet Tortue Géniale : Absorption des dégâts excédentaires ---
     if (target && target.effects?.includes("TortueGeniale")) {
@@ -15,15 +27,18 @@ export function transfertDamageToPlayer(state: CombatState, amount: number, oppo
         return;
     }
 
-    opponent.pv -= amount;
-    state.log.push(`Dégâts perforants ! ${sourceName} inflige ${amount} dégâts excédentaires au joueur.`);
+    opponent.pv -= reducedAmount;
+    state.log.push(`Dégâts perforants ! ${sourceName} inflige ${reducedAmount} dégâts excédentaires au joueur.`);
 }
 
 // Inflige des dégâts à une carte ou directement au joueur
 export function AttackOneMob(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string, attackerPlayer?: Player): { killed: boolean } | void {
 
     // --- Calcul des dégâts avec les bonnus de l'attaquant ---
-    const realDamage = getModifiedDamage(attacker, amount, false);
+    let realDamage = getModifiedDamage(attacker, amount, false);
+
+    // --- Application de la réduction de dégâts (Protection Dimensionnelle) ---
+    realDamage = applyDamageReduction(realDamage, opponent);
 
     // --- Attaque directe sur joueur ---
     if (!target && opponent) {
@@ -109,7 +124,10 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
 
     // --- Calcul des dégâts réels avec les bonnus de l'attaquant ---
     // isAOE = true pour ne pas appliquer le bonus d'Arc à tout le monde
-    const realDamage = getModifiedDamage(attacker, amount, true);
+    let realDamage = getModifiedDamage(attacker, amount, true);
+
+    // --- Application de la réduction de dégâts (Protection Dimensionnelle) ---
+    realDamage = applyDamageReduction(realDamage, opponent);
 
     // --- Gestion de l'Arc (Cible aléatoire pour le bonus) ---
     const hasArc = attacker.equipment?.some(eq => eq.name === "Arc");
@@ -192,7 +210,10 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
 export function attackEsquive(state: CombatState, attacker: InGameCard, target: InGameCard | null, amount: number, opponent?: Player, io?: Server, roomId?: string, attackerPlayer?: Player): { killed: boolean } | void {
 
     // --- Calcul des dégâts réels avec les bonnus de l'attaquant ---
-    const realDamage = getModifiedDamage(attacker, amount, false);
+    let realDamage = getModifiedDamage(attacker, amount, false);
+
+    // --- Application de la réduction de dégâts (Protection Dimensionnelle) ---
+    realDamage = applyDamageReduction(realDamage, opponent);
 
     // --- Appliquer l'effet Esquive au lanceur ---
     if (attacker.category === "mob") {
@@ -299,7 +320,10 @@ export function voleEnergie(state: CombatState, attacker: InGameCard, target: In
 export function attackDirectPlayer(state: CombatState, attacker: InGameCard, amount: number, opponent: Player, io?: Server, roomId?: string): { killed: boolean } | void {
   
     // --- Calcul des dégâts avec les bonnus de l'attaquant ---
-    const realDamage = getModifiedDamage(attacker, amount, false);
+    let realDamage = getModifiedDamage(attacker, amount, false);
+
+    // --- Application de la réduction de dégâts (Protection Dimensionnelle) ---
+    realDamage = applyDamageReduction(realDamage, opponent);
 
     // --- Attaque directe sur joueur ---
     opponent.pv -= realDamage;
@@ -349,11 +373,9 @@ export function applyTankEffect(state: CombatState, attacker: InGameCard): void 
 // Nouvelle fonction pour l'attaque aléatoire (ex: Shulker)
 export function AttaqueRandomMobAndPlayer(io: Server, roomId: string, state: CombatState, attacker: InGameCard, damage: number, opponent: Player, player: Player): { killed?: boolean; error?: string; msg?: string } | void | null {
     
-    // 1. Attaque directe sur le joueur
     opponent.pv -= damage;
     state.log.push(`${attacker.name} inflige ${damage} PV à l'adversaire !`);
 
-    // 2. Attaque sur un mob aléatoire
     const validTargets = opponent.board
         .map((card, index) => ({ card, index }))
         .filter(item => item.card.category === "mob" && !hasInvisibility(item.card));
@@ -364,10 +386,8 @@ export function AttaqueRandomMobAndPlayer(io: Server, roomId: string, state: Com
 
         state.log.push(`${attacker.name} attaque aléatoirement ${target.name} !`);
         
-        // On utilise AttackOneMob pour gérer les dégâts sur le mob (armure, etc.)
         AttackOneMob(state, attacker, target, damage, opponent, io, roomId, player);
 
-        // Gestion de la mort du mob
         if (target.pv_durability !== undefined && target.pv_durability <= 0) {
             handleMobDeath(io, roomId, opponent, targetIndex, state.log, player);
         }
@@ -398,5 +418,18 @@ export function applyTortueGenialeEffect(state: CombatState, attacker: InGameCar
         state.log.push(`${attacker.name} rentre dans sa carapace ! (Si elle meurt, aucun dégât ne sera transféré au joueur)`);
     } else {
         state.log.push(`${attacker.name} est déjà prête à se sacrifier.`);
+    }
+}
+
+// Effet Protection Dimensionnelle : Réduit de 50% les dégâts subis au prochain tour
+export function applyDimensionalProtection(state: CombatState, player: Player): void {
+    if (!player.effects) player.effects = [];
+
+    // On utilise _1 pour indiquer que cela dure 1 tour (logique gérée par endTurn/gameLogic)
+    if (!player.effects.some(e => e.startsWith("ProtectionDimensionnelle"))) {
+        player.effects.push("ProtectionDimensionnelle_1");
+        state.log.push(`${player.id} active Protection Dimensionnelle ! (-50% dégâts reçus au prochain tour)`);
+    } else {
+        state.log.push(`${player.id} est déjà protégé par la dimension.`);
     }
 }

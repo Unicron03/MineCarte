@@ -504,7 +504,7 @@ async function actions() {
             description: "Réduit de 50% toutes les attaques adverses du prochain tour de votre adversaire.",
             damage: 0,
             cost: 5,
-            function_name: "defaultFunction",
+            function_name: "applyDimensionalProtection",
         },
     });
 
