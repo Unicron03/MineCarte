@@ -3,6 +3,7 @@ import { InGameCard, Player, CombatState } from "../../../components/utils/types
 import { applyArmorEffect, hasEsquive, getModifiedDamage } from "../testEffectFonctions";
 import { detachEquipment, applySwordEffect, applyShieldEffect, checkTotemEffect } from "./equipementFunction";
 import { handleMobDeath } from "../gameLogic";
+import { hasInvisibility } from "../testEffectFonctions";
 
 // Transfère les dégâts excédentaires au joueur adverse
 export function transfertDamageToPlayer(state: CombatState, amount: number, opponent: Player,sourceName: string): void {
@@ -336,4 +337,37 @@ export function applyTankEffect(state: CombatState, attacker: InGameCard): void 
     } else {
         state.log.push(`${attacker.name} est déjà en posture défensive.`);
     }
+}
+
+// Nouvelle fonction pour l'attaque aléatoire (ex: Shulker)
+export function AttaqueRandomMobAndPlayer(io: Server, roomId: string, state: CombatState, attacker: InGameCard, damage: number, opponent: Player, player: Player): { killed?: boolean; error?: string; msg?: string } | void | null {
+    
+    // 1. Attaque directe sur le joueur
+    opponent.pv -= damage;
+    state.log.push(`${attacker.name} inflige ${damage} PV à l'adversaire !`);
+
+    // 2. Attaque sur un mob aléatoire
+    const validTargets = opponent.board
+        .map((card, index) => ({ card, index }))
+        .filter(item => item.card.category === "mob" && !hasInvisibility(item.card));
+
+    if (validTargets.length > 0) {
+        const randomIndex = Math.floor(Math.random() * validTargets.length);
+        const { card: target, index: targetIndex } = validTargets[randomIndex];
+
+        state.log.push(`${attacker.name} attaque aléatoirement ${target.name} !`);
+        
+        // On utilise AttackOneMob pour gérer les dégâts sur le mob (armure, etc.)
+        AttackOneMob(state, attacker, target, damage, opponent, io, roomId, player);
+
+        // Gestion de la mort du mob
+        if (target.pv_durability !== undefined && target.pv_durability <= 0) {
+            handleMobDeath(io, roomId, opponent, targetIndex, state.log, player);
+        }
+    } else {
+        state.log.push("Aucun mob adverse à attaquer !");
+    }
+
+    // Retourne si le joueur est mort
+    return { killed: opponent.pv <= 0 };
 }

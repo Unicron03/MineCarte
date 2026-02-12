@@ -495,7 +495,7 @@ async function actions() {
             description: "Inflige 10 PV à un mob aléatoire du plateau de l'adversaire & Inflige 10 PV à l'adversaire.",
             damage: 10,
             cost: 2,
-            function_name: "defaultFunction",
+            function_name: "AttaqueRandomMobAndPlayer",
         },
     });
 
