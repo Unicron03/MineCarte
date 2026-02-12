@@ -6,8 +6,15 @@ import { handleMobDeath } from "../gameLogic";
 import { hasInvisibility } from "../testEffectFonctions";
 
 // Transfère les dégâts excédentaires au joueur adverse
-export function transfertDamageToPlayer(state: CombatState, amount: number, opponent: Player,sourceName: string): void {
+export function transfertDamageToPlayer(state: CombatState, amount: number, opponent: Player,sourceName: string, target?: InGameCard): void {
     if (amount <= 0) return;
+
+    // --- Effet Tortue Géniale : Absorption des dégâts excédentaires ---
+    if (target && target.effects?.includes("TortueGeniale")) {
+        state.log.push(`[Tortue Géniale] ${target.name} se sacrifie et absorbe tous les dégâts excédentaires !`);
+        return;
+    }
+
     opponent.pv -= amount;
     state.log.push(`Dégâts perforants ! ${sourceName} inflige ${amount} dégâts excédentaires au joueur.`);
 }
@@ -57,7 +64,7 @@ export function AttackOneMob(state: CombatState, attacker: InGameCard, target: I
 
     // --- Transfert de dégâts ---
     if (target.pv_durability < 0 && opponent) {
-        transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
+        transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name, target);
     }
 
     // --- Effet Bouclier (Riposte) ---
@@ -167,7 +174,7 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
 
                 // --- Transfert de dégâts---
                 if (target.pv_durability < 0) {
-                    transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
+                    transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name, target);
                 }
                 // Utilisation de handleMobDeath pour gérer correctement la mort (et les talents comme Creeper)
                 handleMobDeath(io, roomId, opponent, i, state.log, attackerPlayer);
@@ -235,7 +242,7 @@ export function attackEsquive(state: CombatState, attacker: InGameCard, target: 
 
     // --- Transfert de dégâts si nécessaire ---
     if (target.pv_durability < 0 && opponent) {
-      transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name);
+      transfertDamageToPlayer(state, Math.abs(target.pv_durability), opponent, attacker.name, target);
     }
 
     // --- Effet Bouclier (Riposte) ---
@@ -380,4 +387,16 @@ export function AttackRandomCat(state: CombatState, attacker: InGameCard, target
     state.log.push(`${attacker.name} effectue un coup de griffe aléatoire (${damage} dégâts) !`);
 
     return AttackOneMob(state, attacker, target, damage, opponent, io, roomId, attackerPlayer);
+}
+
+// Effet Tortue Géniale : Si la tortue meurt au prochain tour, elle absorbe les dégâts excédentaires
+export function applyTortueGenialeEffect(state: CombatState, attacker: InGameCard): void {
+    if (!attacker.effects) attacker.effects = [];
+
+    if (!attacker.effects.includes("TortueGeniale")) {
+        attacker.effects.push("TortueGeniale");
+        state.log.push(`${attacker.name} rentre dans sa carapace ! (Si elle meurt, aucun dégât ne sera transféré au joueur)`);
+    } else {
+        state.log.push(`${attacker.name} est déjà prête à se sacrifier.`);
+    }
 }

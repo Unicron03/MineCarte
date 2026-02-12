@@ -67,7 +67,7 @@ export function applyArtifactDamage(io: Server, roomId: string, state: CombatSta
 
             // --- Gestion des dégâts supplémentaires au joueur si la carte meurt ---
             if (targetCard.pv_durability < 0) {
-                transfertDamageToPlayer(state, Math.abs(targetCard.pv_durability), opponent, sourceName);
+                transfertDamageToPlayer(state, Math.abs(targetCard.pv_durability), opponent, sourceName, targetCard);
             }
 
             // --- Gestion de la mort de la carte ---
