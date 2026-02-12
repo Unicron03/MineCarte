@@ -371,3 +371,13 @@ export function AttaqueRandomMobAndPlayer(io: Server, roomId: string, state: Com
     // Retourne si le joueur est mort
     return { killed: opponent.pv <= 0 };
 }
+
+export function AttackRandomCat(state: CombatState, attacker: InGameCard, target: InGameCard | null, opponent: Player, io?: Server, roomId?: string, attackerPlayer?: Player): { killed: boolean } | void {
+    const min = 5;
+    const max = 15;
+    const damage = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    state.log.push(`${attacker.name} effectue un coup de griffe aléatoire (${damage} dégâts) !`);
+
+    return AttackOneMob(state, attacker, target, damage, opponent, io, roomId, attackerPlayer);
+}

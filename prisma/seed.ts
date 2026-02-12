@@ -473,9 +473,8 @@ async function actions() {
         data: {
             name: "Coup de griffe",
             description: "Inflige aléatoirement entre 5 et 15 PV à un mob adverse.",
-            damage: Math.floor(Math.random() * (15 - 5 + 1)) + 5, // (syntaxe : max - min)
             cost: 1,
-            function_name: "AttackOneMob",
+            function_name: "AttackRandomCat",
             requiresTarget: true,
             targetType: "enemy"
         },
