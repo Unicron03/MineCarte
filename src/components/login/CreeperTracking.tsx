@@ -86,13 +86,15 @@ export default function CreeperTracking() {
             rightPupilPos.current.y +=
                 (rightPupilTarget.current.y - rightPupilPos.current.y) * ease;
 
-            leftPupilEl.current &&
-                (leftPupilEl.current.style.transform =
-                    `translate(${leftPupilPos.current.x}px, ${leftPupilPos.current.y}px)`);
+            if (leftPupilEl.current) {
+                leftPupilEl.current.style.transform =
+                    `translate(${leftPupilPos.current.x}px, ${leftPupilPos.current.y}px)`;
+            }
 
-            rightPupilEl.current &&
-                (rightPupilEl.current.style.transform =
-                    `translate(${rightPupilPos.current.x}px, ${rightPupilPos.current.y}px)`);
+            if (rightPupilEl.current) {
+                rightPupilEl.current.style.transform =
+                    `translate(${rightPupilPos.current.x}px, ${rightPupilPos.current.y}px)`;
+            }
 
             rafId = requestAnimationFrame(animate);
         };
@@ -126,8 +128,8 @@ export default function CreeperTracking() {
     };
 
     const stopExplosions = () => {
-        hoverTimer.current && clearTimeout(hoverTimer.current);
-        explosionInterval.current && clearInterval(explosionInterval.current);
+        if (hoverTimer.current) clearTimeout(hoverTimer.current);
+        if (explosionInterval.current) clearInterval(explosionInterval.current);
 
         hoverTimer.current = null;
         explosionInterval.current = null;

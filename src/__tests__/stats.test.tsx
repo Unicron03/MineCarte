@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { getAllUserStats, getUserStatsForMode, getLeaderboard } from '@/prisma/requests'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '../../generated/prisma/client'
 import { auth } from '@/lib/auth'
-import { after } from 'node:test'
 
-let user: any
+let user: Prisma.UserGetPayload<Record<string, never>>
 
 beforeAll(async () => {
     await prisma.user.deleteMany({ where: { email: 'test_stats@gmail.com' } })
@@ -17,11 +17,13 @@ beforeAll(async () => {
         }
     });
 
-    user = await prisma.user.findUnique({
+    const tempUser = await prisma.user.findUnique({
         where: { email: 'test_stats@gmail.com' },
     })
     
-    if (!user) {
+    if (tempUser) {
+        user = tempUser
+    } else {
         throw new Error('Utilisateur de test introuvable après création : test_stats@gmail.com')
     }
 

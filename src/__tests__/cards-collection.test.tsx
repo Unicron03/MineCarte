@@ -2,8 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { getAllCardsWithUserCollection, drawCards, getUserCollection, getUserFavoriteCards, setFavoriteCard } from '@/prisma/requests'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { Prisma } from '../../generated/prisma/client'
 
-let user: any
+let user: Prisma.UserGetPayload<Record<string, never>>
 
 beforeAll(async () => {
     await prisma.user.deleteMany({ where: { email: 'test_card-collection@gmail.com' } })
@@ -16,11 +17,13 @@ beforeAll(async () => {
         }
     });
 
-    user = await prisma.user.findUnique({
+    const tempUser = await prisma.user.findUnique({
         where: { email: 'test_card-collection@gmail.com' },
     })
     
-    if (!user) {
+    if (tempUser) {
+        user = tempUser
+    } else {
         throw new Error('Utilisateur de test introuvable après création : test_card-collection@gmail.com')
     }
 })
@@ -49,13 +52,13 @@ describe('getAllCardsWithUserCollection', () => {
         // On supprime toutes les cartes de la collection de l'utilisateur pour partir d'une base propre
         await prisma.collection.deleteMany({ where: { user_id: user.id } })
 
-        let cards = await getAllCardsWithUserCollection(user.id)
+        const cards = await getAllCardsWithUserCollection(user.id)
         expect(cards).toBeInstanceOf(Array)
         expect(cards.length).toBeGreaterThan(0)
 
-        // On vérifie que les cartes ont bien la propriété "owned" à false
-        cards.forEach((card: any) => {
-            expect(card).toHaveProperty('isDiscovered', false)
+        cards.forEach((item) => {
+            expect(item.card).toHaveProperty('name')
+            expect(item).toHaveProperty('isDiscovered', false)
         })
     })
 })
@@ -94,7 +97,7 @@ describe('setFavoriteCard', () => {
         await setFavoriteCard(cardToFavorite.card_id, user.id, true)
 
         cards = await getUserCollection(user.id)
-        const favoritedCard = cards.find((card: any) => card.card_id === cardToFavorite.card_id)
+        const favoritedCard = cards.find((card) => card.card_id === cardToFavorite.card_id)
         expect(favoritedCard).toHaveProperty('favorite', true)
 
         // await prisma.collection.deleteMany({ where: { user_id: user.id } })
@@ -108,10 +111,13 @@ describe('getUserFavoriteCards', () => {
 
         // On simule une ouverture de carte pour s'assurer que l'utilisateur a au moins une carte dans sa collection
         await drawCards(user.id, 5)
+    
+        await setFavoriteCard(1, user.id, true)
+        await setFavoriteCard(2, user.id, true)
 
-        const cards = await getUserCollection(user.id)
-        expect(cards).toBeInstanceOf(Array)
-        expect(cards.length).toBeGreaterThan(0)
+        const favoriteCards = await getUserFavoriteCards(user.id)
+        expect(favoriteCards).toBeInstanceOf(Array)
+        expect(favoriteCards.length).toBe(2)
         
         await prisma.collection.deleteMany({ where: { user_id: user.id } })
     })

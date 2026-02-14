@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { getUserDecks, createDeck, renameDeck, duplicateDeck, deleteDeck, equipDeck, getActiveDeck, addCardToDeck, removeCardFromDeck } from '@/prisma/requests'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '../../generated/prisma/client'
 import { auth } from '@/lib/auth'
 
-let user: any
+let user: Prisma.UserGetPayload<Record<string, never>>
 
 beforeAll(async () => {
     await auth.api.signUpEmail({
@@ -14,18 +15,25 @@ beforeAll(async () => {
         }
     });
 
-    user = await prisma.user.findUnique({
+    const tempUser = await prisma.user.findUnique({
         where: { email: 'test_decks@gmail.com' },
     })
     
-    if (!user) {
+    if (tempUser) {
+        user = tempUser
+    } else {
         throw new Error('Utilisateur de test introuvable après création : test_decks@gmail.com')
     }
 })
 
 describe('createDeck', () => {
     it('création d’un deck pour l’utilisateur', async () => {
-        const deck = await createDeck(user.id)
+        try {
+           await createDeck(user.id)
+        } catch (error) {
+            console.error('Erreur lors de la création du deck :', error)
+            throw error
+        }
     })
 })
 
