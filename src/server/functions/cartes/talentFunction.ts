@@ -256,3 +256,22 @@ export function applyLegendaryRequirement(io: Server, roomId: string, player: Pl
         io.to(roomId).emit("log", `[Exigence légendaire] L'Œuf de dragon éclot et laisse place à la créature légendaire !`);
     }
 }
+
+// Talent Blaze : Flammes Perpétuelles (50% chance d'infliger 5 dégâts à l'adversaire après une attaque)
+export function checkFlammesPerpetuelles(io: Server, roomId: string, attacker: InGameCard, opponent: Player): void {
+    if (attacker.category === "mob" && (attacker.name === "Blaze" || attacker.talent === "Flammes perpétuelles")) {
+        if (Math.random() < 0.5) {
+            const damage = 5;
+            // On utilise un state temporaire pour réutiliser la logique de protection (Gardien)
+            const tempState: CombatState = { log: [] };
+            
+            const finalDamage = applyGuardianProtection(tempState, opponent, damage);
+            opponent.pv -= finalDamage;
+            
+            io.to(roomId).emit("log", `[Flammes Perpétuelles] Le Blaze crache une boule de feu bonus !`);
+            // Envoi des logs de protection éventuels
+            tempState.log.forEach(msg => io.to(roomId).emit("log", msg));
+            io.to(roomId).emit("log", `L'adversaire perd ${finalDamage} PV.`);
+        }
+    }
+}

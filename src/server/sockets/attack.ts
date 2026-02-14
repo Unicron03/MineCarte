@@ -3,7 +3,7 @@ import { CombatState, Player, Action, InGameCard, GameState } from "../../compon
 import { getActionList } from "../../../server";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
 import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect, AttaqueRandomMobAndPlayer, AttackRandomCat, applyTortueGenialeEffect, applyDimensionalProtection } from "../functions/cartes/attackFunction";
-import { drawCard, checkRetourALEnvoyeur, updateGuardianEffect } from "../functions/cartes/talentFunction";
+import { drawCard, checkRetourALEnvoyeur, updateGuardianEffect, checkFlammesPerpetuelles } from "../functions/cartes/talentFunction";
 import { hasInvisibility, isStunned, getAttackCost } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
@@ -208,6 +208,7 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, Game
 
         if (result !== null) {
             attacker.hasAttacked = true;
+            checkFlammesPerpetuelles(io, roomId, attacker, opponent);
         }
 
         // --- Finalisation de l'attaque ---
@@ -308,6 +309,7 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, Game
 
         if (result !== null) {
             attacker.hasAttacked = true;
+            checkFlammesPerpetuelles(io, roomId, attacker, opponent);
         }
 
         // --- Finalisation de l'attaque ---
