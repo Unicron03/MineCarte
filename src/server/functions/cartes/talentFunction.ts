@@ -234,3 +234,25 @@ export function applyGuardianProtection(state: CombatState, player: Player, dama
     }
     return finalDamage;
 }
+
+// Vérifie si la condition de Croissance légendaire est remplie (Présence d'un Œuf)
+export function checkLegendaryGrowth(player: Player, card: InGameCard): boolean {
+    if (card.category === "mob" && (card.name === "Ender Dragon" || card.talent === "Croissance légendaire")) {
+        // Vérification robuste : accepte "Œuf de dragon", "Oeuf de dragon" ou "Œuf d'Ender Dragon"
+        return player.board.some(c => c.name === "Œuf de dragon" || c.name === "Oeuf de dragon" || c.name === "Œuf d'Ender Dragon");
+    }
+    return true;
+}
+
+// Applique Exigence légendaire (Sacrifice de l'Œuf lors de l'arrivée du Dragon)
+export function applyLegendaryRequirement(io: Server, roomId: string, player: Player): void {
+    // On cherche l'index avec la même logique robuste pour être sûr de trouver la carte à sacrifier
+    const eggIndex = player.board.findIndex(c => c.name === "Œuf de dragon" || c.name === "Oeuf de dragon" || c.name === "Œuf d'Ender Dragon");
+    if (eggIndex !== -1) {
+        const egg = player.board[eggIndex];
+        detachEquipment(player, egg);
+        player.board.splice(eggIndex, 1);
+        player.discard.push(egg);
+        io.to(roomId).emit("log", `[Exigence légendaire] L'Œuf de dragon éclot et laisse place à la créature légendaire !`);
+    }
+}

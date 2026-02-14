@@ -4,7 +4,7 @@ import { sendGameState } from "../functions/gameLogic";
 import { getActionList } from "../../../server";
 import { GameState, CombatState } from "../../components/utils/typesPvp";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
-import { updateGuardianEffect } from "../functions/cartes/talentFunction";
+import { updateGuardianEffect, checkLegendaryGrowth, applyLegendaryRequirement } from "../functions/cartes/talentFunction";
 
 
 // Gère le socket pour jouer une carte
@@ -34,6 +34,18 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
         if (player.energie < realCost) {
             io.to(socket.id).emit("log", "Pas assez d'énergie.");
             return;
+        }
+
+        // --- Talent : Croissance légendaire (Vérification condition) ---
+        if (!checkLegendaryGrowth(player, card)) {
+            io.to(socket.id).emit("log", "Croissance légendaire : Un Œuf de dragon est requis pour poser cette carte !");
+            return;
+        }
+
+        // --- Talent : Exigence légendaire (Application effet) ---
+        // Si c'est l'Ender Dragon, on sacrifie l'œuf AVANT de vérifier la limite de place
+        if (card.category === "mob" && (card.name === "Ender Dragon" || card.talent === "Croissance légendaire")) {
+            applyLegendaryRequirement(io, roomId, player);
         }
 
         // --- Vérification de la limite de 3 mobs sur le plateau ---
