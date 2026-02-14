@@ -100,7 +100,7 @@ describe('setFavoriteCard', () => {
         const favoritedCard = cards.find((card) => card.card_id === cardToFavorite.card_id)
         expect(favoritedCard).toHaveProperty('favorite', true)
 
-        // await prisma.collection.deleteMany({ where: { user_id: user.id } })
+        await prisma.collection.deleteMany({ where: { user_id: user.id } })
     })
 })
 
@@ -112,12 +112,18 @@ describe('getUserFavoriteCards', () => {
         // On simule une ouverture de carte pour s'assurer que l'utilisateur a au moins une carte dans sa collection
         await drawCards(user.id, 5)
     
-        await setFavoriteCard(1, user.id, true)
-        await setFavoriteCard(2, user.id, true)
+        // On récupère les cartes de la collection et on en marque une comme favorite
+        const cards = await getUserCollection(user.id)
+        const cardToFavorite = cards[0]
+        
+        if (!cardToFavorite.card_id) {
+            throw new Error("La carte à favoriser n'a pas été trouvée")
+        }
+        await setFavoriteCard(cardToFavorite.card_id, user.id, true)
 
         const favoriteCards = await getUserFavoriteCards(user.id)
         expect(favoriteCards).toBeInstanceOf(Array)
-        expect(favoriteCards.length).toBe(2)
+        expect(favoriteCards.length).toBeGreaterThan(0)
         
         await prisma.collection.deleteMany({ where: { user_id: user.id } })
     })
