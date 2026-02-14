@@ -8,7 +8,6 @@ import Chest from "../Chest";
 import { UserStar, Store, Smile, Key, Bolt } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 
 export default function HomePageClient({ 
     videoSrc,
@@ -19,7 +18,6 @@ export default function HomePageClient({
     initialUserKeys: number;
     timeNextChest: Date;
 }) {
-    const router = useRouter();
     const [isCardOpening, setCardOpening] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState("");
     const [isAvailable, setIsAvailable] = useState(false);
