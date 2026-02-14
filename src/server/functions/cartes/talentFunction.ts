@@ -195,3 +195,42 @@ export function peurViscerale(io: Server, roomId: string, player: Player, oppone
         return false;
     }
 }
+
+// Met à jour l'effet visuel Lien Éternel sur le joueur (Appelé lors de la pose de carte ou mort de mob)
+export function updateGuardianEffect(state: CombatState, player: Player): void {
+    const guardians = player.board.filter(c => c.category === "mob" && c.name === "Gardien" && (c.pv_durability ?? 0) > 0);
+    const effectName = "LienEternel";
+
+    if (!player.effects) player.effects = [];
+
+    if (guardians.length >= 2) {
+        // Ajout de l'effet visuel s'il n'est pas présent
+        if (!player.effects.includes(effectName)) {
+            player.effects.push(effectName);
+            state.log.push(`[Lien éternel] Protection active : Vos PV ne descendront pas sous 10.`);
+        }
+    } else {
+        // Retrait de l'effet visuel si la condition n'est plus remplie
+        const index = player.effects.indexOf(effectName);
+        if (index !== -1) {
+            player.effects.splice(index, 1);
+            state.log.push(`[Lien éternel] Protection désactivée (moins de 2 Gardiens).`);
+        }
+    }
+}
+
+// Calcule les dégâts finaux après application de la protection du Gardien
+export function applyGuardianProtection(state: CombatState, player: Player, damage: number): number {
+    let finalDamage = damage;
+
+    if (player.effects?.includes("LienEternel")) {
+        if (player.pv > 10 && player.pv - finalDamage < 10) {
+            finalDamage = player.pv - 10;
+            state.log.push(`[Lien éternel] Protection activée ! Les Gardiens maintiennent vos PV à 10.`);
+        } else if (player.pv <= 10) {
+            finalDamage = 0;
+            state.log.push(`[Lien éternel] Protection activée ! Les Gardiens empêchent vos PV de descendre davantage.`);
+        }
+    }
+    return finalDamage;
+}

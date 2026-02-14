@@ -2,8 +2,9 @@ import type { Server, Socket } from "socket.io";
 import { playCard } from "../functions/gameLogic";
 import { sendGameState } from "../functions/gameLogic";
 import { getActionList } from "../../../server";
-import { GameState } from "../../components/utils/typesPvp";
+import { GameState, CombatState } from "../../components/utils/typesPvp";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
+import { updateGuardianEffect } from "../functions/cartes/talentFunction";
 
 
 // Gère le socket pour jouer une carte
@@ -147,6 +148,12 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
         // --- Exécution de la carte ---
         const result = playCard(io, roomId, player, card, opponent);
         if (result.success) {
+            // --- Mise à jour de l'effet Lien Éternel (Gardien) ---
+            const combatState: CombatState = { log: [] };
+            updateGuardianEffect(combatState, player);
+            // Envoi des logs éventuels (ex: "Protection active")
+            combatState.log.forEach(msg => io.to(roomId).emit("log", msg));
+
             sendGameState(io, rooms, roomId);
         } else {
             io.to(socket.id).emit("log", result.msg);

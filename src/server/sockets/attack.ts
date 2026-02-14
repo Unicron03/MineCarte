@@ -3,7 +3,7 @@ import { CombatState, Player, Action, InGameCard, GameState } from "../../compon
 import { getActionList } from "../../../server";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
 import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect, AttaqueRandomMobAndPlayer, AttackRandomCat, applyTortueGenialeEffect, applyDimensionalProtection } from "../functions/cartes/attackFunction";
-import { drawCard, checkRetourALEnvoyeur } from "../functions/cartes/talentFunction";
+import { drawCard, checkRetourALEnvoyeur, updateGuardianEffect } from "../functions/cartes/talentFunction";
 import { hasInvisibility, isStunned, getAttackCost } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
@@ -105,6 +105,8 @@ function finalizeAttack(io: Server,  rooms: Map<string, GameState>,  roomId: str
     // Gestion de la mort d'une carte (attaque cible unique)
     if (result?.killed && target && targetIndex !== null && action.function !== "heal") { 
         handleMobDeath(io, roomId, targetOwner, targetIndex, state.log, attackerPlayer);
+        // Mise à jour de l'effet Lien Éternel si un Gardien est mort
+        updateGuardianEffect(state, targetOwner);
     }
 
     // Si c'est une attaque de zone

@@ -4,6 +4,7 @@ import { applyArmorEffect, hasEsquive, getModifiedDamage } from "../testEffectFo
 import { detachEquipment, applySwordEffect, applyShieldEffect, checkTotemEffect } from "./equipementFunction";
 import { handleMobDeath } from "../gameLogic";
 import { hasInvisibility } from "../testEffectFonctions";
+import { updateGuardianEffect, applyGuardianProtection } from "./talentFunction";
 
 // Vérifie et applique la réduction de dégâts (Protection Dimensionnelle)
 function applyDamageReduction(damage: number, defender?: Player): number {
@@ -11,6 +12,18 @@ function applyDamageReduction(damage: number, defender?: Player): number {
         return Math.floor(damage * 0.5);
     }
     return damage;
+}
+
+// Applique les dégâts au joueur en gérant les effets de protection de PV min (Lien éternel)
+function applyPlayerDamage(state: CombatState, player: Player, amount: number): number {
+    // Mise à jour de l'état de l'effet avant d'appliquer les dégâts
+    updateGuardianEffect(state, player);
+
+    // Calcul des dégâts réduits par le talent (logique déléguée à talentFunction)
+    const finalDamage = applyGuardianProtection(state, player, amount);
+
+    player.pv -= finalDamage;
+    return finalDamage;
 }
 
 // Transfère les dégâts excédentaires au joueur adverse
@@ -27,8 +40,8 @@ export function transfertDamageToPlayer(state: CombatState, amount: number, oppo
         return;
     }
 
-    opponent.pv -= reducedAmount;
-    state.log.push(`Dégâts perforants ! ${sourceName} inflige ${reducedAmount} dégâts excédentaires au joueur.`);
+    const applied = applyPlayerDamage(state, opponent, reducedAmount);
+    state.log.push(`Dégâts perforants ! ${sourceName} inflige ${applied} dégâts excédentaires au joueur.`);
 }
 
 // Inflige des dégâts à une carte ou directement au joueur
@@ -42,8 +55,8 @@ export function AttackOneMob(state: CombatState, attacker: InGameCard, target: I
 
     // --- Attaque directe sur joueur ---
     if (!target && opponent) {
-        opponent.pv -= realDamage;
-        state.log.push(`${attacker.name} inflige ${realDamage} dégâts au joueur !`);
+        const applied = applyPlayerDamage(state, opponent, realDamage);
+        state.log.push(`${attacker.name} inflige ${applied} dégâts au joueur !`);
         
         // --- Effet Épée ---
         applySwordEffect(state, attacker, opponent, io, roomId);
@@ -152,8 +165,8 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
             damageToPlayer += 10;
             state.log.push(`[Arc] Tir précis sur le joueur (+10 dégâts) !`);
         }
-        opponent.pv -= damageToPlayer;
-        state.log.push(`${attacker.name} inflige ${damageToPlayer} dégâts au joueur (aucun mob adverse) !`);
+        const applied = applyPlayerDamage(state, opponent, damageToPlayer);
+        state.log.push(`${attacker.name} inflige ${applied} dégâts au joueur (aucun mob adverse) !`);
         return { killed: opponent.pv <= 0 };
     }
 
@@ -196,6 +209,8 @@ export function AttackAllMobs(io: Server, roomId: string, state: CombatState, at
                 }
                 // Utilisation de handleMobDeath pour gérer correctement la mort (et les talents comme Creeper)
                 handleMobDeath(io, roomId, opponent, i, state.log, attackerPlayer);
+                // Mise à jour de l'effet Lien Éternel si un Gardien est mort
+                updateGuardianEffect(state, opponent);
             }
         }
     }
@@ -226,8 +241,8 @@ export function attackEsquive(state: CombatState, attacker: InGameCard, target: 
 
     // --- Attaque directe sur joueur ---
     if (!target && opponent) {
-        opponent.pv -= realDamage;
-        state.log.push(`${attacker.name} inflige ${realDamage} dégâts au joueur !`);
+        const applied = applyPlayerDamage(state, opponent, realDamage);
+        state.log.push(`${attacker.name} inflige ${applied} dégâts au joueur !`);
         
         // --- Effet Épée ---
         applySwordEffect(state, attacker, opponent, io, roomId);
@@ -292,6 +307,7 @@ export function damageAndDie(state: CombatState, attacker: InGameCard, target: I
         player.discard.push(attacker);
         player.board.splice(index, 1);
         state.log.push(`${attacker.name} explose et est détruit !`);
+        updateGuardianEffect(state, player);
     }
     return result;
 }
@@ -326,8 +342,8 @@ export function attackDirectPlayer(state: CombatState, attacker: InGameCard, amo
     realDamage = applyDamageReduction(realDamage, opponent);
 
     // --- Attaque directe sur joueur ---
-    opponent.pv -= realDamage;
-    state.log.push(`${attacker.name} inflige ${realDamage} dégâts directement au joueur !`);
+    const applied = applyPlayerDamage(state, opponent, realDamage);
+    state.log.push(`${attacker.name} inflige ${applied} dégâts directement au joueur !`);
 
     // --- Effet Épée ---
     applySwordEffect(state, attacker, opponent, io, roomId);
@@ -373,8 +389,9 @@ export function applyTankEffect(state: CombatState, attacker: InGameCard): void 
 // Nouvelle fonction pour l'attaque aléatoire (ex: Shulker)
 export function AttaqueRandomMobAndPlayer(io: Server, roomId: string, state: CombatState, attacker: InGameCard, damage: number, opponent: Player, player: Player): { killed?: boolean; error?: string; msg?: string } | void | null {
     
-    opponent.pv -= damage;
-    state.log.push(`${attacker.name} inflige ${damage} PV à l'adversaire !`);
+    const reducedDamage = applyDamageReduction(damage, opponent);
+    const applied = applyPlayerDamage(state, opponent, reducedDamage);
+    state.log.push(`${attacker.name} inflige ${applied} PV à l'adversaire !`);
 
     const validTargets = opponent.board
         .map((card, index) => ({ card, index }))
