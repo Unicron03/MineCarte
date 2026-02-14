@@ -464,8 +464,7 @@ async function actions() {
         data: {
             name: "Peur viscérale",
             description: "Défausse aléatoirement un Creeper sur le plateau de votre adversaire.",
-            autoActivate: true,
-            function_name: "defaultFunction"
+            function_name: "peurViscerale"
         },
     });
 

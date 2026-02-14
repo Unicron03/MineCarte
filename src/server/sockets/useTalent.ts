@@ -3,6 +3,7 @@ import { GameState } from "../../components/utils/typesPvp";
 import { getActionList } from "../../../server";
 import { sendGameState } from "../functions/gameLogic";
 import { checkAndTriggerWarden } from "../functions/testEffectFonctions";
+import { peurViscerale } from "../functions/cartes/talentFunction";
 
 // Gère le socket pour utiliser un talent de carte
 export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, GameState>) => {
@@ -116,6 +117,10 @@ export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, G
                 // Nettoyage des morts
                 opponent.board = opponent.board.filter(c => c.category !== "mob" || (c.pv_durability !== undefined && c.pv_durability > 0));
                 success = true;
+                break;
+
+            case "peurViscerale":
+                success = peurViscerale(io, roomId, player, opponent, card);
                 break;
 
             case "defaultFunction":

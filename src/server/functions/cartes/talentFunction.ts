@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import { Player, CombatState, InGameCard } from "../../../components/utils/typesPvp";
 import { handleMobDeath } from "../gameLogic";
+import { detachEquipment } from "./equipementFunction";
 
 // Pioche une ou plusieurs cartes
 export function drawCard(state: CombatState, player: Player, count: number): void {
@@ -163,5 +164,34 @@ export function encreNoire(io: Server, roomId: string, player: Player, opponent:
     if (!player.effects.includes("EncreNoire")) {
         player.effects.push("EncreNoire");
         io.to(roomId).emit("log", `${card.name} crache de l'Encre Noire ! La prochaine attaque adverse sera redirigée.`);
+    }
+}
+
+// Talent Chat : Peur viscérale (Défausse un Creeper adverse)
+export function peurViscerale(io: Server, roomId: string, player: Player, opponent: Player, card: InGameCard): boolean {
+    
+    // Recherche des Creepers sur le plateau adverse
+    const creeperIndices = opponent.board
+        .map((c, index) => (c.category === "mob" && c.name === "Creeper") ? index : -1)
+        .filter(index => index !== -1);
+
+    if (creeperIndices.length > 0) {
+        // Sélection aléatoire d'un Creeper
+        const randomIndex = Math.floor(Math.random() * creeperIndices.length);
+        const targetIndex = creeperIndices[randomIndex];
+        const targetCreeper = opponent.board[targetIndex];
+
+        // Gestion des équipements (détachement avant défausse pour ne pas les perdre)
+        detachEquipment(opponent, targetCreeper);
+
+        // Retrait du plateau et ajout à la défausse
+        opponent.board.splice(targetIndex, 1);
+        opponent.discard.push(targetCreeper);
+
+        io.to(roomId).emit("log", `Peur viscérale ! ${card.name} effraie ${targetCreeper.name} qui s'enfuit du plateau !`);
+        return true;
+    } else {
+        io.to(roomId).emit("log", `Peur viscérale ! ${card.name} cherche un Creeper à effrayer, mais n'en trouve pas.`);
+        return false;
     }
 }
