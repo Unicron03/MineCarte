@@ -1,3 +1,6 @@
+[![CI](https://github.com/Unicron03/MineCarte/actions/workflows/ci.yml/badge.svg)](https://github.com/Unicron03/MineCarte/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Unicron03/MineCarte/branch/main/graph/badge.svg)](https://codecov.io/gh/Unicron03/MineCarte)
+
 Pour les combat multi-joeur il y a deux fichier important
 - server.js
 - src/app/game/page.tsx
