@@ -72,6 +72,9 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
               {isMob ? (isAutoActivate ? "Passif" : "Talent") : "Effet"}
             </span>
             {talentName}
+            {talentData?.description && (
+              <span className="block opacity-80 italic mt-1 font-normal text-[9px] leading-tight">{talentData.description}</span>
+            )}
           </div>
         )}
 

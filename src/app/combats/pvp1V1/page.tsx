@@ -89,13 +89,19 @@ export default function GamePage() {
                         if (dc.card.category === "EQUIPMENT") category = "equipement";
                         else if (dc.card.category === "ARTIFACT") category = "artefact";
                         
+                        // Correction : Pour les équipements/artefacts, l'effet est souvent stocké dans attack1_action dans la BDD
+                        let talentName = dc.card.talent_action?.name || null;
+                        if ((category === "equipement" || category === "artefact") && !talentName) {
+                            talentName = dc.card.attack1_action?.name || null;
+                        }
+
                         const cardDef: ServerDeckCard = {
                             name: dc.card.name,
                             imageName: dc.card.folder_name,
                             cost: dc.card.cost,
                             category: category,
                             pv: dc.card.pv_durability,
-                            talent: dc.card.talent_action?.name || null,
+                            talent: talentName,
                             attack1: dc.card.attack1_action?.name || null,
                             attack2: dc.card.attack2_action?.name || null
                         };

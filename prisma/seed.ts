@@ -1217,7 +1217,7 @@ async function cards(actions: SeedActions) {
         create: {
             id: 22,
             name: 'Épée',
-            description: "",
+            description: "Tant que cette carte est rattaché à un mob, elle inflige, après attaque du mob, 5 PV à chaque mob adverse.",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
@@ -1233,7 +1233,7 @@ async function cards(actions: SeedActions) {
         create: {
             id: 23,
             name: 'Pioche',
-            description: "",
+            description: "Permet de piocher première carte du dessus de votre deck. ",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
@@ -1249,7 +1249,7 @@ async function cards(actions: SeedActions) {
         create: {
             id: 24,
             name: 'Arc',
-            description: "",
+            description: "Tant que cette carte est rattaché à un mob, elle permet d'ajouter 10 PV aux attaques de celui-ci. Si l'attaque en question est une attaque visant plusieurs mobs adverses, les dégâts de cette équipement vise aléatoirement un des mobs. ",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
