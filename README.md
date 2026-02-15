@@ -40,3 +40,9 @@ docker compose up --build -d
 ```
 npm run test
 ```
+
+## Lencer le linter
+
+```
+npx eslint .
+```
