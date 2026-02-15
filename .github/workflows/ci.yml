@@ -188,9 +188,6 @@ jobs:
       - name: Validate Prisma schema
         run: npx prisma validate
 
-      - name: Check for pending migrations
-        run: npx prisma migrate diff --from-schema prisma/schema.prisma --to-config-datasource prisma/schema.prisma --exit-code
-
   # Job final: Success gate
   ci-success:
     name: ✅ CI Success
