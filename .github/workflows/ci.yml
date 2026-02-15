@@ -76,16 +76,19 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/minecarte_test
 
-      - name: Run Vitest
-        run: npm run test
+      - name: Run Vitest with coverage
+        run: npm run test:coverage
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/minecarte_test
+            DATABASE_URL: postgresql://postgres:postgres@localhost:5432/minecarte_test
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        if: always()
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
-          files: ./coverage/coverage-final.json
+            token: ${{ secrets.CODECOV_TOKEN }}
+            files: ./coverage/coverage-final.json
+            flags: unittests
+            name: codecov-minecarte
+            fail_ci_if_error: false
 
   # Job 3: Build Next.js
   build:
@@ -186,7 +189,7 @@ jobs:
         run: npx prisma validate
 
       - name: Check for pending migrations
-        run: npx prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datamodel prisma/schema.prisma --exit-code
+        run: npx prisma migrate diff --from-schema prisma/schema.prisma --to-config-datasource prisma/schema.prisma --exit-code
 
   # Job final: Success gate
   ci-success:
