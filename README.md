@@ -1,7 +1,7 @@
 # Minecarte
 
 [![CI](https://github.com/Unicron03/MineCarte/actions/workflows/ci.yml/badge.svg)](https://github.com/Unicron03/MineCarte/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/Unicron03/MineCarte/branch/main/graph/badge.svg?token=TON_TOKEN_ICI)](https://codecov.io/gh/Unicron03/MineCarte)
+[![codecov](https://codecov.io/gh/Unicron03/MineCarte/graph/badge.svg?token=JF8E1KKJIB)](https://codecov.io/gh/Unicron03/MineCarte)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 
