@@ -183,7 +183,7 @@ async function actions() {
             name: "Appel à un ami",
             description: "Si une carte Golem est présent dans vos 5 prochaines cartes à piocher, vous récupérez cette carte dans votre main.",
             cost: 2,
-            function_name: "defaultFunction"
+            function_name: "AppelAUnAmi"
         },
     });
 

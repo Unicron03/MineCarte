@@ -470,3 +470,25 @@ export function Entraide(state: CombatState, attacker: InGameCard, target: InGam
     // Application des dégâts via la fonction standard (gestion armure, etc.)
     return AttackOneMob(state, attacker, target, damage, opponent, io, roomId, player);
 }
+
+// Attaque Appel à un ami : Cherche un Golem dans les 5 prochaines cartes
+export function AppelAUnAmi(state: CombatState, player: Player): void {
+    // On regarde les 5 prochaines cartes (ou moins si le deck est petit)
+    const lookAhead = Math.min(player.deck.length, 5);
+    let foundIndex = -1;
+
+    for (let i = 0; i < lookAhead; i++) {
+        if (player.deck[i].name === "Golem") {
+            foundIndex = i;
+            break;
+        }
+    }
+
+    if (foundIndex !== -1) {
+        const [golemCard] = player.deck.splice(foundIndex, 1);
+        player.hand.push(golemCard);
+        state.log.push(`[Appel à un ami] Un Golem a répondu à l'appel et rejoint votre main !`);
+    } else {
+        state.log.push(`[Appel à un ami] Aucun Golem trouvé dans les 5 prochaines cartes.`);
+    }
+}

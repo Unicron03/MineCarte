@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import { CombatState, Player, Action, InGameCard, GameState } from "../../components/utils/typesPvp";
 import { getActionList } from "../../../server";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
-import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect, AttaqueRandomMobAndPlayer, AttackRandomCat, applyTortueGenialeEffect, applyDimensionalProtection, Entraide } from "../functions/cartes/attackFunction";
+import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect, AttaqueRandomMobAndPlayer, AttackRandomCat, applyTortueGenialeEffect, applyDimensionalProtection, Entraide, AppelAUnAmi } from "../functions/cartes/attackFunction";
 import { drawCard, checkRetourALEnvoyeur, updateGuardianEffect, checkFlammesPerpetuelles } from "../functions/cartes/talentFunction";
 import { hasInvisibility, isStunned, getAttackCost } from "../functions/testEffectFonctions";
 
@@ -96,6 +96,9 @@ function executeAction(io: Server, roomId: string, state: CombatState, action: A
         
         case "Entraide":
             return Entraide(state, attacker, target, player, opponent, io, roomId);
+
+        case "AppelAUnAmi":
+            return AppelAUnAmi(state, player);
 
         case "defaultFunction":
             return { error: "not_implemented", msg: "Cette fonction n'est pas implémentée." };
