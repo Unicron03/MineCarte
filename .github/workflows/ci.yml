@@ -28,13 +28,28 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-    #   - name: Check Prettier formatting
-    #     run: npm run format:check
+      # - name: Check Prettier formatting
+      #   run: npm run format:check
 
-  # Job 2: Tests unitaires
+  # Job 2: Tests unitaires AVEC base de données
   test:
     name: 🧪 Unit Tests
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: minecarte_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     
     steps:
       - name: Checkout code
@@ -51,9 +66,20 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/minecarte_test
+
+      - name: Setup database
+        run: |
+          npx prisma db push --force-reset --accept-data-loss
+          npx tsx prisma/seed.ts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/minecarte_test
 
       - name: Run Vitest
         run: npm run test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/minecarte_test
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -81,11 +107,14 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
 
       - name: Build Next.js
         run: npm run build
         env:
-          SKIP_ENV_VALIDATION: true
+          DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
 
   # Job 4: Docker Build
   docker:
@@ -99,23 +128,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image (app)
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.app
+          file: ./Dockerfile
           push: false
-          tags: minecarte-app:test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build Docker image (websocket)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.websocket
-          push: false
-          tags: minecarte-ws:test
+          tags: minecarte:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -139,6 +158,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
 
       - name: Run TypeScript compiler
         run: npx tsc --noEmit
@@ -155,6 +176,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -164,7 +186,7 @@ jobs:
         run: npx prisma validate
 
       - name: Check for pending migrations
-        run: npx prisma migrate diff --from-schema prisma/schema.prisma --to-config-datasource prisma/schema.prisma --exit-code
+        run: npx prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datamodel prisma/schema.prisma --exit-code
 
   # Job final: Success gate
   ci-success:
