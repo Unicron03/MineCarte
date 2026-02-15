@@ -14,6 +14,14 @@ import { targetSelectionSocket } from "./src/server/sockets/targetSelection";
 import { useTalentSocket } from "./src/server/sockets/useTalent";
 import type { GameState, Player, InGameCard } from "./src/components/utils/typesPvp";
 
+type EnhancedInGameCard = InGameCard & {
+  pv: number;
+  talent: string | null;
+  attack1: string;
+  attack2: string | null;
+};
+
+type EnhancedDeck = EnhancedInGameCard[];
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -33,8 +41,8 @@ io.on("connection", (socket: Socket) => {
   console.log("CONNECT:", socket.id);
 
     // --- Quand un joueur s'enregistre ---
-  socket.on("registerUser", ({ userId, deck }: { userId: string, deck?: any[] }) => {
-    (socket as any).userId = userId;
+  socket.on("registerUser", ({ userId, deck }: { userId: string, deck?: EnhancedDeck}) => {
+    (socket as Socket & { userId?: string }).userId = userId;
     console.log(`User connecté: ${userId} (socket ${socket.id})`);
 
     // --- Construction du deck joueur ---
@@ -137,7 +145,7 @@ setInterval(() => {
       const s = io.sockets.sockets.get(p.id);
       const connected = s && s.connected;
       if (!connected && p._disconnectedAt && (now - p._disconnectedAt > GRACE_MS)) {
-        const opponent = state.players.find((x: any) => x.id !== p.id);
+        const opponent = state.players.find((x: Player) => x.id !== p.id);
         if (opponent) {
           io.to(opponent.id).emit("victory", { reason: "opponent_disconnected" });
           io.to(opponent.id).emit("log", "Votre adversaire est parti. Vous avez gagné !");
