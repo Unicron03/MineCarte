@@ -172,7 +172,7 @@ async function actions() {
             description: "Inflige 5 PV à un mob adverse pour chaque villageois présent sur le plateau (le votre et celui de votre adversaire).",
             damage: 5,
             cost: 1,
-            function_name: "defaultFunction",
+            function_name: "Entraide",
             requiresTarget: true,
             targetType: "enemy"
         },

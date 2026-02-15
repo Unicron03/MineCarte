@@ -450,3 +450,23 @@ export function applyDimensionalProtection(state: CombatState, player: Player): 
         state.log.push(`${player.id} est déjà protégé par la dimension.`);
     }
 }
+
+// Attaque Entraide : Inflige 5 dégâts par Villageois sur le plateau
+export function Entraide(state: CombatState, attacker: InGameCard, target: InGameCard | null, player: Player, opponent: Player, io?: Server, roomId?: string): { killed: boolean } | void {
+    // Compte les villageois sur les deux plateaux
+    const playerVillagers = player.board.filter(c => c.category === "mob" && c.name === "Villageois").length;
+    const opponentVillagers = opponent.board.filter(c => c.category === "mob" && c.name === "Villageois").length;
+    const totalVillagers = playerVillagers + opponentVillagers;
+    
+    const damage = totalVillagers * 5;
+
+    state.log.push(`[Entraide] ${totalVillagers} Villageois présents (Alliés: ${playerVillagers}, Ennemis: ${opponentVillagers}).`);
+
+    if (damage === 0) {
+        state.log.push(`[Entraide] Aucun villageois pour soutenir l'attaque. 0 dégâts.`);
+        return { killed: false };
+    }
+
+    // Application des dégâts via la fonction standard (gestion armure, etc.)
+    return AttackOneMob(state, attacker, target, damage, opponent, io, roomId, player);
+}
