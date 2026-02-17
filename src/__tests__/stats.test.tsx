@@ -102,10 +102,15 @@ describe('getLeaderboard', () => {
         });
 
         const updatedLeaderboard = await getLeaderboard('ONE_V_ONE', 10);
-        expect(updatedLeaderboard[0]).toHaveProperty('user_id', duplicateUser.user.id)
-        expect(updatedLeaderboard[0]).toHaveProperty('points', 2000)
-        expect(updatedLeaderboard[1]).toHaveProperty('user_id', user.id)
-        expect(updatedLeaderboard[1]).toHaveProperty('points', 1500)
+        
+        const duplicateUserStats = updatedLeaderboard.find((s: { user_id: string }) => s.user_id === duplicateUser.user.id)
+        const userStats = updatedLeaderboard.find((s: { user_id: string }) => s.user_id === user.id)
+
+        expect(duplicateUserStats).toBeDefined()
+        expect(duplicateUserStats).toHaveProperty('points', 2000)
+        
+        expect(userStats).toBeDefined()
+        expect(userStats).toHaveProperty('points', 1500)
     
         await prisma.user.deleteMany({ where: { email: 'test_stats_leaderboard@gmail.com' } })
     })

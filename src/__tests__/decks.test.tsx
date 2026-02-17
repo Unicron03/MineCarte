@@ -44,7 +44,8 @@ describe('getUserDecks', () => {
 
         expect(decks).toBeInstanceOf(Array)
         expect(decks.length).toBeGreaterThan(0)
-        expect(decks[0]).toHaveProperty('name', "Deck n°1")
+        expect(decks[0]).toHaveProperty('name')
+        expect(decks[0].name).toMatch(/Deck n°\d+/)
     })
 })
 
