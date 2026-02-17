@@ -1,6 +1,5 @@
 import { Server } from "socket.io";
 import type { Player, InGameCard, CombatState, EffectContext } from "../../../components/utils/typesPvp";
-import { heal } from "./attackFunction"; 
 import { handleMobDeath } from "../gameLogic";
 import { drawCard } from "./talentFunction";
 
@@ -51,7 +50,13 @@ export function applyPotionRegen(state: CombatState, player: Player): void {
 
                 // --- Activation de la Potion ---
                 state.log.push(`[Potion] La potion s'active sur ${card.name}.`);
-                heal(state, card, 10);
+                
+                if (card.pv_durability !== undefined) {
+                    const max = card.max_pv ?? card.pv_durability;
+                    const healAmount = Math.min(10, max - card.pv_durability);
+                    card.pv_durability += healAmount;
+                    state.log.push(`${card.name} récupère ${healAmount} PV`);
+                }
             }
         }
     });

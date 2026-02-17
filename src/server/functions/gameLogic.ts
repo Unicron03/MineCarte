@@ -1,10 +1,11 @@
 import { Server, Socket } from "socket.io";
 import type { InGameCard, Player, GameState } from "../../components/utils/typesPvp";
-import { actionList } from "../../components/utils/data";
+import { getActionList } from "../../../server";
 import { applyCraftTableEffect, handleBurnEffect, handleGoldenAppleEffect, checkAndTriggerWarden } from "./testEffectFonctions";
 import { healPlayer, drawCardsEffect, fishingRodEffect, applyEnchantmentTableEffect, anvilEffect, checkAnvilCondition } from "./cartes/artefactFunction";
 import { detachEquipment, applyPotionRegen, applyPickaxeEffect, hasElytra } from "./cartes/equipementFunction";
 import { removeEnergyFromOpponent, applyCarapaceEffect, pressionPsychologique, checkWitherExplosionNoire, enchantementPuissant, levitation, encreNoire } from "./cartes/talentFunction";
+import { appliquerResultatMatch } from "./gestionVictoire";
 
 
 // --- Piocher une carte ---
@@ -63,7 +64,7 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
         applyCraftTableEffect(player, found, io, roomId, true);
 
         if (found.effet) {
-            const action = actionList.find(a => a.name === found.effet);
+            const action = getActionList().find(a => a.name === found.effet);
             if (action) {
                 if (action.function === "healPlayer") {
                     const combatState = { log: [] as string[] };
@@ -167,7 +168,7 @@ export function playCard(io: Server, roomId: string, player: Player, card: InGam
 
         // --- DÉTECTION SONORE (WARDEN) ---
         // Si le mob joué a un talent auto-actif (ex: Golem), cela déclenche le Warden adverse
-        const action = actionList.find(a => a.name === found.talent);
+        const action = getActionList().find(a => a.name === found.talent);
         // Exception pour le Gast : Son talent "Retour à l'envoyeur" est passif mais ne se déclenche qu'à l'attaque, pas à la pose
         if (action && action.autoActivate && found.talent !== "Retour à l'envoyeur") {
              checkAndTriggerWarden(io, roomId, player, opponent, cardToPlay);
@@ -220,7 +221,12 @@ export function playEquipment(io: Server, roomId: string, player: Player, card: 
 }
 
 // --- Terminer le tour ---
-export function endTurn(io: Server, rooms: Map<string, GameState>, state: GameState) {
+export async function endTurn(
+    io: Server, 
+    rooms: Map<string, GameState>, 
+    state: GameState, 
+    userToRoom: Map<string, { roomId: string; playerIndex: number }>
+) {
 
     // --- Récupérer le joueur qui termine son tour ---
     const playerEnding = state.players[state.turnIndex];
@@ -396,7 +402,7 @@ export function endTurn(io: Server, rooms: Map<string, GameState>, state: GameSt
     drawCard(current);
     io.to(state.roomId).emit("log",`Tour de ${current.id} → +${gain} énergie (total: ${current.energie})`);
     sendGameState(io, rooms, state.roomId);
-    if (checkVictory(io, state, rooms)) return;
+    if (await checkVictory(io, state, rooms, userToRoom)) return;
 }
 
 // --- Envoyer l'état du jeu ---
@@ -454,8 +460,9 @@ export function handleMatchmaking(
     rooms: Map<string, GameState>, 
     waitingPlayer: { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null, 
     genToken: () => string, 
-    createPlayer: (socketId: string, deck: InGameCard[], token: string, userId?: string) => Player, 
-    currentDeck: InGameCard[],  
+    createPlayer: (socketId: string, deck: InGameCard[], token: string, userId?: string) => Player,
+    currentDeck: InGameCard[],
+    currentUserId: string | undefined,
     sendGameState: (io: Server, rooms: Map<string, GameState>, roomId: string) => void, 
     applyEnergyGain: (player: Player, isSecondPlayer: boolean) => { gain: number; before: number; after: number }
 ): { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null {
@@ -482,6 +489,12 @@ export function handleMatchmaking(
             // --- Création des joueurs ---
             const p1 = createPlayer(waitingPlayer.socketId, waitingPlayer.deck, token1, waitingPlayer.userId);
             const p2 = createPlayer(socket.id, currentDeck, token2, (socket as unknown as { userId: string }).userId);
+
+            // Appliquer la "défaite initiale" aux deux joueurs.
+            // Cela sert de "coût d'entrée" et garantit que la partie est comptabilisée.
+            // Le gagnant sera compensé. Cela évite les décomptes multiples lors des rafraîchissements.
+            appliquerResultatMatch(p1.userId, false);
+            appliquerResultatMatch(p2.userId, false);
 
             // --- Joueur 1 commence le premier tour ---
             p1.turnCount = 1;
@@ -514,16 +527,16 @@ export function handleMatchmaking(
         } else {
 
             // --- Le joueur en attente s'est déconnecté ---
-            const newWaiting = { socketId: socket.id, token: genToken(), userId: (socket as unknown as { userId: string }).userId, deck: currentDeck };
+            const newWaiting = { socketId: socket.id, token: genToken(), userId: currentUserId, deck: currentDeck };
             socket.emit("waiting");
-            console.log(` Nouveau joueur en attente: ${socket.id}`);
+            console.log(` Nouveau joueur en attente: ${socket.id} (user: ${currentUserId})`);
             return newWaiting;
         }
     // --- Sinon, mettre le joueur actuel en attente ---
     } else {
-        const newWaiting = { socketId: socket.id, token: genToken(), deck: currentDeck };
+        const newWaiting = { socketId: socket.id, token: genToken(), userId: currentUserId, deck: currentDeck };
         socket.emit("waiting");
-        console.log(` Joueur en attente: ${socket.id}`);
+        console.log(` Joueur en attente: ${socket.id} (user: ${currentUserId})`);
         return newWaiting;
     }
 }
@@ -549,7 +562,12 @@ export function applyEnergyGain(player: Player, isSecondPlayer: boolean) {
 }
 
 // --- Vérification de la victoire ---
-export function checkVictory(io: Server, roomState: GameState, rooms: Map<string, GameState>) {
+export async function checkVictory(
+    io: Server, 
+    roomState: GameState, 
+    rooms: Map<string, GameState>,
+    userToRoom: Map<string, { roomId: string; playerIndex: number }>
+) {
     
     // --- Vérification des points de vie ---
     const [p1, p2] = roomState.players;
@@ -558,22 +576,31 @@ export function checkVictory(io: Server, roomState: GameState, rooms: Map<string
     if (p1.pv <= 0 && p2.pv <= 0) {
         io.to(roomState.roomId).emit("draw");
         rooms.delete(roomState.roomId);
+        roomState.players.forEach(p => { if (p.userId) userToRoom.delete(p.userId); });
         return true;
     }
 
     // --- Cas de victoire J2 ---
     if (p1.pv <= 0) {
-        io.to(p1.id).emit("defeat", { reason: "pv_zero" });
-        io.to(p2.id).emit("victory", { reason: "enemy_zero" });
+        // J2 gagne
+        const result = await appliquerResultatMatch(p2.userId, true);
+        
+        io.to(p1.id).emit("defeat", { reason: "pv_zero", pointsChange: -50 });
+        io.to(p2.id).emit("victory", { reason: "enemy_zero", ...result });
         rooms.delete(roomState.roomId);
+        roomState.players.forEach(p => { if (p.userId) userToRoom.delete(p.userId); });
         return true;
     }
 
     // --- Cas de victoire J1 ---
     if (p2.pv <= 0) {
-        io.to(p2.id).emit("defeat", { reason: "pv_zero" });
-        io.to(p1.id).emit("victory", { reason: "enemy_zero" });
+        // J1 gagne
+        const result = await appliquerResultatMatch(p1.userId, true);
+        
+        io.to(p2.id).emit("defeat", { reason: "pv_zero", pointsChange: -50 });
+        io.to(p1.id).emit("victory", { reason: "enemy_zero", ...result });
         rooms.delete(roomState.roomId);
+        roomState.players.forEach(p => { if (p.userId) userToRoom.delete(p.userId); });
         return true;
     }
 

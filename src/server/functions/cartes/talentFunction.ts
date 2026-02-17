@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import { Player, CombatState, InGameCard } from "../../../components/utils/typesPvp";
 import { handleMobDeath } from "../gameLogic";
+import { detachEquipment } from "./equipementFunction";
 
 // Pioche une ou plusieurs cartes
 export function drawCard(state: CombatState, player: Player, count: number): void {
@@ -163,5 +164,114 @@ export function encreNoire(io: Server, roomId: string, player: Player, opponent:
     if (!player.effects.includes("EncreNoire")) {
         player.effects.push("EncreNoire");
         io.to(roomId).emit("log", `${card.name} crache de l'Encre Noire ! La prochaine attaque adverse sera redirigée.`);
+    }
+}
+
+// Talent Chat : Peur viscérale (Défausse un Creeper adverse)
+export function peurViscerale(io: Server, roomId: string, player: Player, opponent: Player, card: InGameCard): boolean {
+    
+    // Recherche des Creepers sur le plateau adverse
+    const creeperIndices = opponent.board
+        .map((c, index) => (c.category === "mob" && c.name === "Creeper") ? index : -1)
+        .filter(index => index !== -1);
+
+    if (creeperIndices.length > 0) {
+        // Sélection aléatoire d'un Creeper
+        const randomIndex = Math.floor(Math.random() * creeperIndices.length);
+        const targetIndex = creeperIndices[randomIndex];
+        const targetCreeper = opponent.board[targetIndex];
+
+        // Gestion des équipements (détachement avant défausse pour ne pas les perdre)
+        detachEquipment(opponent, targetCreeper);
+
+        // Retrait du plateau et ajout à la défausse
+        opponent.board.splice(targetIndex, 1);
+        opponent.discard.push(targetCreeper);
+
+        io.to(roomId).emit("log", `Peur viscérale ! ${card.name} effraie ${targetCreeper.name} qui s'enfuit du plateau !`);
+        return true;
+    } else {
+        io.to(roomId).emit("log", `Peur viscérale ! ${card.name} cherche un Creeper à effrayer, mais n'en trouve pas.`);
+        return false;
+    }
+}
+
+// Met à jour l'effet visuel Lien Éternel sur le joueur (Appelé lors de la pose de carte ou mort de mob)
+export function updateGuardianEffect(state: CombatState, player: Player): void {
+    const guardians = player.board.filter(c => c.category === "mob" && c.name === "Gardien" && (c.pv_durability ?? 0) > 0);
+    const effectName = "LienEternel";
+
+    if (!player.effects) player.effects = [];
+
+    if (guardians.length >= 2) {
+        // Ajout de l'effet visuel s'il n'est pas présent
+        if (!player.effects.includes(effectName)) {
+            player.effects.push(effectName);
+            state.log.push(`[Lien éternel] Protection active : Vos PV ne descendront pas sous 10.`);
+        }
+    } else {
+        // Retrait de l'effet visuel si la condition n'est plus remplie
+        const index = player.effects.indexOf(effectName);
+        if (index !== -1) {
+            player.effects.splice(index, 1);
+            state.log.push(`[Lien éternel] Protection désactivée (moins de 2 Gardiens).`);
+        }
+    }
+}
+
+// Calcule les dégâts finaux après application de la protection du Gardien
+export function applyGuardianProtection(state: CombatState, player: Player, damage: number): number {
+    let finalDamage = damage;
+
+    if (player.effects?.includes("LienEternel")) {
+        if (player.pv > 10 && player.pv - finalDamage < 10) {
+            finalDamage = player.pv - 10;
+            state.log.push(`[Lien éternel] Protection activée ! Les Gardiens maintiennent vos PV à 10.`);
+        } else if (player.pv <= 10) {
+            finalDamage = 0;
+            state.log.push(`[Lien éternel] Protection activée ! Les Gardiens empêchent vos PV de descendre davantage.`);
+        }
+    }
+    return finalDamage;
+}
+
+// Vérifie si la condition de Croissance légendaire est remplie (Présence d'un Œuf)
+export function checkLegendaryGrowth(player: Player, card: InGameCard): boolean {
+    if (card.category === "mob" && (card.name === "Ender Dragon" || card.talent === "Croissance légendaire")) {
+        // Vérification robuste : accepte "Œuf de dragon", "Oeuf de dragon" ou "Œuf d'Ender Dragon"
+        return player.board.some(c => c.name === "Œuf de dragon" || c.name === "Oeuf de dragon" || c.name === "Œuf d'Ender Dragon");
+    }
+    return true;
+}
+
+// Applique Exigence légendaire (Sacrifice de l'Œuf lors de l'arrivée du Dragon)
+export function applyLegendaryRequirement(io: Server, roomId: string, player: Player): void {
+    // On cherche l'index avec la même logique robuste pour être sûr de trouver la carte à sacrifier
+    const eggIndex = player.board.findIndex(c => c.name === "Œuf de dragon" || c.name === "Oeuf de dragon" || c.name === "Œuf d'Ender Dragon");
+    if (eggIndex !== -1) {
+        const egg = player.board[eggIndex];
+        detachEquipment(player, egg);
+        player.board.splice(eggIndex, 1);
+        player.discard.push(egg);
+        io.to(roomId).emit("log", `[Exigence légendaire] L'Œuf de dragon éclot et laisse place à la créature légendaire !`);
+    }
+}
+
+// Talent Blaze : Flammes Perpétuelles (50% chance d'infliger 5 dégâts à l'adversaire après une attaque)
+export function checkFlammesPerpetuelles(io: Server, roomId: string, attacker: InGameCard, opponent: Player): void {
+    if (attacker.category === "mob" && (attacker.name === "Blaze" || attacker.talent === "Flammes perpétuelles")) {
+        if (Math.random() < 0.5) {
+            const damage = 5;
+            // On utilise un state temporaire pour réutiliser la logique de protection (Gardien)
+            const tempState: CombatState = { log: [] };
+            
+            const finalDamage = applyGuardianProtection(tempState, opponent, damage);
+            opponent.pv -= finalDamage;
+            
+            io.to(roomId).emit("log", `[Flammes Perpétuelles] Le Blaze crache une boule de feu bonus !`);
+            // Envoi des logs de protection éventuels
+            tempState.log.forEach(msg => io.to(roomId).emit("log", msg));
+            io.to(roomId).emit("log", `L'adversaire perd ${finalDamage} PV.`);
+        }
     }
 }

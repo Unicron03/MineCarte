@@ -172,7 +172,7 @@ async function actions() {
             description: "Inflige 5 PV à un mob adverse pour chaque villageois présent sur le plateau (le votre et celui de votre adversaire).",
             damage: 5,
             cost: 1,
-            function_name: "defaultFunction",
+            function_name: "Entraide",
             requiresTarget: true,
             targetType: "enemy"
         },
@@ -183,7 +183,7 @@ async function actions() {
             name: "Appel à un ami",
             description: "Si une carte Golem est présent dans vos 5 prochaines cartes à piocher, vous récupérez cette carte dans votre main.",
             cost: 2,
-            function_name: "defaultFunction"
+            function_name: "AppelAUnAmi"
         },
     });
 
@@ -464,8 +464,7 @@ async function actions() {
         data: {
             name: "Peur viscérale",
             description: "Défausse aléatoirement un Creeper sur le plateau de votre adversaire.",
-            autoActivate: true,
-            function_name: "defaultFunction"
+            function_name: "peurViscerale"
         },
     });
 
@@ -473,9 +472,8 @@ async function actions() {
         data: {
             name: "Coup de griffe",
             description: "Inflige aléatoirement entre 5 et 15 PV à un mob adverse.",
-            damage: Math.floor(Math.random() * (15 - 5 + 1)) + 5, // (syntaxe : max - min)
             cost: 1,
-            function_name: "AttackOneMob",
+            function_name: "AttackRandomCat",
             requiresTarget: true,
             targetType: "enemy"
         },
@@ -495,7 +493,7 @@ async function actions() {
             description: "Inflige 10 PV à un mob aléatoire du plateau de l'adversaire & Inflige 10 PV à l'adversaire.",
             damage: 10,
             cost: 2,
-            function_name: "defaultFunction",
+            function_name: "AttaqueRandomMobAndPlayer",
         },
     });
 
@@ -505,7 +503,7 @@ async function actions() {
             description: "Réduit de 50% toutes les attaques adverses du prochain tour de votre adversaire.",
             damage: 0,
             cost: 5,
-            function_name: "defaultFunction",
+            function_name: "applyDimensionalProtection",
         },
     });
 
@@ -1219,6 +1217,7 @@ async function cards(actions: SeedActions) {
         create: {
             id: 22,
             name: 'Épée',
+            description: "Tant que cette carte est rattaché à un mob, elle inflige, après attaque du mob, 5 PV à chaque mob adverse.",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
@@ -1234,6 +1233,7 @@ async function cards(actions: SeedActions) {
         create: {
             id: 23,
             name: 'Pioche',
+            description: "Permet de piocher première carte du dessus de votre deck. ",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
@@ -1249,6 +1249,7 @@ async function cards(actions: SeedActions) {
         create: {
             id: 24,
             name: 'Arc',
+            description: "Tant que cette carte est rattaché à un mob, elle permet d'ajouter 10 PV aux attaques de celui-ci. Si l'attaque en question est une attaque visant plusieurs mobs adverses, les dégâts de cette équipement vise aléatoirement un des mobs. ",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,

@@ -1,8 +1,9 @@
 import { Server, Socket } from "socket.io";
 import { GameState } from "../../components/utils/typesPvp";
-import { actionList } from "../../components/utils/data";
+import { getActionList } from "../../../server";
 import { sendGameState } from "../functions/gameLogic";
 import { checkAndTriggerWarden } from "../functions/testEffectFonctions";
+import { peurViscerale } from "../functions/cartes/talentFunction";
 
 // Gère le socket pour utiliser un talent de carte
 export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, GameState>) => {
@@ -57,7 +58,7 @@ export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, G
         }
 
         // --- Récupérer la définition de l'action ---
-        const actionDef = actionList.find((a) => a.name === card.talent);
+        const actionDef = getActionList().find((a) => a.name === card.talent);
         if (!actionDef) {
             socket.emit("error", "Action inconnue.");
             return;
@@ -116,6 +117,10 @@ export const useTalentSocket = (io: Server, socket: Socket, rooms: Map<string, G
                 // Nettoyage des morts
                 opponent.board = opponent.board.filter(c => c.category !== "mob" || (c.pv_durability !== undefined && c.pv_durability > 0));
                 success = true;
+                break;
+
+            case "peurViscerale":
+                success = peurViscerale(io, roomId, player, opponent, card);
                 break;
 
             case "defaultFunction":

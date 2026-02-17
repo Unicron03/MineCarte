@@ -88,6 +88,7 @@ export interface EffectDisplayProps {
 export interface EndGameScreenProps {
   result: "win" | "lose" | "draw";
   onQuit: () => void;
+  data?: { pointsChange?: number; keysChange?: number };
 }
 
 // Props pour le composant GameLogs
