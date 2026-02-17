@@ -39,9 +39,9 @@ async function fetchAttack(id: number | null) {
 type CardType = Prisma.cardsGetPayload<Record<string, never>>;
 
 function CardPopupDetailsInner(
-    { undescovered = true, favorite, quantity, rarity, card }:
-    { undescovered?: boolean, favorite?: boolean, quantity?: number, rarity?: number, card: CardType })
-{
+    { undescovered = true, favorite, quantity, rarity, card, canSetFavorite = true }:
+    { undescovered?: boolean, favorite?: boolean, quantity?: number, rarity?: number, card: CardType, canSetFavorite?: boolean }
+){
     const [isFavorite, setIsFavorite] = useState(favorite);
 
     const invertFavorite = async () => {
@@ -74,7 +74,7 @@ function CardPopupDetailsInner(
 
     return (
         <div className="card self-center w-fit min-w-[230px] max-w-[230px] h-full content-center relative">
-            { undescovered && (
+            { undescovered && canSetFavorite && (
                 <Star
                     size={24}
                     className="absolute z-50 card-star cursor-pointer -left-1.5 -top-1.5"
@@ -135,7 +135,7 @@ function CardPopupDetailsInner(
                                 />
                             </Atropos>
 
-                            { undescovered &&
+                            { undescovered && canSetFavorite &&
                                 <div className="flex items-center gap-2">
                                     <Button variant={null} className="p-2" onClick={invertFavorite}>
                                         <Star className="card-star" color="gold" fill={isFavorite ? "gold" : "none"} />
@@ -223,7 +223,9 @@ function CardPopupDetailsInner(
 
                             <Separator />
 
-                            <span>{card.description}</span>
+                            { card.description && card.description !== null &&
+                                <span>Description : {card.description}</span>
+                            }
                         </div>
                     </div>
                 </DialogContent>
@@ -238,6 +240,7 @@ export default function CardPopupDetails(props: {
     quantity?: number;
     rarity?: number;
     card: CardType;
+    canSetFavorite?: boolean;
 }) {
     return (
         <QueryClientProvider client={queryClient}>

@@ -8,7 +8,6 @@ import Chest from "../Chest";
 import { UserStar, Store, Smile, Key, Bolt } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 
 export default function HomePageClient({ 
     videoSrc,
@@ -19,7 +18,6 @@ export default function HomePageClient({
     initialUserKeys: number;
     timeNextChest: Date;
 }) {
-    const router = useRouter();
     const [isCardOpening, setCardOpening] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState("");
     const [isAvailable, setIsAvailable] = useState(false);
@@ -48,6 +46,7 @@ export default function HomePageClient({
 
             if (diff <= 0) {
                 setTimeRemaining("Disponible !");
+                setIsAvailable(true);
                 return;
             }
 
@@ -55,6 +54,7 @@ export default function HomePageClient({
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
+            setIsAvailable(false);
             setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
         };
 
@@ -94,7 +94,7 @@ export default function HomePageClient({
                 />
 
                 <div className="glass-nav flex gap-4 items-center px-4 text-base font-medium">
-                    <span className={timeRemaining === "Disponible !" ? "text-green-400 font-bold" : ""}>
+                    <span id="spanTimeNextChest" className={timeRemaining === "Disponible !" ? "text-green-400 font-bold" : ""}>
                         {timeRemaining || "Chargement..."}
                     </span>
                     <div className="glass-highlight flex gap-2 rounded-full px-2 py-1.5">

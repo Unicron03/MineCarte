@@ -863,7 +863,7 @@ async function actions() {
 }
 
 async function cards(actions: SeedActions) {
-    const card_skeleton = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 1, name: 'Squelette' },
         update: {},
         create: {
@@ -879,7 +879,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_dragon = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 2, name: 'Ender dragon' },
         update: {},
         create: {
@@ -897,7 +897,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_enderman = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 3, name: 'Enderman' },
         update: {},
         create: {
@@ -915,7 +915,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_creeper = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 4, name: 'Creeper' },
         update: {},
         create: {
@@ -932,7 +932,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_golem = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 5, name: 'Golem' },
         update: {},
         create: {
@@ -950,7 +950,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_villager = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 6, name: 'Villageois' },
         update: {},
         create: {
@@ -966,7 +966,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_zombie = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 7, name: 'Zombie' },
         update: {},
         create: {
@@ -982,7 +982,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_axolotl = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 8, name: 'Axolotl' },
         update: {},
         create: {
@@ -998,7 +998,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_turtle = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 9, name: 'Tortue' },
         update: {},
         create: {
@@ -1014,7 +1014,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_blaze = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 10, name: 'Blaze' },
         update: {},
         create: {
@@ -1030,7 +1030,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_spider = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 11, name: 'Araignée' },
         update: {},
         create: {
@@ -1046,7 +1046,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_warden = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 12, name: 'Warden' },
         update: {},
         create: {
@@ -1064,7 +1064,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_guardian = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 13, name: 'Guardian' },
         update: {},
         create: {
@@ -1081,7 +1081,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_witch = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 14, name: 'Sorcière' },
         update: {},
         create: {
@@ -1099,7 +1099,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_ghast = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 15, name: 'Ghast' },
         update: {},
         create: {
@@ -1115,7 +1115,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_wither = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 16, name: 'Wither' },
         update: {},
         create: {
@@ -1133,7 +1133,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_snowgolem = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 17, name: 'Golem de neige' },
         update: {},
         create: {
@@ -1148,7 +1148,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_squid = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 18, name: 'Poulpe' },
         update: {},
         create: {
@@ -1163,7 +1163,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_cat = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 19, name: 'Chat' },
         update: {},
         create: {
@@ -1179,7 +1179,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_egg = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 20, name: 'Oeuf de dragon' },
         update: {},
         create: {
@@ -1194,7 +1194,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_shulker = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 21, name: 'Shulker' },
         update: {},
         create: {
@@ -1211,7 +1211,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_sword = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 22, name: 'Épée' },
         update: {},
         create: {
@@ -1227,7 +1227,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_pickaxe = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 23, name: 'Pioche' },
         update: {},
         create: {
@@ -1243,7 +1243,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_bow = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 24, name: 'Arc' },
         update: {},
         create: {

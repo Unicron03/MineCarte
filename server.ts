@@ -15,6 +15,14 @@ import { useTalentSocket } from "./src/server/sockets/useTalent";
 import { appliquerResultatMatch } from "./src/server/functions/gestionVictoire";
 import type { GameState, Player, InGameCard, Action } from "./src/components/utils/typesPvp";
 
+type EnhancedInGameCard = InGameCard & {
+  pv: number;
+  talent: string | null;
+  attack1: string;
+  attack2: string | null;
+};
+
+type EnhancedDeck = EnhancedInGameCard[];
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -87,10 +95,10 @@ async function initializeServer() {
     socket.emit("actionList", actionList);
 
     // --- Quand un joueur s'enregistre ---
-    socket.on("registerUser", ({ userId, dbUserId, deck }: { userId: string, dbUserId?: string, deck?: any[] }) => {
+    socket.on("registerUser", ({ userId, dbUserId, deck }: { userId: string, dbUserId?: string, deck?: EnhancedDeck }) => {
       // On priorise l'ID de la base de données s'il existe
       const finalUserId = dbUserId || userId;
-      (socket as any).userId = finalUserId;
+      (socket as Socket & { userId?: string }).userId = finalUserId;
       console.log(`User connecté: ${finalUserId} (socket ${socket.id})`);
 
       // --- Construction du deck joueur ---
@@ -192,7 +200,7 @@ async function initializeServer() {
         const s = io.sockets.sockets.get(p.id);
         const connected = s && s.connected;
         if (!connected && p._disconnectedAt && (now - p._disconnectedAt > GRACE_MS)) {
-          const opponent = state.players.find((x: any) => x.id !== p.id);
+          const opponent = state.players.find((x: Player) => x.id !== p.id);
           if (opponent) {
             // L'adversaire gagne (compense sa défaite initiale)
             appliquerResultatMatch(opponent.userId, true).then((result) => {
