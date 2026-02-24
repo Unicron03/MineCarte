@@ -49,12 +49,10 @@ describe('updateUserPseudo', () => {
 
 describe('deleteUser', () => {
     it('suppression de l’utilisateur', async () => {
-        const nbUsersBefore = await prisma.user.count()
-
         const deletedUser = await deleteUser(user.id)
         expect(deletedUser).toHaveProperty('id', user.id)
 
-        const nbUsersAfter = await prisma.user.count()
-        expect(nbUsersAfter).toBe(nbUsersBefore - 1)
+        const checkUser = await prisma.user.findUnique({ where: { id: user.id } })
+        expect(checkUser).toBeNull()
     })
 })
