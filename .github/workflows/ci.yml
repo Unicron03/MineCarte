@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [main, master, develop, feature/tests-playwright]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main, master, develop, feature/tests-playwright]
+    branches: [main, master, develop]
 
 jobs:
   # Job 1: Lint & Format
