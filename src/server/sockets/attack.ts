@@ -1,14 +1,14 @@
 import { Server, Socket } from "socket.io";
 import { CombatState, Player, Action, InGameCard, GameState } from "../../components/utils/typesPvp";
-import { actionList } from "../../components/utils/data";
+import { getActionList } from "../../../server";
 import { sendGameState, checkVictory, checkVillageGuardian, handleMobDeath } from "../functions/gameLogic";
-import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect } from "../functions/cartes/attackFunction";
-import { drawCard, checkRetourALEnvoyeur } from "../functions/cartes/talentFunction";
+import { AttackOneMob, heal, AttackAllMobs, attackEsquive, damageAndDie, voleEnergie, attackDirectPlayer, hurlementSombre, applyTankEffect, AttaqueRandomMobAndPlayer, AttackRandomCat, applyTortueGenialeEffect, applyDimensionalProtection, Entraide, AppelAUnAmi } from "../functions/cartes/attackFunction";
+import { drawCard, checkRetourALEnvoyeur, updateGuardianEffect, checkFlammesPerpetuelles } from "../functions/cartes/talentFunction";
 import { hasInvisibility, isStunned, getAttackCost } from "../functions/testEffectFonctions";
 
 // Récupère l'action dans actionList grace a son nom
 function getActionByName(name: string): Action | undefined {
-    return actionList.find(
+    return getActionList().find(
         (a) => a.name.toLowerCase() === name.toLowerCase()
     );
 }
@@ -81,17 +81,38 @@ function executeAction(io: Server, roomId: string, state: CombatState, action: A
         case "applyTankEffect":
             return applyTankEffect(state, attacker);
 
+        case "AttaqueRandomMobAndPlayer":
+            if (!action.damage) return;
+            return AttaqueRandomMobAndPlayer(io, roomId, state, attacker, action.damage, opponent, player);
+
+        case "AttackRandomCat":
+            return AttackRandomCat(state, attacker, target, opponent, io, roomId, player);
+
+        case "applyTortueGenialeEffect":
+            return applyTortueGenialeEffect(state, attacker);
+
+        case "applyDimensionalProtection":
+            return applyDimensionalProtection(state, player);
+        
+        case "Entraide":
+            return Entraide(state, attacker, target, player, opponent, io, roomId);
+
+        case "AppelAUnAmi":
+            return AppelAUnAmi(state, player);
+
         case "defaultFunction":
             return { error: "not_implemented", msg: "Cette fonction n'est pas implémentée." };
     }
 }
 
 // Fonction utilitaire pour finaliser l'attaque
-function finalizeAttack(io: Server,  rooms: Map<string, GameState>,  roomId: string,  room: GameState, result: { killed?: boolean; error?: string; msg?: string } | void | null,  state: CombatState,  targetOwner: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player) {
+function finalizeAttack(io: Server,  rooms: Map<string, GameState>,  roomId: string,  room: GameState, result: { killed?: boolean; error?: string; msg?: string } | void | null,  state: CombatState,  targetOwner: Player,  target: InGameCard | null,  targetIndex: number | null,  action: Action, attackerPlayer: Player, userToRoom: Map<string, { roomId: string; playerIndex: number }>) {
   
     // Gestion de la mort d'une carte (attaque cible unique)
     if (result?.killed && target && targetIndex !== null && action.function !== "heal") { 
         handleMobDeath(io, roomId, targetOwner, targetIndex, state.log, attackerPlayer);
+        // Mise à jour de l'effet Lien Éternel si un Gardien est mort
+        updateGuardianEffect(state, targetOwner);
     }
 
     // Si c'est une attaque de zone
@@ -108,10 +129,10 @@ function finalizeAttack(io: Server,  rooms: Map<string, GameState>,  roomId: str
 
     state.log.forEach((msg) => io.to(roomId).emit("log", msg));
     sendGameState(io, rooms, roomId);
-    checkVictory(io, room, rooms);
+    checkVictory(io, room, rooms, userToRoom);
 }
 
-export function attackSocket(io: Server, socket: Socket, rooms: Map<string, GameState>) {
+export function attackSocket(io: Server, socket: Socket, rooms: Map<string, GameState>, userToRoom: Map<string, { roomId: string; playerIndex: number }>) {
 
     // --- Demande d'attaque ---
     socket.on("requestAttack", ({ roomId, attackerIndex, attackName }) => {
@@ -170,7 +191,7 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, Game
         }
 
         // --- Attaque ciblée -> Demander une cible ennemie ---
-        if (action.function === "AttackOneMob" || action.function === "attackEsquive" || action.function === "damageAndDie" || action.function === "voleEnergie" || action.function === "hurlementSombre") {
+        if (action.function === "AttackOneMob" || action.function === "attackEsquive" || action.function === "damageAndDie" || action.function === "voleEnergie" || action.function === "hurlementSombre" || action.function === "Entraide") {
           
             // --- Vérifier la présence de cibles valides ---
             const hasMobs = opponent.board.some((c: InGameCard) => c.category === "mob" && !hasInvisibility(c));
@@ -193,10 +214,11 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, Game
 
         if (result !== null) {
             attacker.hasAttacked = true;
+            checkFlammesPerpetuelles(io, roomId, attacker, opponent);
         }
 
         // --- Finalisation de l'attaque ---
-        finalizeAttack(io, rooms, roomId, room, result, state, opponent, null, null, action, player);
+        finalizeAttack(io, rooms, roomId, room, result, state, opponent, null, null, action, player, userToRoom);
     });
 
     // Exécution de l'attaque après sélection de la cible
@@ -293,10 +315,11 @@ export function attackSocket(io: Server, socket: Socket, rooms: Map<string, Game
 
         if (result !== null) {
             attacker.hasAttacked = true;
+            checkFlammesPerpetuelles(io, roomId, attacker, opponent);
         }
 
         // --- Finalisation de l'attaque ---
-        finalizeAttack(io, rooms, roomId, room, result, state, targetOwner, target, finalTargetIndex, action, player);
+        finalizeAttack(io, rooms, roomId, room, result, state, targetOwner, target, finalTargetIndex, action, player, userToRoom);
     });
 
 }

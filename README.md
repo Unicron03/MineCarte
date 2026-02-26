@@ -1,11 +1,35 @@
-Pour les combat multi-joeur il y a deux fichier important
-- server.js
-- src/app/game/page.tsx
+# Minecarte
 
-Dans serveur.js des fonctions doivent être implémentées.
-Modifier aussi dans server.js des socket.on si besoin.
+[![CI](https://github.com/Unicron03/MineCarte/actions/workflows/ci.yml/badge.svg)](https://github.com/Unicron03/MineCarte/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Unicron03/MineCarte/graph/badge.svg?token=JF8E1KKJIB)](https://codecov.io/gh/Unicron03/MineCarte)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 
-Un petit problème: Quand un joueur quitte, l'autre n'est pas expulser, de même quand un joueur fais retour.
+## 📊 Coverage
+
+Consulte la couverture de code sur [Codecov](https://codecov.io/gh/Unicron03/MineCarte)
+
+## 🧪 Tests
+
+### Unitaires
+
+```bash
+npm run test           # Tests unitaires
+npm run test:coverage  # Tests avec couverture
+```
+
+### End-to-end (Playwright)
+
+```bash
+npx playwright install  # Installer l'utilitaire Playwright
+npm test:e2e            # Tests end-to-end Playwright
+```
+
+## 🔧 Linter ESLint
+
+```bash
+npx eslint .
+```
 
 ## Pour Merge et Push
 

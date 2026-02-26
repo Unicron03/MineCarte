@@ -1,9 +1,10 @@
 import type { Server, Socket } from "socket.io";
 import { playCard } from "../functions/gameLogic";
 import { sendGameState } from "../functions/gameLogic";
-import { actionList } from "../../components/utils/data";
-import { GameState } from "../../components/utils/typesPvp";
+import { getActionList } from "../../../server";
+import { GameState, CombatState } from "../../components/utils/typesPvp";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
+import { updateGuardianEffect, checkLegendaryGrowth, applyLegendaryRequirement } from "../functions/cartes/talentFunction";
 
 
 // Gère le socket pour jouer une carte
@@ -33,6 +34,18 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
         if (player.energie < realCost) {
             io.to(socket.id).emit("log", "Pas assez d'énergie.");
             return;
+        }
+
+        // --- Talent : Croissance légendaire (Vérification condition) ---
+        if (!checkLegendaryGrowth(player, card)) {
+            io.to(socket.id).emit("log", "Croissance légendaire : Un Œuf de dragon est requis pour poser cette carte !");
+            return;
+        }
+
+        // --- Talent : Exigence légendaire (Application effet) ---
+        // Si c'est l'Ender Dragon, on sacrifie l'œuf AVANT de vérifier la limite de place
+        if (card.category === "mob" && (card.name === "Ender Dragon" || card.talent === "Croissance légendaire")) {
+            applyLegendaryRequirement(io, roomId, player);
         }
 
         // --- Vérification de la limite de 3 mobs sur le plateau ---
@@ -82,7 +95,7 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
         // --- Gérer les artefacts qui nécessitent une cible ---
         if (card.category === "artefact") {
             const actionName = card.effet || card.name;
-            const actionDef = actionList.find((a) => a.name === actionName);
+            const actionDef = getActionList().find((a) => a.name === actionName);
 
             // --- Si l'action nécessite une cible ---
             if (actionDef && actionDef.requiresTarget) {
@@ -147,6 +160,12 @@ export function playCardSocket(io: Server, socket: Socket, rooms: Map<string, Ga
         // --- Exécution de la carte ---
         const result = playCard(io, roomId, player, card, opponent);
         if (result.success) {
+            // --- Mise à jour de l'effet Lien Éternel (Gardien) ---
+            const combatState: CombatState = { log: [] };
+            updateGuardianEffect(combatState, player);
+            // Envoi des logs éventuels (ex: "Protection active")
+            combatState.log.forEach(msg => io.to(roomId).emit("log", msg));
+
             sendGameState(io, rooms, roomId);
         } else {
             io.to(socket.id).emit("log", result.msg);

@@ -4,12 +4,14 @@ import { Heart } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import { getUserFavoriteCards, getUser } from "@/prisma/requests";
+import { getCurrentUserId } from "@/lib/get-user";
 
 export const dynamic = 'force-dynamic';
 
 export default async function ShowcasePage({ params }: { params: Promise<{ userSlug: string }> }) {
     const { userSlug } = await params;
     
+    const currentUserId = await getCurrentUserId();
     const stats = await getUser(userSlug);
     const favoriteCards = await getUserFavoriteCards(userSlug);
 
@@ -45,6 +47,7 @@ export default async function ShowcasePage({ params }: { params: Promise<{ userS
                                     card={card}
                                     undescovered={true}
                                     favorite={true}
+                                    canSetFavorite={currentUserId === stats?.id}
                                     quantity={card.quantity}
                                 />
                             ))}

@@ -21,6 +21,7 @@ import { ConnexionForm, connexionSchema } from "@/components/utils/schema"
 import { signIn } from "@/lib/auth-client"
 import { useState } from "react"
 import { useAuthPanel } from "./AuthPanelContext"
+import Image from "next/image";
 
 export function ConnectionPanel() {
     const router = useRouter()
@@ -83,7 +84,25 @@ export function ConnectionPanel() {
     return (
         <Dialog open={openConnectionPanel} onOpenChange={setOpenConnectionPanel}>
             <DialogTrigger asChild>
-                <Button className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black">
+                <Button className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black border-white border-2 p-1.5 h-[45px] flex items-center">
+                    {/* Logo thème clair */}
+                    <Image
+                        src="/logo.png"
+                        alt="Login icon"
+                        width={35}
+                        height={35}
+                        className="mr-2 block dark:hidden"
+                    />
+
+                    {/* Logo thème sombre */}
+                    <Image
+                        src="/logo_black.png"
+                        alt="Login icon"
+                        width={35}
+                        height={35}
+                        className="mr-2 hidden dark:block"
+                    />
+
                     Se connecter
                 </Button>
             </DialogTrigger>

@@ -6,6 +6,16 @@ import CardOpeningDisplay from "./cards/CardOpeningDisplay";
 import { Prisma } from "../../generated/prisma/client";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { toast } from "react-toastify";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/shadcn/ui/alert-dialog";
 
 type DrawnCard = Prisma.cardsGetPayload<Record<string, never>> & { 
     isNew: boolean;
@@ -16,21 +26,27 @@ type DrawnCard = Prisma.cardsGetPayload<Record<string, never>> & {
 export default function Chest({ 
     onOpeningChange,
     isAvailable,
-    timeNextChest
+    userKeys,
+    onKeysUpdate,
+    onEndingTirage,
 }: {
     onOpeningChange: (isOpen: boolean) => void;
     isAvailable: boolean;
-    timeNextChest: Date;
+    userKeys: number;
+    onKeysUpdate: () => void;
+    onEndingTirage: () => void;
 }) {
     const [isAnimated, setIsAnimated] = useState(false);
     const [drawnCards, setDrawnCards] = useState<DrawnCard[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isDrawing, setIsDrawing] = useState(false);
+    const [showKeyDialog, setShowKeyDialog] = useState(false);
+    const [keysNeeded, setKeysNeeded] = useState(0);
     const { userId, isLoading } = useCurrentUser();
 
-    const drawCardsFromAPI = async (): Promise<DrawnCard[]> => {
+    const drawCardsFromAPI = async (useKeys: boolean = false): Promise<DrawnCard[]> => {
         if (!userId) {
-            alert("Erreur : utilisateur non connecté");
+            toast.error("Erreur : utilisateur non connecté");
             return [];
         }
 
@@ -40,19 +56,35 @@ export default function Chest({
             const response = await fetch('/api/cards/draw', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, amount: 5 })
+                body: JSON.stringify({ userId, amount: 5, useKeys })
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to draw cards');
+                // Si le coffre n'est pas disponible et qu'on peut utiliser des clés
+                if (response.status === 429 && data.canUseKeys && !useKeys) {
+                    console.log("Proposition d'utilisation des clés" + data.canUseKeys + data.keysNeeded);
+                    setKeysNeeded(data.keysNeeded);
+                    setShowKeyDialog(true);
+                    return [];
+                }
+
+                throw new Error(data.error || 'Erreur lors du tirage de cartes');
             }
 
-            const data = await response.json();
+            // Mettre à jour les clés après utilisation
+            onKeysUpdate();
+            
             return data.cards as DrawnCard[];
         } catch (error) {
             console.error("Erreur lors du tirage:", error);
-            alert(error instanceof Error ? error.message : "Erreur lors du tirage de cartes");
+            toast.error(error instanceof Error ? error.message : "Erreur lors du tirage de cartes", {
+                progressClassName: "fancy-progress-bar",
+                closeOnClick: true,
+                autoClose: 5000,
+                theme: localStorage.getItem("theme") || "light"
+            });
             return [];
         } finally {
             setIsDrawing(false);
@@ -60,16 +92,11 @@ export default function Chest({
     };
 
     const handleChestClick = async () => {
-        if (isLoading || !userId) { // Vérifie isLoading ET userId
-            alert("Chargement en cours...");
-            return;
-        }
-
-        if (!isAvailable) {
-            toast.error(`Le coffre n'est pas encore disponible ! Revenez à ${timeNextChest.getHours()}h${timeNextChest.getMinutes().toString().padStart(2, '0')}m${timeNextChest.getSeconds().toString().padStart(2, '0')}s`, {
+        if (isLoading || !userId) {
+            toast.error("Chargement en cours...", {
                 progressClassName: "fancy-progress-bar",
                 closeOnClick: true,
-                autoClose: 10000,
+                autoClose: 3000,
                 theme: localStorage.getItem("theme") || "light"
             });
             return;
@@ -79,12 +106,29 @@ export default function Chest({
 
         setIsAnimated(true);
 
-        const newDrawnCards = await drawCardsFromAPI();
+        const newDrawnCards = await drawCardsFromAPI(false);
         
         if (newDrawnCards.length > 0) {
             setDrawnCards(newDrawnCards);
             setIsDialogOpen(true);
             onOpeningChange(true);
+        } else {
+            setIsAnimated(false);
+        }
+    };
+
+    const handleUseKeys = async () => {
+        setShowKeyDialog(false);
+        setIsAnimated(true);
+
+        const newDrawnCards = await drawCardsFromAPI(true);
+        
+        if (newDrawnCards.length > 0) {
+            setDrawnCards(newDrawnCards);
+            setIsDialogOpen(true);
+            onOpeningChange(true);
+        } else {
+            setIsAnimated(false);
         }
     };
 
@@ -93,6 +137,7 @@ export default function Chest({
         setDrawnCards([]);
         setIsAnimated(false);
         onOpeningChange(false);
+        onEndingTirage();
     };
 
     return (
@@ -101,10 +146,11 @@ export default function Chest({
                 unoptimized
                 src={isAnimated ? "/chest.gif" : "/chest.png"}
                 alt="Coffre"
+                id="chest"
                 width={400}
                 height={100}
                 className={`mb-8 z-9999 drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)] 
-                    ${isAvailable && !isLoading ? "animate-coffre cursor-pointer" : "cursor-not-allowed"}
+                    ${isAvailable && !isLoading ? "animate-coffre cursor-pointer" : "cursor-pointer"}
                     ${isDrawing || isLoading ? "opacity-50 cursor-wait" : ""}
                     ${!isAvailable ? "opacity-50 grayscale" : ""}
                 `}
@@ -116,6 +162,27 @@ export default function Chest({
                     {isLoading ? "Chargement..." : "Tirage en cours..."}
                 </p>
             )}
+
+            {/* Dialog pour proposer l'utilisation des clés */}
+            <AlertDialog open={showKeyDialog} onOpenChange={setShowKeyDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Utiliser des clés ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Le coffre n&apos;est pas encore disponible. Voulez-vous utiliser <strong>{keysNeeded} clé(s)</strong> pour l&apos;ouvrir maintenant ?
+                            <br />
+                            <br />
+                            Vous avez actuellement <strong>{userKeys} clé(s)</strong>.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleUseKeys}>
+                            Utiliser {keysNeeded} clé(s)
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             {isDialogOpen && drawnCards.length > 0 && (
                 <CardOpeningDisplay drawnCards={drawnCards} onClose={handleCloseCardOpening} />

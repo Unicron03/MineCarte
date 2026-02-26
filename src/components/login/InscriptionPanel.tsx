@@ -49,7 +49,16 @@ export function InscriptionPanel() {
                 onRequest: () => {
                     // Loading déjà géré par isLoading
                 },
-                onSuccess: () => {
+                onSuccess: async (ctx) => {
+                    // Initialiser les données après inscription réussie
+                    if (ctx.data?.user?.id) {
+                        await fetch('/api/user/initialize', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId: ctx.data.user.id })
+                        });
+                    }
+
                     toast.success(
                         <span>Inscription réussie. Bienvenue 👋</span>,
                         {
@@ -59,6 +68,7 @@ export function InscriptionPanel() {
                             theme: localStorage.getItem("theme") || "light"
                         }
                     )
+
                     setOpenInscriptionPanel(false)
                     router.push("/home")
                     router.refresh()
@@ -88,15 +98,15 @@ export function InscriptionPanel() {
     return (
         <Dialog open={openInscriptionPanel} onOpenChange={setOpenInscriptionPanel}>
             <DialogTrigger asChild>
-                <Button className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black">
-                    S&apos;inscrire
+                <Button className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black border-white border-2 p-1.5 h-[45px]">
+                    Créer un compte
                 </Button>
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-[475px] h-fit bg-white dark:bg-black">
                 <form onSubmit={form.onSubmit(handleSubmit)}>
                     <DialogHeader>
-                        <DialogTitle>Inscription</DialogTitle>
+                        <DialogTitle>Créer un compte</DialogTitle>
                         <DialogDescription className="text-[#a1a1a1]">
                             Inscrivez-vous pour commencer à collectionner des cartes !
                         </DialogDescription>
@@ -168,7 +178,7 @@ export function InscriptionPanel() {
                             className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black"
                             disabled={isLoading}
                         >
-                            {isLoading ? "Inscription..." : "S'inscrire"}
+                            {isLoading ? "Création en cours..." : "Créer un compte"}
                         </Button>
                     </DialogFooter>
 

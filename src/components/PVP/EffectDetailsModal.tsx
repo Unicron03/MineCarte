@@ -35,7 +35,7 @@ const EffectDetailsModal: React.FC<EffectDetailsModalProps> = ({isOpen, onClose,
           {imageName && (
             <div className="w-20 h-20 rounded-full border-4 border-gray-700 bg-gray-800 overflow-hidden shadow-inner">
               <img 
-                src={`/cards/${imageName}.png`} 
+                src={`/cards/${imageName}/all.png`} 
                 alt={title} 
                 className="w-full h-full object-cover" 
                 onError={(e) => {

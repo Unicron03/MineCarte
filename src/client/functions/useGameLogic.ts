@@ -3,7 +3,9 @@ import { usePathname, useRouter } from "next/navigation";
 
 // --- Types et datas ---
 import { InGameCard, GameState, AttackSelection } from "../../components/utils/typesPvp";
-import { actionList } from "@/components/utils/data";
+import { setActionList } from "@/client/store/actionStore";
+import { getActionList } from "@/client/store/actionStore";
+
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 // --- Lib ---
@@ -29,12 +31,29 @@ export const useGameLogic = (initialDeck: any[] | null) => {
     
     // --- États du composant ---
     const [endGameResult, setEndGameResult] = useState<"win" | "lose" | "draw" | null>(null);
+    const [endGameData, setEndGameData] = useState<{ pointsChange?: number; keysChange?: number } | null>(null);
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [myId, setMyId] = useState<string>("");
     const [logs, setLogs] = useState<string[]>([]);
     const [yourTurn, setYourTurn] = useState(false);
     const [usedAttacks, setUsedAttacks] = useState<number[]>([]);
     const [attackSelection, setAttackSelection] = useState<AttackSelection | null>(null);
+
+
+
+    useEffect(() => {
+    socket.on("actionList", (actions) => {
+        console.log("Actions reçues du serveur:", actions);
+        setActionList(actions);
+    });
+
+    return () => {
+        socket.off("actionList");
+    };
+    }, [socket]);
+
+
+
 
     // --- Persistence: usedAttacks ---
     useEffect(() => {
@@ -101,13 +120,15 @@ export const useGameLogic = (initialDeck: any[] | null) => {
             setGameState(state);
         });
 
-        socket.on("victory", () => {
+        socket.on("victory", (data) => {
             setEndGameResult("win");
+            setEndGameData(data);
             setLogs(prev => [...prev, "Vous avez gagné !"]);
         });
 
-        socket.on("defeat", () => {
+        socket.on("defeat", (data) => {
             setEndGameResult("lose");
+            setEndGameData(data);
             setLogs(prev => [...prev, "Vous avez perdu..."]);
         });
 
@@ -168,7 +189,7 @@ export const useGameLogic = (initialDeck: any[] | null) => {
                 if (confirmQuit) {
                     socket.emit("quit", { roomId: gameState.roomId });
                     closeSocket();
-                    router.push("/");
+                    router.push("/combats");
                 } else {
                     window.history.pushState(null, "", window.location.href);
                 }
@@ -191,7 +212,7 @@ export const useGameLogic = (initialDeck: any[] | null) => {
         if (!gameState) return;
         if (endGameResult) return;
 
-        const action = actionList.find((a) => a.name === attackName);
+        const action = getActionList().find((a) => a.name === attackName);
         const opponentBoard = gameState.players.find((p) => p.id !== myId)?.board ?? [];
 
         if (usedAttacks.includes(attackerIndex)) return; 
@@ -282,11 +303,11 @@ export const useGameLogic = (initialDeck: any[] | null) => {
 
     const quitHandler = useCallback(() => {
         if (gameState?.roomId) {
+            // On notifie le serveur de l'abandon. Le serveur répondra avec un événement "defeat",
+            // qui déclenchera l'affichage de l'écran de fin de partie.
             socket.emit("quit", { roomId: gameState.roomId });
         }
-        closeSocket();
-        router.push("/");
-    }, [gameState?.roomId, socket, router]);
+    }, [gameState?.roomId, socket]);
 
     const cancelOffensiveArtifact = useCallback(() => {
         socket.emit("cancelOffensiveArtifact");
@@ -299,6 +320,7 @@ export const useGameLogic = (initialDeck: any[] | null) => {
     return {
         // États
         endGameResult,
+        endGameData,
         gameState,
         myId,
         logs,

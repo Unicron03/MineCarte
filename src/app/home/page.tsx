@@ -25,5 +25,5 @@ export default async function Home() {
     const user = await getUser(userId);
     const videoSrc = await getVideoOfTheDay();
 
-    return <HomePageClient videoSrc={videoSrc} timeNextChest={user?.timeNextChest || new Date()} />;
+    return <HomePageClient videoSrc={videoSrc} initialUserKeys={user?.inventory?.keys || 0} timeNextChest={user?.timeNextChest || new Date()} />;
 }

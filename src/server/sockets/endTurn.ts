@@ -3,7 +3,7 @@ import { endTurn } from "../functions/gameLogic";
 import { GameState, Player } from "../../components/utils/typesPvp";
 
 // Gère la fin de tour d'un joueur
-export function endTurnSocket(io: Server, socket: Socket, rooms: Map<string, GameState>) {
+export function endTurnSocket(io: Server, socket: Socket, rooms: Map<string, GameState>, userToRoom: Map<string, { roomId: string; playerIndex: number }>) {
 
     // --- Réception de la fin de tour ---
     socket.on("endTurn", ({ roomId }) => {
@@ -11,7 +11,7 @@ export function endTurnSocket(io: Server, socket: Socket, rooms: Map<string, Gam
 
         // --- Vérification de l'existence de la room ---
         if (!state) return;
-        endTurn(io, rooms, state);
+        endTurn(io, rooms, state, userToRoom);
 
         // --- Notification des joueurs ---
         const current = state.players[state.turnIndex];

@@ -1,14 +1,16 @@
 import { Prisma } from "../../../generated/prisma/client";
+import localFont from 'next/font/local';
 
 export const defaultNbCardGivenInChest: number = 5;
 export const defaultNbDecksPerUser: number = 10;
 export const defaultNbCardsPerDeck: number = 15;
 export const defaultHoursTimeNextChest: number = 8;
+export const myFont = localFont({ src: '../../app/fonts/Minecrafter.Reg.ttf' });
 
 export type Card = {
     id: number;
     name: string;
-    description: string;
+    description: string | null;
     category: string;
     rarity: number;
     pv_durability: number;
@@ -55,4 +57,5 @@ export const backCard: Prisma.cardsGetPayload<Record<string, never>> = {
     main_img: "/cards/transparent.png",
     background_img: "/cards/transparent.png",
     third_img: "/cards/back.png",
+    folder_name: "cards/default.png",
 }

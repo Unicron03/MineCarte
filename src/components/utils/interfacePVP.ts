@@ -4,6 +4,7 @@ import { InGameCard, Player } from "./typesPvp";
 export interface ApiDeckCard {
     card: {
         name: string;
+        folder_name: string;
         cost: number;
         category: string;
         pv_durability: number;
@@ -17,6 +18,7 @@ export interface ApiDeckCard {
 // Format de carte attendu par le serveur
 export interface ServerDeckCard {
     name: string;
+    imageName: string;
     cost: number;
     category: string;
     pv: number;
@@ -86,6 +88,7 @@ export interface EffectDisplayProps {
 export interface EndGameScreenProps {
   result: "win" | "lose" | "draw";
   onQuit: () => void;
+  data?: { pointsChange?: number; keysChange?: number };
 }
 
 // Props pour le composant GameLogs

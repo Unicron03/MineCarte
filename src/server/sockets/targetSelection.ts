@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { GameState, Player, CombatState } from "../../components/utils/typesPvp";
 import { sendGameState } from "../functions/gameLogic";
-import { actionList } from "../../components/utils/data";
+import { getActionList } from "../../../server";
 import { applyArtifactDamage, healGolem, halveLifeEffect, discardOwnCard, giveInvisibleEffect, applyBurnEffect, applyGoldenAppleEffect, healEndCreature, applyBellEffect } from "../functions/cartes/artefactFunction";
 import { applyCraftTableEffect } from "../functions/testEffectFonctions";
 
@@ -81,7 +81,7 @@ export const targetSelectionSocket = (io: Server, socket: Socket, rooms: Map<str
 
                 // --- Récupération de l'action associée à la carte ---
                 const actionName = (sourceCard.category === "artefact" ? sourceCard.effet : undefined) || sourceCard.name;
-                const actionDef = actionList.find((a) => a.name === actionName);
+                const actionDef = getActionList().find((a) => a.name === actionName);
 
                 // --- Exécution de l'effet offensif ---
                 if (actionDef && actionDef.function === "applyArtifactDamage") {
@@ -131,7 +131,7 @@ export const targetSelectionSocket = (io: Server, socket: Socket, rooms: Map<str
 
                 // --- Récupération de l'action associée à la carte ---
                 const actionNameSupport = (sourceCard.category === "artefact" ? sourceCard.effet : undefined) || sourceCard.name;
-                const actionDefSupport = actionList.find((a) => a.name === actionNameSupport);
+                const actionDefSupport = getActionList().find((a) => a.name === actionNameSupport);
 
                 // --- Exécution de l'effet de soutien ---
                 if (actionDefSupport && actionDefSupport.function === "healGolem") {

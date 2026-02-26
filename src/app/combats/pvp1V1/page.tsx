@@ -24,7 +24,9 @@ import { useGameLogic } from "@/client/functions/useGameLogic";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 import SelectionModal from "@/components/PVP/SelectionModal";
-import { actionList } from "@/components/utils/data";
+import { getActionList } from "@/client/store/actionStore";
+
+
 import { InGameCard } from "@/components/utils/typesPvp";
 import { ServerDeckCard, ApiDeckCard } from "@/components/utils/interfacePVP";
 
@@ -35,7 +37,7 @@ export default function GamePage() {
     const [formattedDeck, setFormattedDeck] = useState<ServerDeckCard[] | null>(null);
 
     // On récupère les infos de base, mais on va surcharger la logique d'attaque
-    const { endGameResult, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic(formattedDeck);
+    const { endGameResult, endGameData, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic(formattedDeck);
     
     const router = useRouter(); 
     const socket = getSocket();
@@ -53,7 +55,7 @@ export default function GamePage() {
         targets: (InGameCard & { boardIndex: number })[] 
     } | null>(null);
 
-    // --- État pour les alertes (ex: pas assez d'énergie) ---
+    // --- État pour les alertes ---
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
      // --- État pour la modale de détails (Effets/Equipements) ---
@@ -65,13 +67,12 @@ export default function GamePage() {
         type: "effect" | "equipment" | "talent";
     } | null>(null);
 
-    // --- RECUPERATION DU DECK ACTIF (DEBUG) ---
+    // --- RECUPERATION DU DECK ACTIF ---
     useEffect(() => {
         const fetchDeck = async () => {
             console.log("=== CLIENT: UserID réel ===", userId);
 
             try {
-                // On appelle l'API Next.js pour récupérer le deck
                 const res = await fetch(`/api/pvp?userId=${userId}`);
                 
                 if (!res.ok) {
@@ -84,25 +85,27 @@ export default function GamePage() {
 
                 if (data.deck_cards && Array.isArray(data.deck_cards)) {
                     data.deck_cards.forEach((dc: ApiDeckCard) => {
-                        
-                        // Transformation pour createCard
-                        // createCard(name, cost, category, pv, talent, attack1, attack2)
-                        
                         let category = "mob";
                         if (dc.card.category === "EQUIPMENT") category = "equipement";
                         else if (dc.card.category === "ARTIFACT") category = "artefact";
                         
+                        // Correction : Pour les équipements/artefacts, l'effet est souvent stocké dans attack1_action dans la BDD
+                        let talentName = dc.card.talent_action?.name || null;
+                        if ((category === "equipement" || category === "artefact") && !talentName) {
+                            talentName = dc.card.attack1_action?.name || null;
+                        }
+
                         const cardDef: ServerDeckCard = {
                             name: dc.card.name,
+                            imageName: dc.card.folder_name,
                             cost: dc.card.cost,
                             category: category,
                             pv: dc.card.pv_durability,
-                            talent: dc.card.talent_action?.name || null,
+                            talent: talentName,
                             attack1: dc.card.attack1_action?.name || null,
                             attack2: dc.card.attack2_action?.name || null
                         };
 
-                        // Ajouter autant de fois que la quantité
                         for (let i = 0; i < dc.quantity; i++) {
                             deckForServer.push(cardDef);
                         }
@@ -269,7 +272,7 @@ export default function GamePage() {
             description = "Bonus de dégâts et régénération.";
         } else {
             // 2. Chercher dans la liste des actions/cartes
-            const action = actionList.find(a => a.name === effectName || a.function === effectName);
+            const action = getActionList().find(a => a.name === effectName || a.function === effectName);
             if (action) {
                 title = action.name;
                 description = action.description || description;
@@ -291,7 +294,7 @@ export default function GamePage() {
         let description = "Aucune description.";
         
         // On cherche la description dans actionList via le nom ou l'effet
-        const action = actionList.find(a => a.name === equipment.name || (equipment.category !== "mob" && a.name === equipment.effet));
+        const action = getActionList().find(a => a.name === equipment.name || (equipment.category !== "mob" && a.name === equipment.effet));
         
         if (action) {
             description = action.description || description;
@@ -320,9 +323,15 @@ export default function GamePage() {
         return (
             <EndGameScreen 
                 result={endGameResult} 
+                data={endGameData || undefined}
                 onQuit={() => {
                     closeSocket();
-                    router.push("/");
+                    // Force la redirection si le router ne répond pas immédiatement
+                    router.push("/combats");
+                    // Fallback au cas où
+                    setTimeout(() => {
+                        window.location.href = "/combats";
+                    }, 500);
                 }} 
             />
         );

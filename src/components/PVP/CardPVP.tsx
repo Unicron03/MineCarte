@@ -1,21 +1,22 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { CardPVPProps } from "../utils/interfacePVP";
-import { actionList } from "../utils/data";
+import { getActionList } from "@/client/store/actionStore";
+
 
 const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = false, overrides, onTalentClick, onAttackClick, onClick, onEffectClick, onEquipmentClick}) => {
     const finalCost = overrides?.cost ?? card.cost ?? 0;
     
     const isMob = card.category === "mob";
     const finalVie = isMob ? (overrides?.pv_durability ?? card.pv_durability ?? 0) : undefined;
-    const attack1 = isMob ? actionList.find((a) => a.name === card.attack1) : undefined;
-    const attack2 = isMob ? actionList.find((a) => a.name === card.attack2) : undefined;
+    const attack1 = isMob ? getActionList().find((a) => a.name === card.attack1) : undefined;
+    const attack2 = isMob ? getActionList().find((a) => a.name === card.attack2) : undefined;
     
     // L'effet est dans la propriété effet pour les Artefacts/Équipements, et talent pour les Mobs
     const effetOuTalent = isMob ? card.talent : card.effet;
     
     // Récupérer la définition du talent pour vérifier s'il est autoActivate
-    const talentAction = isMob && card.talent ? actionList.find((a) => a.name === card.talent) : undefined;
+    const talentAction = isMob && card.talent ? getActionList().find((a) => a.name === card.talent) : undefined;
     const isAutoActivate = talentAction?.autoActivate === true;
 
     // Gestion indépendante des clics
@@ -31,7 +32,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
     else if (card.category === "artefact") borderColor = "border-yellow-500";
     else if (card.category === "equipement") borderColor = "border-blue-500";
     
-    const imgSrc = `/cards/${card.imageName}.png`;
+    const imgSrc = `/cards/${card.imageName}/all.png`;
     
     const pvColor = isPlayer ? "bg-green-600" : "bg-red-600";
 
@@ -86,7 +87,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
                           }}
                         >
                             <img 
-                                src={`/cards/${equip.imageName}.png`} 
+                                src={`/cards/${equip.imageName}/all.png`} 
                                 alt={equip.name}
                                 className="w-full h-full object-cover"
                                 onError={handleImageError}
@@ -178,7 +179,7 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
                             }}
                         >
                           <img 
-                              src={`/cards/${effect}.png`} 
+                              src={`/cards/${effect}/all.png`} 
                               alt={effect}
                               className="w-full h-full object-cover"
                               onError={handleImageError}

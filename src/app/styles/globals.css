@@ -194,3 +194,15 @@ button { cursor: pointer; }
         @apply bg-background text-foreground;
     }
 }
+
+@keyframes eye-shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
+.animate-eye-shake {
+  animation: eye-shake 0.15s infinite;
+}

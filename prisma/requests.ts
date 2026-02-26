@@ -18,6 +18,11 @@ export async function getUser(id: string) {
 			name: true,
 			email: true,
 			timeNextChest: true,
+            inventory: {
+                select: {
+                    keys: true
+                }
+            }
 		}
 	});
 }
@@ -42,7 +47,7 @@ export async function getUserStatsForMode(userId: string, gameMode: string) {
         where: {
             user_id_game_mode: {
                 user_id: userId,
-                game_mode: gameMode as any
+                game_mode: gameMode as GameMode
             }
         }
     });
@@ -143,7 +148,7 @@ function getRandomRarity(): number {
     }
 }
 
-type DrawnCard = Prisma.cardsGetPayload<{}> & { 
+type DrawnCard = Prisma.cardsGetPayload<Record<string, never>> & { 
     isNew: boolean;
     quantity: number;
     favorite: boolean;
@@ -274,10 +279,6 @@ export async function createDeck(userId: string) {
             id: true
         }
     });
-
-	const userDecks = await prisma.decks.findMany({
-		where: { user_id: userId },
-	});
 
 	const newDeckName = `Deck n°${(lastDeck?.id || 0) + 1}`;
 
