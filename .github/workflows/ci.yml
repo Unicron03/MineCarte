@@ -139,6 +139,8 @@ jobs:
     - name: Run Playwright tests
       run: npx playwright test
       env:
+        BETTER_AUTH_SECRET: test-secret-ci
+        BETTER_AUTH_URL: http://localhost:3000
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/minecarte_e2e
         NEXT_PUBLIC_APP_URL: http://localhost:3000
     
