@@ -31,7 +31,6 @@ test.describe('Fonctionnalités', () => {
     await page.getByRole('button', { name: 'Se connecter' }).click();
     
     // Ouvrir le coffre quand il est disponible
-    await page.pause();
     await page.locator('#chest').click();
     await page.locator('span').nth(1).click();
   });
@@ -70,7 +69,6 @@ test.describe('Fonctionnalités', () => {
     await page.getByRole('link', { name: 'Combats' }).click();
 
     // Clique le bouton de création deck
-    await page.pause();
     await page.locator('#decks').click();
     await page.getByRole('button', { name: 'Créer un nouveau deck' }).click();
     await page.getByRole('img', { name: 'Deck vide' }).click();
