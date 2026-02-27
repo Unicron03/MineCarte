@@ -27,7 +27,7 @@ export default function Combats() {
             </div>
 
             <Footer left={
-                <Link href="/decks" className="glass-nav">
+                <Link href="/decks" id="decks" className="glass-nav">
                     <WalletCards className="m-2" color="white"/>
                 </Link>
             } />

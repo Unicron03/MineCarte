@@ -98,7 +98,7 @@ export function InscriptionPanel() {
     return (
         <Dialog open={openInscriptionPanel} onOpenChange={setOpenInscriptionPanel}>
             <DialogTrigger asChild>
-            <Button className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black border-white border-2 p-1.5 h-[45px]">
+                <Button className="hover:opacity-60 bg-black dark:bg-white text-white dark:text-black border-white border-2 p-1.5 h-[45px]">
                     Créer un compte
                 </Button>
             </DialogTrigger>

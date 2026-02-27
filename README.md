@@ -11,9 +11,18 @@ Consulte la couverture de code sur [Codecov](https://codecov.io/gh/Unicron03/Min
 
 ## 🧪 Tests
 
+### Unitaires
+
 ```bash
 npm run test           # Tests unitaires
 npm run test:coverage  # Tests avec couverture
+```
+
+### End-to-end (Playwright)
+
+```bash
+npx playwright install  # Installer l'utilitaire Playwright
+npm test:e2e            # Tests end-to-end Playwright
 ```
 
 ## 🔧 Linter ESLint

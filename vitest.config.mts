@@ -5,12 +5,14 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 export default defineConfig({
     plugins: [tsconfigPaths(), react()],
     test: {
+        include: ['src/__tests__/**/*.{test,spec}.{ts,tsx}'],
+        exclude: ['src/__tests__/playwright/**/*'],
         environment: 'jsdom',
         // Configuration de la couverture de code
         coverage: {
-            provider: 'v8',                          // Moteur de coverage (rapide)
-            reporter: ['text', 'json', 'html', 'lcov'], // Formats de rapport
-            exclude: [                               // Fichiers à ignorer
+            provider: 'v8',                                 // Moteur de coverage (rapide)
+            reporter: ['text', 'json', 'html', 'lcov'],     // Formats de rapport
+            exclude: [                                      // Fichiers à ignorer
                 'node_modules/',
                 'generated/',
                 '*.config.ts',
