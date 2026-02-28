@@ -79,11 +79,11 @@ export default function EditPseudoDialog({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="link" size="icon">
+                <Button variant="link" size="icon" id="edit-pseudo-button">
                     <Pencil />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" id="edit-pseudo-champ">
                 <DialogHeader>
                     <DialogTitle>Modifier le pseudo</DialogTitle>
                     <DialogDescription>

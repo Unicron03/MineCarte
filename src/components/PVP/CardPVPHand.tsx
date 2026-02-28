@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
-import { actionList } from "../utils/data";
+import { getActionList } from "@/client/store/actionStore";
 import { CardPVPHandProps } from "../utils/interfacePVP";
 
 
@@ -8,10 +8,10 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
   const isMob = card.category === "mob";
   
   // Récupération des données complètes des actions
-  const attack1Data = isMob ? actionList.find((a) => a.name === card.attack1) : undefined;
-  const attack2Data = isMob ? actionList.find((a) => a.name === card.attack2) : undefined;
+  const attack1Data = isMob ? getActionList().find((a) => a.name === card.attack1) : undefined;
+  const attack2Data = isMob ? getActionList().find((a) => a.name === card.attack2) : undefined;
   const talentName = isMob ? card.talent : card.effet;
-  const talentData = talentName ? actionList.find((a) => a.name === talentName) : undefined;
+  const talentData = talentName ? getActionList().find((a) => a.name === talentName) : undefined;
   const isAutoActivate = talentData?.autoActivate === true;
 
   // Couleurs de bordure selon la catégorie
@@ -72,6 +72,9 @@ const CardPVPHand: React.FC<CardPVPHandProps> = ({ card, onClick, style, classNa
               {isMob ? (isAutoActivate ? "Passif" : "Talent") : "Effet"}
             </span>
             {talentName}
+            {talentData?.description && (
+              <span className="block opacity-80 italic mt-1 font-normal text-[9px] leading-tight">{talentData.description}</span>
+            )}
           </div>
         )}
 

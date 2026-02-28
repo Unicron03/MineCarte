@@ -146,6 +146,7 @@ export default function Chest({
                 unoptimized
                 src={isAnimated ? "/chest.gif" : "/chest.png"}
                 alt="Coffre"
+                id="chest"
                 width={400}
                 height={100}
                 className={`mb-8 z-9999 drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)] 

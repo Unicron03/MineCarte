@@ -172,7 +172,7 @@ async function actions() {
             description: "Inflige 5 PV à un mob adverse pour chaque villageois présent sur le plateau (le votre et celui de votre adversaire).",
             damage: 5,
             cost: 1,
-            function_name: "defaultFunction",
+            function_name: "Entraide",
             requiresTarget: true,
             targetType: "enemy"
         },
@@ -183,7 +183,7 @@ async function actions() {
             name: "Appel à un ami",
             description: "Si une carte Golem est présent dans vos 5 prochaines cartes à piocher, vous récupérez cette carte dans votre main.",
             cost: 2,
-            function_name: "defaultFunction"
+            function_name: "AppelAUnAmi"
         },
     });
 
@@ -464,8 +464,7 @@ async function actions() {
         data: {
             name: "Peur viscérale",
             description: "Défausse aléatoirement un Creeper sur le plateau de votre adversaire.",
-            autoActivate: true,
-            function_name: "defaultFunction"
+            function_name: "peurViscerale"
         },
     });
 
@@ -473,9 +472,8 @@ async function actions() {
         data: {
             name: "Coup de griffe",
             description: "Inflige aléatoirement entre 5 et 15 PV à un mob adverse.",
-            damage: Math.floor(Math.random() * (15 - 5 + 1)) + 5, // (syntaxe : max - min)
             cost: 1,
-            function_name: "AttackOneMob",
+            function_name: "AttackRandomCat",
             requiresTarget: true,
             targetType: "enemy"
         },
@@ -495,7 +493,7 @@ async function actions() {
             description: "Inflige 10 PV à un mob aléatoire du plateau de l'adversaire & Inflige 10 PV à l'adversaire.",
             damage: 10,
             cost: 2,
-            function_name: "defaultFunction",
+            function_name: "AttaqueRandomMobAndPlayer",
         },
     });
 
@@ -505,7 +503,7 @@ async function actions() {
             description: "Réduit de 50% toutes les attaques adverses du prochain tour de votre adversaire.",
             damage: 0,
             cost: 5,
-            function_name: "defaultFunction",
+            function_name: "applyDimensionalProtection",
         },
     });
 
@@ -865,7 +863,7 @@ async function actions() {
 }
 
 async function cards(actions: SeedActions) {
-    const card_skeleton = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 1, name: 'Squelette' },
         update: {},
         create: {
@@ -881,7 +879,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_dragon = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 2, name: 'Ender dragon' },
         update: {},
         create: {
@@ -899,7 +897,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_enderman = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 3, name: 'Enderman' },
         update: {},
         create: {
@@ -917,7 +915,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_creeper = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 4, name: 'Creeper' },
         update: {},
         create: {
@@ -934,7 +932,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_golem = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 5, name: 'Golem' },
         update: {},
         create: {
@@ -952,7 +950,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_villager = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 6, name: 'Villageois' },
         update: {},
         create: {
@@ -968,7 +966,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_zombie = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 7, name: 'Zombie' },
         update: {},
         create: {
@@ -984,7 +982,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_axolotl = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 8, name: 'Axolotl' },
         update: {},
         create: {
@@ -1000,7 +998,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_turtle = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 9, name: 'Tortue' },
         update: {},
         create: {
@@ -1016,7 +1014,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_blaze = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 10, name: 'Blaze' },
         update: {},
         create: {
@@ -1032,7 +1030,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_spider = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 11, name: 'Araignée' },
         update: {},
         create: {
@@ -1048,7 +1046,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_warden = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 12, name: 'Warden' },
         update: {},
         create: {
@@ -1066,7 +1064,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_guardian = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 13, name: 'Guardian' },
         update: {},
         create: {
@@ -1083,7 +1081,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_witch = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 14, name: 'Sorcière' },
         update: {},
         create: {
@@ -1101,7 +1099,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_ghast = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 15, name: 'Ghast' },
         update: {},
         create: {
@@ -1117,7 +1115,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_wither = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 16, name: 'Wither' },
         update: {},
         create: {
@@ -1135,7 +1133,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_snowgolem = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 17, name: 'Golem de neige' },
         update: {},
         create: {
@@ -1150,7 +1148,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_squid = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 18, name: 'Poulpe' },
         update: {},
         create: {
@@ -1165,7 +1163,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_cat = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 19, name: 'Chat' },
         update: {},
         create: {
@@ -1181,7 +1179,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_egg = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 20, name: 'Oeuf de dragon' },
         update: {},
         create: {
@@ -1196,7 +1194,7 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_shulker = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 21, name: 'Shulker' },
         update: {},
         create: {
@@ -1213,12 +1211,13 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_sword = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 22, name: 'Épée' },
         update: {},
         create: {
             id: 22,
             name: 'Épée',
+            description: "Tant que cette carte est rattaché à un mob, elle inflige, après attaque du mob, 5 PV à chaque mob adverse.",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
@@ -1228,12 +1227,13 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_pickaxe = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 23, name: 'Pioche' },
         update: {},
         create: {
             id: 23,
             name: 'Pioche',
+            description: "Permet de piocher première carte du dessus de votre deck. ",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
@@ -1243,12 +1243,13 @@ async function cards(actions: SeedActions) {
         }
     })
 
-    const card_bow = await prisma.cards.upsert({
+    await prisma.cards.upsert({
         where: { id: 24, name: 'Arc' },
         update: {},
         create: {
             id: 24,
             name: 'Arc',
+            description: "Tant que cette carte est rattaché à un mob, elle permet d'ajouter 10 PV aux attaques de celui-ci. Si l'attaque en question est une attaque visant plusieurs mobs adverses, les dégâts de cette équipement vise aléatoirement un des mobs. ",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
