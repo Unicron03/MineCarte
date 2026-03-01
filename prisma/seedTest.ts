@@ -68,6 +68,25 @@ async function users() {
     console.log('✅ Users created');
 }
 
+async function inventory() {
+    // Récupérer les IDs réels des utilisateurs
+    const alice = await prisma.user.findUnique({ where: { email: 'alice@prisma.io' } });
+    const john = await prisma.user.findUnique({ where: { email: 'john.doe@prisma.io' } });
+    const evdp = await prisma.user.findUnique({ where: { email: 'enzo@gmail.com' } });
+
+    if (!alice || !john || !evdp) {
+        throw new Error('Users not found');
+    }
+
+    await prisma.inventory.createMany({
+        data: [
+            { user_id: alice.id, keys: 12 },
+            { user_id: john.id, keys: 24 },
+            { user_id: evdp.id, keys: 32 },
+        ]
+    });
+}
+
 async function collection() {
     // Récupérer les IDs réels des utilisateurs
     const alice = await prisma.user.findUnique({ where: { email: 'alice@prisma.io' } });
@@ -267,11 +286,14 @@ async function decks() {
             is_active: true,
             deck_cards: {
                 create: [
-                    { card_id: 1, quantity: 1 },
+                    { card_id: 1, quantity: 2 },
                     { card_id: 8, quantity: 2 },
-                    { card_id: 9, quantity: 1 },
-                    { card_id: 10, quantity: 1 },
-                    { card_id: 11, quantity: 1 },
+                    { card_id: 9, quantity: 2 },
+                    { card_id: 10, quantity: 2 },
+                    { card_id: 11, quantity: 2 },
+                    { card_id: 19, quantity: 2 },
+                    { card_id: 33, quantity: 2 },
+                    { card_id: 45, quantity: 1 },
                 ]
             }
         }
@@ -284,9 +306,14 @@ async function decks() {
             is_active: true,
             deck_cards: {
                 create: [
-                    { card_id: 1, quantity: 1 },
-                    { card_id: 2, quantity: 1 },
-                    { card_id: 3, quantity: 1 },
+                    { card_id: 1, quantity: 2 },
+                    { card_id: 3, quantity: 2 },
+                    { card_id: 6, quantity: 2 },
+                    { card_id: 7, quantity: 2 },
+                    { card_id: 14, quantity: 2 },
+                    { card_id: 18, quantity: 2 },
+                    { card_id: 27, quantity: 2 },
+                    { card_id: 39, quantity: 1 },
                 ]
             }
         }
@@ -310,6 +337,7 @@ async function main() {
     console.log('🗑️  Cleaned existing data');
 
     await users();
+    await inventory();
     await collection();
     await userStats();
     await decks();

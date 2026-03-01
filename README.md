@@ -22,7 +22,7 @@ npm run test:coverage  # Tests avec couverture
 
 ```bash
 npx playwright install  # Installer l'utilitaire Playwright
-npm test:e2e            # Tests end-to-end Playwright
+npm run test:e2e            # Tests end-to-end Playwright
 ```
 
 ## 🔧 Linter ESLint
