@@ -261,17 +261,21 @@ export default function GamePage() {
             const dmg = effectName.split("_")[1];
             title = "Brûlure";
             description = `Cette unité subit ${dmg} dégâts à la fin de son tour.`;
+            effectName = "Burn"; // Pour l'image
         } else if (effectName === "Esquive") {
             title = "Esquive";
             description = "45% de chance d'éviter les dégâts d'une attaque.";
+            effectName = "Dodge"; // Pour l'image
         } else if (effectName === "Invisible") {
             title = "Invisibilité";
             description = "Cette unité ne peut pas être ciblée par des attaques adverses.";
-        } else if (effectName.startsWith("GoldenApple_")) {
-            title = "Pomme Dorée";
-            description = "Bonus de dégâts et régénération.";
+            effectName = "Invisible"; // Pour l'image
+        } else if (effectName === "DoubleDamage") {
+            title = "Double Dégâts";
+            description = "Les dégâts de cette unité sont doublés pendant un tour.";
+            effectName = "DoubleDamage"; // Pour l'image
         } else {
-            // 2. Chercher dans la liste des actions/cartes
+            // Chercher dans la liste des actions/cartes
             const action = getActionList().find(a => a.name === effectName || a.function === effectName);
             if (action) {
                 title = action.name;

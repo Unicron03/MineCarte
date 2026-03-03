@@ -746,7 +746,7 @@ async function actions() {
 
     const elytra_effect = await prisma.actions.create({
         data: {
-            name: "Elitra",
+            name: "Elytra",
             description: "Si le mob rattaché meurt, il est déposé dans votre main.",
             function_name: "elytraEffect",
             autoActivate: true

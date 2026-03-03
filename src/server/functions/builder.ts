@@ -17,7 +17,7 @@ type PrismaAction = {
 
 
 export function buildActionList(prismaActions: PrismaAction[]): Action[] {
-  console.log("🟦 [Builder] Reçu depuis Prisma :", prismaActions);
+  console.log("[Builder] Reçu depuis Prisma :", prismaActions);
 
   const actions = prismaActions.map((action, index) => {
     const built = {
@@ -32,11 +32,11 @@ export function buildActionList(prismaActions: PrismaAction[]): Action[] {
       autoActivate: action.autoActivate,
     };
 
-    console.log(`🟩 [Builder] Action #${index}`, built);
+    console.log(`[Builder] Action #${index}`, built);
     return built;
   });
 
-  console.log("🟨 [Builder] Liste finale :", actions);
+  console.log("[Builder] Liste finale :", actions);
   return actions;
 }
 

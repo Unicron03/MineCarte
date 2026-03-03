@@ -228,9 +228,10 @@ export function getActionList(): Action[] {
   return actionList;
 }
 
-
 // --- Démarrage du serveur ---
-initializeServer().catch((error) => {
-  console.error('[Server] Erreur fatale lors de l\'initialisation:', error);
-  process.exit(1);
-});
+if (process.env.NODE_ENV !== "test") {
+  initializeServer().catch((error) => {
+    console.error('[Server] Erreur fatale lors de l\'initialisation:', error);
+    process.exit(1);
+  });
+}
