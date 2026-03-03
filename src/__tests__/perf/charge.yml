@@ -1,0 +1,88 @@
+config:
+  target: "http://localhost:3002"
+  engines:
+    socketio: {}
+  phases:
+    # Phase 1 — Montée douce : 1 → 10 joueurs en 30s
+    - duration: 30
+      arrivalRate: 1
+      rampTo: 10
+      name: "Montée douce"
+
+    # Phase 2 — Charge normale : 10 joueurs/s pendant 30s
+    - duration: 30
+      arrivalRate: 10
+      name: "Charge normale"
+
+    # Phase 3 — Pic de charge : 30 joueurs/s pendant 20s
+    - duration: 20
+      arrivalRate: 30
+      name: "Pic de charge"
+
+  # Variables disponibles dans les scénarios
+  variables:
+    userId:
+      - "test-user-1"
+      - "test-user-2"
+      - "test-user-3"
+      - "test-user-4"
+      - "test-user-5"
+      - "test-user-6"
+      - "test-user-7"
+      - "test-user-8"
+      - "test-user-9"
+      - "test-user-10"
+
+scenarios:
+  - name: "Joueur rejoint et attend un match"
+    engine: socketio
+    flow:
+      # 1. Connexion au serveur WebSocket
+      - emit:
+          channel: "registerUser"
+          data:
+            userId: "{{ userId }}"
+            dbUserId: "{{ userId }}"
+            deck:
+              - name: "Zombie"
+                imageName: "zombie.png"
+                cost: 2
+                category: "mob"
+                pv: 30
+                talent: null
+                attack1: "scratch"
+                attack2: null
+              - name: "Creeper"
+                imageName: "creeper.png"
+                cost: 3
+                category: "mob"
+                pv: 25
+                talent: null
+                attack1: "explode"
+                attack2: null
+              - name: "Épée en fer"
+                imageName: "sword.png"
+                cost: 1
+                category: "equipement"
+                pv: null
+                talent: "bonus_attack"
+                attack1: null
+                attack2: null
+
+      # 2. Attendre la réponse du serveur (roomInfo = match trouvé)
+      - think: 2
+
+      # 3. Écouter l'event roomInfo pendant 5s max
+      - emit:
+          channel: "registerUser"
+          data:
+            userId: "{{ userId }}"
+          response:
+            channel: "roomInfo"
+            data:
+              roomId: ".*"
+            # Si pas de match trouvé en 5s, ce n'est pas une erreur
+            # (normal si nombre impair de joueurs)
+
+      # 4. Rester connecté 10s (simule un joueur en attente de match)
+      - think: 10
