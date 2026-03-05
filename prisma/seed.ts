@@ -746,7 +746,7 @@ async function actions() {
 
     const elytra_effect = await prisma.actions.create({
         data: {
-            name: "Elitra",
+            name: "Elytra",
             description: "Si le mob rattaché meurt, il est déposé dans votre main.",
             function_name: "elytraEffect",
             autoActivate: true
@@ -1065,7 +1065,7 @@ async function cards(actions: SeedActions) {
     })
 
     await prisma.cards.upsert({
-        where: { id: 13, name: 'Guardian' },
+        where: { id: 13, name: 'Gardien' },
         update: {},
         create: {
             id: 13,
@@ -1211,6 +1211,8 @@ async function cards(actions: SeedActions) {
         }
     })
 
+    // ------------------------------------------------------ EQUIPEMENT ------------------------------------------------------
+
     await prisma.cards.upsert({
         where: { id: 22, name: 'Épée' },
         update: {},
@@ -1233,7 +1235,7 @@ async function cards(actions: SeedActions) {
         create: {
             id: 23,
             name: 'Pioche',
-            description: "Permet de piocher première carte du dessus de votre deck. ",
+            description: "Permet de piocher première carte du dessus de votre deck.",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
@@ -1249,13 +1251,351 @@ async function cards(actions: SeedActions) {
         create: {
             id: 24,
             name: 'Arc',
-            description: "Tant que cette carte est rattaché à un mob, elle permet d'ajouter 10 PV aux attaques de celui-ci. Si l'attaque en question est une attaque visant plusieurs mobs adverses, les dégâts de cette équipement vise aléatoirement un des mobs. ",
+            description: "Tant que cette carte est rattaché à un mob, elle permet d'ajouter 10 PV aux attaques de celui-ci. Si l'attaque en question est une attaque visant plusieurs mobs adverses, les dégâts de cette équipement vise aléatoirement un des mobs.",
             category: 'EQUIPMENT',
             pv_durability: 3,
             cost: 2,
             attack1: actions.bow_effect.id,
             ...(await loadCardImages('bow')),
             folder_name: 'bow'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 25, name: 'Armure' },
+        update: {},
+        create: {
+            id: 25,
+            name: 'Armure',
+            description: "Permet de protéger le mob rattaché en soustrayant 10 dégâts à chaque attaque.",
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 2,
+            attack1: actions.armor_effect.id,
+            ...(await loadCardImages('armor')),
+            folder_name: 'armor'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 26, name: 'Bottes de célérité' },
+        update: {},
+        create: {
+            id: 26,
+            name: 'Bottes de célérité',
+            description: "Si le mob rattaché est attaqué, une attaque au prochain lui coûtera une énergie de moins.",
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 2,
+            attack1: actions.speedboots_effect.id,
+            ...(await loadCardImages('celerity-boots')),
+            folder_name: 'celerity-boots'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 27, name: 'Elytra' },
+        update: {},
+        create: {
+            id: 27,
+            name: 'Elytra',
+            description: "Si le mob rattaché meurt, il est déposé dans votre main.",
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 3,
+            attack1: actions.elytra_effect.id,
+            ...(await loadCardImages('elytra')),
+            folder_name: 'elytra'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 28, name: 'Potion de soin' },
+        update: {},
+        create: {
+            id: 28,
+            name: 'Potion de soin',
+            description: "Soigne le mob rattaché de 10 PV à chaque tour.",
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 2,
+            attack1: actions.potion_regen_effect.id,
+            ...(await loadCardImages('potion-heal')),
+            folder_name: 'potion-heal'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 29, name: 'Bouclier' },
+        update: {},
+        create: {
+            id: 29,
+            name: 'Bouclier',
+            description: "Si le mob rattaché subit des attaques d'une attaque, on inflige 10 PV au mob attaquant.",
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 1,
+            attack1: actions.shield_effect.id,
+            ...(await loadCardImages('shield')),
+            folder_name: 'shield'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 30, name: 'Totem' },
+        update: {},
+        create: {
+            id: 30,
+            name: 'Totem',
+            description: "Si le mob rattaché devait mourir, il conserve 5 PV et l'équipement est défaussé. Le reste des dégâts de l'attaque subie sont aspirés par le totem.",
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 4,
+            attack1: actions.totem_effect.id,
+            ...(await loadCardImages('totem')),
+            folder_name: 'totem'
+        }
+    })
+
+    // ------------------------------------------------------ ARTEFACTS ------------------------------------------------------
+
+    await prisma.cards.upsert({
+        where: { id: 31, name: 'Enclume' },
+        update: {},
+        create: {
+            id: 31,
+            name: 'Enclume',
+            description: "Récupère un équipement de votre défausse et le transfère dans votre main.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 1,
+            attack1: actions.anvil_effect.id,
+            ...(await loadCardImages('anvil')),
+            folder_name: 'anvil'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 32, name: 'Lit' },
+        update: {},
+        create: {
+            id: 32,
+            name: 'Lit',
+            description: "Soigne votre joueur de 25 dégâts.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 2,
+            attack1: actions.potion_player_effect.id,
+            ...(await loadCardImages('bed')),
+            folder_name: 'bed'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 33, name: 'Cloche' },
+        update: {},
+        create: {
+            id: 33,
+            name: 'Cloche',
+            description: "Si le Warden a moins de 50% de sa vie, il peut attaquer avec un coût de 1 au prochain tour.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 2,
+            attack1: actions.bell_effect.id,
+            ...(await loadCardImages('bell')),
+            folder_name: 'bell'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 34, name: 'Livre' },
+        update: {},
+        create: {
+            id: 34,
+            name: 'Livre',
+            description: "Pioche les 2 premières cartes du deck.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 1,
+            attack1: actions.book_effect.id,
+            ...(await loadCardImages('book')),
+            folder_name: 'book'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 35, name: 'Établi' },
+        update: {},
+        create: {
+            id: 35,
+            name: 'Établi',
+            description: "Réduit le coût de la future carte posée de 3. Ne fonctionne que sur le tour utilisé.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 1,
+            attack1: actions.craftingtable_effect.id,
+            ...(await loadCardImages('crafting-table')),
+            folder_name: 'crafting-table'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 36, name: "Cristal de l'End" },
+        update: {},
+        create: {
+            id: 36,
+            name: "Cristal de l'End",
+            description: "Réduit de moitié la vie d'un mob adverse au choix.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 2,
+            attack1: actions.endcrsystal_effect.id,
+            ...(await loadCardImages('crystal')),
+            folder_name: 'crystal'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 37, name: "Table d'enchantement" },
+        update: {},
+        create: {
+            id: 37,
+            name: "Table d'enchantement",
+            description: "Pendant ce tour, tous les équipements attachés coûtent 1 RedStone.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 2,
+            attack1: actions.enchanttable_effect.id,
+            ...(await loadCardImages('enchant-table')),
+            folder_name: 'enchant-table'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 38, name: 'Canne à pêche' },
+        update: {},
+        create: {
+            id: 38,
+            name: 'Canne à pêche',
+            description: "Vous avez 75% de chance de voler 2 RedStone maximum à votre adversaire, et 25% de chance de lui en donner 2.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 1,
+            attack1: actions.fishingrod_effect.id,
+            ...(await loadCardImages('fishing-rod')),
+            folder_name: 'fishing-rod'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 39, name: 'Pomme dorée' },
+        update: {},
+        create: {
+            id: 39,
+            name: 'Pomme dorée',
+            description: "Soigne 10 dégâts d'une carte alliée pendant 3 tours & Augmente ses dégâts de 10 PV pendant 3 tours.",
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 2,
+            attack1: actions.goldenapple_effect.id,
+            ...(await loadCardImages('gapple')),
+            folder_name: 'gapple'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 40, name: 'Lingot de fer' },
+        update: {},
+        create: {
+            id: 40,
+            name: 'Lingot de fer',
+            description: "Soigne 20 dégâts d'un Golem de votre plateau au choix.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 1,
+            attack1: actions.ironingot_effect.id,
+            ...(await loadCardImages('iron-ingot')),
+            folder_name: 'iron-ingot'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 41, name: 'Sceau de lave' },
+        update: {},
+        create: {
+            id: 41,
+            name: 'Sceau de lave',
+            description: "Applique un malus de 'brûlure' à une carte ennemie : elle perd 10 PV à chaque tour pendant 3 tours.",
+            category: 'EQUIPMENT',
+            pv_durability: 3,
+            cost: 2,
+            attack1: actions.lava_effect.id,
+            ...(await loadCardImages('lava-bucket')),
+            folder_name: 'lava-bucket'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 42, name: "Perle de l'End" },
+        update: {},
+        create: {
+            id: 42,
+            name: "Perle de l'End",
+            description: "Permet de défausser au choix une carte de votre plateau.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 2,
+            attack1: actions.enderpearl_effect.id,
+            ...(await loadCardImages('pearl')),
+            folder_name: 'pearl'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 43, name: "Portail de l'End" },
+        update: {},
+        create: {
+            id: 43,
+            name: "Portail de l'End",
+            description: "Permet de soigner au choix un Enderman, un Shulker ou un Ender Dragon de 30 dégâts.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 2,
+            attack1: actions.endportal_effect.id,
+            ...(await loadCardImages('end-portal')),
+            folder_name: 'end-portal'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 44, name: "Potion d'invisibilité" },
+        update: {},
+        create: {
+            id: 44,
+            name: "Potion d'invisibilité",
+            description: "Choisissez au choix un de vos mobs. Ce mob sera invisible et ne pourra pas être attaqué par votre adversaire lors de son prochain tour.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 1,
+            attack1: actions.endportal_effect.id,
+            ...(await loadCardImages('potion-invisibility')),
+            folder_name: 'potion-invisibility'
+        }
+    })
+
+    await prisma.cards.upsert({
+        where: { id: 45, name: 'TNT' },
+        update: {},
+        create: {
+            id: 45,
+            name: 'TNT',
+            description: "Choisissez au choix un de vos mobs. Ce mob sera invisible et ne pourra pas être attaqué par votre adversaire lors de son prochain tour.",
+            category: 'EQUIPMENT',
+            pv_durability: 1,
+            cost: 2,
+            attack1: actions.tnt_effect.id,
+            ...(await loadCardImages('tnt')),
+            folder_name: 'tnt'
         }
     })
 }
