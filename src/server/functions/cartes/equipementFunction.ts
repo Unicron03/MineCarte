@@ -1,0 +1,158 @@
+import { Server } from "socket.io";
+import type { Player, InGameCard, CombatState, EffectContext } from "../../../components/utils/typesPvp";
+import { handleMobDeath } from "../gameLogic";
+import { drawCard } from "./talentFunction";
+
+// --- Identifiants d'Effets Temporaires ---
+export const EFFECT_IDS = {
+    CRAFT_TABLE_COST_RED_3: "CRAFT_TABLE_COST_RED_3",
+};
+
+// Fonction utilitaire pour envoyer un log à la room
+function log(context: EffectContext, msg: string) {
+
+    // --- Envoi du message de log à tous les joueurs dans la room ---
+    context.io.to(context.roomId).emit("log", msg);
+}
+
+// Table de craft : Réduit le coût de la prochaine carte posée de 3 ce tour.
+export function craftTableEffect(context: EffectContext) {
+    
+    // --- Récupération du joueur courant ---
+    const { currentPlayer } = context;
+    if (!currentPlayer.effects) currentPlayer.effects = [];
+    
+    // --- Ajoute l'effet au tableau pour qu'il soit consommé par la prochaine carte jouée ---
+    currentPlayer.effects.push(EFFECT_IDS.CRAFT_TABLE_COST_RED_3);
+    log(context, `[Artefact] Table de craft activée. La prochaine carte coûte -3 ce tour.`);
+}
+
+// Détache les équipements d'un mob et les place dans la défausse du joueur
+export function detachEquipment(player: Player, mob: InGameCard) {
+    if (mob.equipment && mob.equipment.length > 0) {
+        player.discard.push(...mob.equipment);
+        mob.equipment = [];
+    }
+}
+
+// Applique l'effet de régénération de la Potion
+export function applyPotionRegen(state: CombatState, player: Player): void {
+
+    // --- Parcourt tous les mobs du joueur ---
+    player.board.forEach((card) => {
+
+        // --- Vérifie si le mob a une Potion équipée ---
+        if (card.category === "mob" && card.equipment) {
+
+            // --- Vérifie la présence de la Potion ---
+            const hasPotion = card.equipment.some((eq) => eq.name === "Potion");
+            if (hasPotion) {
+
+                // --- Activation de la Potion ---
+                state.log.push(`[Potion] La potion s'active sur ${card.name}.`);
+                
+                if (card.pv_durability !== undefined) {
+                    const max = card.max_pv ?? card.pv_durability;
+                    const healAmount = Math.min(10, max - card.pv_durability);
+                    card.pv_durability += healAmount;
+                    state.log.push(`${card.name} récupère ${healAmount} PV`);
+                }
+            }
+        }
+    });
+}
+
+// Applique l'effet de l'Épée : inflige 5 dégâts à chaque mob adverse après attaque
+export function applySwordEffect(state: CombatState, attacker: InGameCard, opponent: Player, io?: Server, roomId?: string): void {
+    if (attacker.equipment && attacker.equipment.some((eq) => eq.name === "Épée")) {
+        state.log.push(`[Épée] L'épée de ${attacker.name} inflige 5 dégâts aux mobs adverses.`);
+        
+        // Parcours inversé pour gérer les suppressions (morts) sans décaler les index
+        for (let i = opponent.board.length - 1; i >= 0; i--) {
+            const card = opponent.board[i];
+            if (card.category === "mob" && card.pv_durability !== undefined) {
+                card.pv_durability -= 5;
+                
+                if (card.pv_durability <= 0) {
+                    if (io && roomId) {
+                        handleMobDeath(io, roomId, opponent, i, state.log);
+                    } else {
+                        // Fallback si IO n'est pas dispo (ex: appel depuis une fonction sans contexte socket complet)
+                        state.log.push(`${card.name} succombe aux blessures de l'Épée.`);
+                        if (card.equipment) opponent.discard.push(...card.equipment);
+                        opponent.discard.push(card);
+                        opponent.board.splice(i, 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Vérifie et applique l'effet du Totem d'immortalité
+export function checkTotemEffect(state: CombatState, mob: InGameCard, player: Player): boolean {
+    if (mob.equipment && mob.equipment.some((eq) => eq.name === "Totem")) {
+        const index = mob.equipment.findIndex((eq) => eq.name === "Totem");
+        if (index !== -1) {
+            const totem = mob.equipment[index];
+            
+            // Retrait du Totem et envoi à la défausse
+            mob.equipment.splice(index, 1);
+            player.discard.push(totem);
+
+            // Sauvetage du mob
+            mob.pv_durability = 5;
+            state.log.push(`[Totem] Le Totem d'immortalité se brise et sauve ${mob.name} ! (PV fixés à 5)`);
+            return true;
+        }
+    }
+    return false;
+}
+
+// Vérifie si un mob est équipé d'une Elitra
+export function hasElytra(mob: InGameCard): boolean {
+    return mob.equipment ? mob.equipment.some((eq) => eq.name === "Elitra") : false;
+}
+
+// Applique l'effet de la Pioche : pioche une carte au début du tour
+export function applyPickaxeEffect(state: CombatState, player: Player): void {
+    player.board.forEach((card) => {
+        if (card.category === "mob" && card.equipment) {
+            // Vérifie si le mob a une Pioche équipée
+            const hasPickaxe = card.equipment.some((eq) => eq.name === "Pioche");
+            
+            if (hasPickaxe) {
+                state.log.push(`[Pioche] La pioche équipée sur ${card.name} permet de piocher une carte.`);
+                drawCard(state, player, 1);
+            }
+        }
+    });
+}
+
+// Applique l'effet du Bouclier : inflige 10 dégâts à l'attaquant si le porteur est attaqué
+export function applyShieldEffect(state: CombatState, target: InGameCard, attacker: InGameCard, attackerPlayer: Player | undefined, io?: Server, roomId?: string): void {
+    if (target.equipment && target.equipment.some((eq) => eq.name === "Bouclier")) {
+        state.log.push(`[Bouclier] Le bouclier de ${target.name} riposte et inflige 10 dégâts à ${attacker.name} !`);
+        
+        if (attacker.category === "mob" && attacker.pv_durability !== undefined) {
+            attacker.pv_durability -= 10;
+            
+            if (attacker.pv_durability <= 0 && attackerPlayer && io && roomId) {
+                 // Gestion de la mort de l'attaquant
+                 const attackerIndex = attackerPlayer.board.findIndex(c => c.uuid === attacker.uuid);
+                 if (attackerIndex !== -1) {
+                     handleMobDeath(io, roomId, attackerPlayer, attackerIndex, state.log);
+                 }
+            }
+        }
+    }
+}
+
+// Calcule la réduction du coût d'attaque apportée par les équipements (ex: Botte célérité)
+export function getEquipmentAttackCostReduction(mob: InGameCard): number {
+    let reduction = 0;
+    if (mob.equipment && mob.equipment.some((eq) => eq.name === "Botte célérité")) {
+        reduction += 1;
+    }
+    return reduction;
+}

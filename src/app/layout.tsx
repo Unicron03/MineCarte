@@ -3,7 +3,8 @@ import "./styles/globals.css";
 import "./styles/glass.css";
 import "atropos/css";
 import '@smastrom/react-rating/style.css'
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ToastContainer } from "react-toastify";
 
 export default function RootLayout({
     children,
@@ -20,6 +21,7 @@ export default function RootLayout({
                     disableTransitionOnChange
                 >
                     {children}
+                    <ToastContainer />
                 </ThemeProvider>
             </body>
         </html>

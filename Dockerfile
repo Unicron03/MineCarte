@@ -12,6 +12,9 @@ RUN npm install
 # Le .dockerignore sera respecté ici
 COPY . .
 
+# Générer le client Prisma
+RUN npx prisma generate
+
 # Construire l'application
 RUN npm run build
 

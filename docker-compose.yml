@@ -4,51 +4,45 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: minecarte-app
-    environment:
-      - DB_HOST=mysql
-      - DB_USER=minecarte
-      - DB_PASSWORD=minecartepass
-      - DB_NAME=minecarte
     ports:
-      - "3000:3000" # front sur localhost:3000
+      - "3000:3000"
+    command: npm run dev
+    environment:
+      - DATABASE_HOST=db
+      - DB_USER=${DB_USER?}
+      - DB_PASSWORD=${DB_PASSWORD?}
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME?}
     depends_on:
-      - mysql
-    networks:
-      - web
+      - db
     tty: true
 
-  mysql:
-    image: mysql:8.0
-    container_name: minecarte-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: minecarte
-      MYSQL_USER: minecarte
-      MYSQL_PASSWORD: minecartepass
+  websocket:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minecarte-ws
     ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - web
-
-  database: # interface graphique facultative
-    image: phpmyadmin/phpmyadmin
-    container_name: minecarte-phpmyadmin
-    restart: unless-stopped
+      - "3002:3002"
+    command: npx ts-node --project tsconfig.server.json server.ts
     environment:
-      PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: rootpass
-    ports:
-      - "8080:80" # http://localhost:8080
+      - DATABASE_HOST=db
+      - DB_USER=${DB_USER?}
+      - DB_PASSWORD=${DB_PASSWORD?}
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME?}
     depends_on:
-      - mysql
-    networks:
-      - web
-volumes:
-  mysql_data:
+      - db
+    tty: true
 
-networks:
-  web:
+  db:
+    container_name: minecarte-db
+    hostname: db
+    image: postgres:alpine
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ${DB_NAME?}
+      POSTGRES_USER: ${DB_USER?}
+      POSTGRES_PASSWORD: ${DB_PASSWORD?}

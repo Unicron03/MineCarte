@@ -1,49 +1,42 @@
-"use client";
-
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import StarryBackground from "@/components/particles/starry";
-import { ConnectionPanel } from "@/components/ConnectionPanel";
-import Image from "next/image";
-import { useState, useEffect } from "react";
+import { ConnectionPanel } from "@/components/login/ConnectionPanel";
+import { InscriptionPanel } from "@/components/login/InscriptionPanel";
+import { AuthPanelProvider } from "@/components/login/AuthPanelContext";
+import CreeperTracking from "@/components/login/CreeperTracking";
+import CardsDisplay from "@/components/login/CardsDisplay";
+import { myFont } from "@/components/utils/types";
 
 export default function Welcome() {
-    const [title, setTitle] = useState<string | null>(null);
-
-    useEffect(() => {
-        fetch('/api/titles')
-            .then(res => res.json())
-            .then(data => setTitle(data.url))
-            .catch(() => setTitle(null));
-    }, []);
-
     return (
-        <main className="flex flex-col h-screen p-4 tsparticles">
-            <header className="flex justify-end items-center gap-4">
-                <ThemeToggle />
-                <InfoPanel />
-            </header>
+        <AuthPanelProvider>
+            <main className="flex flex-col h-screen p-4 tsparticles relative overflow-hidden">
+                <header className="flex justify-end items-center gap-4 relative z-20">
+                    <ThemeToggle />
+                    <InfoPanel />
+                </header>
 
-            <StarryBackground />
+                <StarryBackground />
+                
+                <CardsDisplay />
 
-            <div className="flex-1 flex flex-col items-center justify-center relative">
-                {title && (
-                    <Image
-                        src={title}
-                        alt="Titre aléatoire"
-                        width={400}
-                        height={100}
-                        className="mb-8"
-                    />
-                )}
-                <ConnectionPanel />
-            </div>
+                <div className="flex-1 flex flex-col items-end justify-center relative z-10 mr-32 gap-4">
+                    <h1 className={`${myFont.className} text-7xl text-center drop-shadow-lg !text-white`}>MineCarte</h1>
+                    <div className="flex gap-4">
+                        <ConnectionPanel />
+                        <InscriptionPanel />
+                    </div>
+                </div>
 
-            <footer className="flex justify-center items-center py-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    &copy; {new Date().getFullYear()} MineCarte. Tous droits réservés.
-                </p>
-            </footer>
-        </main>
+                <CreeperTracking />
+
+                <footer className="flex justify-end items-center py-4 relative z-20">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        &copy; {new Date().getFullYear()} MineCarte. Tous droits réservés.
+                    </p>
+                </footer>
+            </main>
+        </AuthPanelProvider>
     );
 }
