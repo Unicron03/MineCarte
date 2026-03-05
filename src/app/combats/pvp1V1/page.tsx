@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Deck from "@/components/PVP/Deck";
 import CardPVP from "@/components/PVP/CardPVP";
 import LeftPanel from "@/components/PVP/LeftPanel";
-import GameLogs from "@/components/PVP/GameLogs";
+//import GameLogs from "@/components/PVP/GameLogs";
 import EndGameScreen from "@/components/PVP/EndGameScreen";
 import LoadingScreen from "@/components/PVP/LoadingScreen";
 import PlayerHand from "@/components/PVP/PlayerHand";
