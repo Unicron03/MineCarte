@@ -116,7 +116,14 @@ const CardPVP: React.FC<CardPVPProps> = ({ card, clickable = false, isPlayer = f
                         <span className="font-bold block border-b border-purple-500/30 pb-0.5 mb-0.5">
                             {isMob ? (isAutoActivate ? "Passif" : "Talent") : "Effet"}
                         </span>
-                        {effetOuTalent}
+                        {isMob && talentAction ? (
+                            <>
+                                {talentAction.name}
+                                <span className="opacity-80 italic block">{talentAction.description}</span>
+                            </>
+                        ) : (
+                            effetOuTalent
+                        )}
                     </button>
                 )}
 
