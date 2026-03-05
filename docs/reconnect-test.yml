@@ -1,0 +1,164 @@
+config:
+  target: "http://localhost:3002"
+  engines:
+    socketio: {}
+
+  phases:
+    # Phase 1 — Reconnexion rapide (dans les 5s de grâce)
+    - duration: 30
+      arrivalRate: 2
+      name: "Reconnexion rapide"
+
+    # Phase 2 — Reconnexion sous charge
+    - duration: 30
+      arrivalRate: 10
+      name: "Reconnexion sous charge"
+
+    # Phase 3 — Pic de reconnexions simultanées
+    - duration: 20
+      arrivalRate: 20
+      name: "Pic de reconnexions"
+
+scenarios:
+  - name: "Reconnexion dans la fenêtre de grâce (< 5s)"
+    engine: socketio
+    flow:
+      # ─── CONNEXION INITIALE ───────────────────────────────────────────────
+      - emit:
+          channel: "registerUser"
+          data:
+            userId: "reconnect-{{ $randomNumber() }}"
+            dbUserId: "reconnect-{{ $randomNumber() }}"
+            deck:
+              - name: "Blaze"
+                imageName: "blaze.png"
+                cost: 2
+                category: "mob"
+                pv: 20
+                talent: null
+                attack1: "Boule de feu"
+                attack2: null
+              - name: "Zombie"
+                imageName: "zombie.png"
+                cost: 2
+                category: "mob"
+                pv: 30
+                talent: null
+                attack1: "Coup d'ombre"
+                attack2: null
+          response:
+            channel: "roomInfo"
+            capture:
+              - json: "$.roomId"
+                as: "roomId"
+
+      # Jouer un tour avant de se déconnecter
+      - emit:
+          channel: "playCard"
+          data:
+            cardIndex: 0
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 0
+            attackName: "Boule de feu"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "endTurn"
+          data:
+            roomId: "{{ roomId }}"
+
+      # ─── SIMULATION DE DÉCONNEXION ────────────────────────────────────────
+      # Pause de 2s = simule une coupure réseau (< 5s de grâce)
+      - think: 2
+
+      # ─── RECONNEXION avec le même userId ─────────────────────────────────
+      # Le serveur doit retrouver la room et rebrancher le joueur
+      - emit:
+          channel: "registerUser"
+          data:
+            userId: "reconnect-{{ $randomNumber() }}"
+            dbUserId: "reconnect-{{ $randomNumber() }}"
+            deck:
+              - name: "Blaze"
+                imageName: "blaze.png"
+                cost: 2
+                category: "mob"
+                pv: 20
+                talent: null
+                attack1: "Boule de feu"
+                attack2: null
+          response:
+            channel: "roomInfo"
+            capture:
+              - json: "$.roomId"
+                as: "roomIdAfterReconnect"
+
+      # Vérifier que la partie continue après reconnexion
+      - emit:
+          channel: "endTurn"
+          data:
+            roomId: "{{ roomIdAfterReconnect }}"
+
+      - think: 2
+
+  - name: "Déconnexion hors fenêtre de grâce (> 5s)"
+    engine: socketio
+    flow:
+      # ─── CONNEXION INITIALE ───────────────────────────────────────────────
+      - emit:
+          channel: "registerUser"
+          data:
+            userId: "timeout-{{ $randomNumber() }}"
+            dbUserId: "timeout-{{ $randomNumber() }}"
+            deck:
+              - name: "Zombie"
+                imageName: "zombie.png"
+                cost: 2
+                category: "mob"
+                pv: 30
+                talent: null
+                attack1: "Coup d'ombre"
+                attack2: null
+          response:
+            channel: "roomInfo"
+            capture:
+              - json: "$.roomId"
+                as: "roomId"
+
+      # Jouer une action
+      - emit:
+          channel: "playCard"
+          data:
+            cardIndex: 0
+          response:
+            channel: "gameState"
+
+      # ─── DÉCONNEXION LONGUE (> 5s de grâce) ──────────────────────────────
+      # Pause de 7s = dépasse la fenêtre de grâce → l'adversaire doit gagner
+      - think: 7
+
+      # Tentative de reconnexion tardive
+      # Le serveur doit avoir nettoyé la room → pas de roomInfo attendu
+      - emit:
+          channel: "registerUser"
+          data:
+            userId: "timeout-{{ $randomNumber() }}"
+            dbUserId: "timeout-{{ $randomNumber() }}"
+            deck:
+              - name: "Zombie"
+                imageName: "zombie.png"
+                cost: 2
+                category: "mob"
+                pv: 30
+                talent: null
+                attack1: "Coup d'ombre"
+                attack2: null
+
+      - think: 2
