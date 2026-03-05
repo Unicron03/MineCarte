@@ -18,6 +18,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-quer
 import { Button } from "@/shadcn/ui/button";
 import { useState } from "react";
 import { Prisma } from "../../../generated/prisma/client";
+import GoldenParticles from "../particles/golden-particles";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,8 @@ function CardPopupDetailsInner(
                     <div className="flex gap-8">
                         <div className="flex flex-col items-center justify-center min-w-[350px]">
                             <Atropos className="atropos-banner p-2" highlight={false}>
+                                { card.rarity === 3 && <GoldenParticles className="absolute inset-0 w-full h-full z-20" />}
+    
                                 <Image
                                     className="atropos-banner-spacer"
                                     src="/cards/creeper/back.png"

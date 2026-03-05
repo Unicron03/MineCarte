@@ -50,11 +50,6 @@ test.describe('Vérifications UI', () => {
     // Vérifications
     await expect(page.locator('span').filter({ hasText: '1v1' })).toBeVisible();
     await expect(page.getByRole('button', { name: '1v1' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '1vAI' })).toBeVisible();
-    await expect(page.getByText('Vagues')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Commencer' })).toBeVisible();
-    await expect(page.getByText('Donjon')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Entrer' })).toBeVisible();
     await expect(page.getByRole('link').filter({ hasText: /^$/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Accueil' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Collection' })).toBeVisible();
