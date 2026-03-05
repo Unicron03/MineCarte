@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [main, master, develop, feacture/tests_performances]
+    branches: [main, master, develop, feature/tests_performances]
   pull_request:
-    branches: [main, master, develop]
+    branches: [main, master, develop, feature/tests_performances]
 
 jobs:
   # Job 1: Lint & Format
