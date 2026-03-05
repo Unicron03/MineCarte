@@ -172,8 +172,8 @@ export default function GamePage() {
                 // Mots-clés pour les messages d'erreur
                 const errorKeywords = [
                     "pas assez", "plus assez", "énergie insuffisante", "energie insuffisante", 
-                    "impossible", "erreur", "ne pouvez pas", "doit avoir", "déjà attaqué",
-                    "aucune cible"
+                    "impossible", "erreur", "ne pouvez pas", "doit avoir", "déjà attaqué", 
+                    "aucune cible", "devez avoir"
                 ];
 
                 // Mots-clés pour les messages d'information
@@ -374,7 +374,7 @@ export default function GamePage() {
             <div className="flex-1 flex flex-col items-center justify-between">
 
                 {/* Logs en haut à droite */}
-                <GameLogs logs={logs} />
+                {/* <GameLogs logs={logs} /> */} {/* Affichage des logs*/}
             
                 {/* Zone adversaire */}
                 <div className="w-full flex flex-col items-center ">
