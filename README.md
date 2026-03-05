@@ -58,3 +58,35 @@ docker compose up --build -d
 ```
 ./init-build-test.bat
 ```
+
+## Build des Tests
+
+1. Installer artillery
+```
+npm install --save-dev artillery
+```
+
+2. Lancer le build
+```
+docker compose up --build -d
+```
+
+3. Lancer les textes :
+- Test de stress PvP :
+```
+npx artillery run docs/stress-pvp.yml --output docs/report.json
+```
+- Test de reconnexion :
+```
+npx artillery run docs/stress-extreme.yml
+```
+- Test extrême (optionnel) :
+```
+npx artillery run docs/stress-extreme.yml
+```
+
+4. Générer le rapport HTML
+```
+node docs/generate-report.js docs/report.json docs/report-reconnect.json docs/index.html
+```
+

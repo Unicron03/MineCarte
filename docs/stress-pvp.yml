@@ -1,0 +1,159 @@
+config:
+  target: "http://localhost:3002"
+  engines:
+    socketio: {}
+
+  phases:
+    - duration: 30
+      arrivalRate: 2
+      name: "Montée douce"
+    - duration: 30
+      arrivalRate: 10
+      name: "Charge normale"
+    - duration: 20
+      arrivalRate: 30
+      name: "Pic de stress"
+
+scenarios:
+  - name: "Partie PvP complète (3 tours)"
+    engine: socketio
+    flow:
+
+      # ─── CONNEXION + capture roomId ───────────────────────────────────────
+      - emit:
+          channel: "registerUser"
+          data:
+            userId: "stress-{{ $randomNumber() }}"
+            dbUserId: "stress-{{ $randomNumber() }}"
+            deck:
+              - name: "Blaze"
+                imageName: "blaze.png"
+                cost: 2
+                category: "mob"
+                pv: 20
+                talent: null
+                attack1: "Boule de feu"
+                attack2: null
+              - name: "Zombie"
+                imageName: "zombie.png"
+                cost: 2
+                category: "mob"
+                pv: 30
+                talent: null
+                attack1: "Coup d'ombre"
+                attack2: null
+              - name: "Squelette"
+                imageName: "squelette.png"
+                cost: 2
+                category: "mob"
+                pv: 20
+                talent: null
+                attack1: "Coup d'ombre"
+                attack2: null
+          response:
+            channel: "roomInfo"
+            # Capture roomId depuis la réponse du serveur
+            capture:
+              - json: "$.roomId"
+                as: "roomId"
+
+      - think: 1
+
+      # ─── TOUR 1 ───────────────────────────────────────────────────────────
+      - emit:
+          channel: "playCard"
+          data:
+            cardIndex: 0
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 0
+            attackName: "Boule de feu"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "endTurn"
+          data:
+            roomId: "{{ roomId }}"
+
+      - think: 2
+
+      # ─── TOUR 2 ───────────────────────────────────────────────────────────
+      - emit:
+          channel: "playCard"
+          data:
+            cardIndex: 1
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 0
+            attackName: "Boule de feu"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 1
+            attackName: "Coup d'ombre"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "endTurn"
+          data:
+            roomId: "{{ roomId }}"
+
+      - think: 2
+
+      # ─── TOUR 3 ───────────────────────────────────────────────────────────
+      - emit:
+          channel: "playCard"
+          data:
+            cardIndex: 2
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 0
+            attackName: "Boule de feu"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 1
+            attackName: "Coup d'ombre"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 2
+            attackName: "Coup d'ombre"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "endTurn"
+          data:
+            roomId: "{{ roomId }}"
+
+      - think: 3

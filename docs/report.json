@@ -1,0 +1,779 @@
+{
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.Partie PvP complète (3 tours)": 960,
+      "vusers.created": 960,
+      "socketio.emit": 12480,
+      "vusers.failed": 0,
+      "vusers.completed": 960
+    },
+    "rates": {
+      "socketio.emit_rate": 229
+    },
+    "firstCounterAt": 1772717973763,
+    "firstHistogramAt": 1772717973795,
+    "lastCounterAt": 1772718061623,
+    "lastHistogramAt": 1772718061623,
+    "firstMetricAt": 1772717973763,
+    "lastMetricAt": 1772718061623,
+    "period": 1772718060000,
+    "summaries": {
+      "socketio.response_time": {
+        "min": 0,
+        "max": 8.7,
+        "count": 12480,
+        "mean": 0.1,
+        "p50": 0.1,
+        "median": 0.1,
+        "p75": 0.2,
+        "p90": 0.3,
+        "p95": 0.4,
+        "p99": 0.7,
+        "p999": 3.4
+      },
+      "vusers.session_length": {
+        "min": 8011.5,
+        "max": 8089.3,
+        "count": 960,
+        "mean": 8043.7,
+        "p50": 8024.5,
+        "median": 8024.5,
+        "p75": 8024.5,
+        "p90": 8024.5,
+        "p95": 8024.5,
+        "p99": 8024.5,
+        "p999": 8024.5
+      }
+    },
+    "histograms": {
+      "socketio.response_time": {
+        "min": 0,
+        "max": 8.7,
+        "count": 12480,
+        "mean": 0.1,
+        "p50": 0.1,
+        "median": 0.1,
+        "p75": 0.2,
+        "p90": 0.3,
+        "p95": 0.4,
+        "p99": 0.7,
+        "p999": 3.4
+      },
+      "vusers.session_length": {
+        "min": 8011.5,
+        "max": 8089.3,
+        "count": 960,
+        "mean": 8043.7,
+        "p50": 8024.5,
+        "median": 8024.5,
+        "p75": 8024.5,
+        "p90": 8024.5,
+        "p95": 8024.5,
+        "p99": 8024.5,
+        "p999": 8024.5
+      }
+    }
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 14,
+        "vusers.created": 14,
+        "socketio.emit": 102
+      },
+      "rates": {
+        "socketio.emit_rate": 16
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772717973763,
+      "firstHistogramAt": 1772717973795,
+      "lastCounterAt": 1772717979851,
+      "lastHistogramAt": 1772717979851,
+      "firstMetricAt": 1772717973763,
+      "lastMetricAt": 1772717979851,
+      "period": "1772717970000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 3.7,
+          "count": 102,
+          "mean": 0.3,
+          "p50": 0.1,
+          "median": 0.1,
+          "p75": 0.3,
+          "p90": 0.6,
+          "p95": 0.8,
+          "p99": 1.1,
+          "p999": 3.4
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 3.7,
+          "count": 102,
+          "mean": 0.3,
+          "p50": 0.1,
+          "median": 0.1,
+          "p75": 0.3,
+          "p90": 0.6,
+          "p95": 0.8,
+          "p99": 1.1,
+          "p999": 3.4
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 20,
+        "vusers.created": 20,
+        "socketio.emit": 260,
+        "vusers.failed": 0,
+        "vusers.completed": 18
+      },
+      "rates": {
+        "socketio.emit_rate": 28
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772717980761,
+      "firstHistogramAt": 1772717980780,
+      "lastCounterAt": 1772717989887,
+      "lastHistogramAt": 1772717989887,
+      "firstMetricAt": 1772717980761,
+      "lastMetricAt": 1772717989887,
+      "period": "1772717980000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 0.9,
+          "count": 260,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.6,
+          "p999": 0.9
+        },
+        "vusers.session_length": {
+          "min": 8022.2,
+          "max": 8089.3,
+          "count": 18,
+          "mean": 8052,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 0.9,
+          "count": 260,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.6,
+          "p999": 0.9
+        },
+        "vusers.session_length": {
+          "min": 8022.2,
+          "max": 8089.3,
+          "count": 18,
+          "mean": 8052,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 20,
+        "vusers.created": 20,
+        "socketio.emit": 260,
+        "vusers.failed": 0,
+        "vusers.completed": 20
+      },
+      "rates": {
+        "socketio.emit_rate": 28
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772717990761,
+      "firstHistogramAt": 1772717990773,
+      "lastCounterAt": 1772717999878,
+      "lastHistogramAt": 1772717999878,
+      "firstMetricAt": 1772717990761,
+      "lastMetricAt": 1772717999878,
+      "period": "1772717990000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 0.7,
+          "count": 260,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.6,
+          "p999": 0.7
+        },
+        "vusers.session_length": {
+          "min": 8022.7,
+          "max": 8071.3,
+          "count": 20,
+          "mean": 8043.7,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 0.7,
+          "count": 260,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.6,
+          "p999": 0.7
+        },
+        "vusers.session_length": {
+          "min": 8022.7,
+          "max": 8071.3,
+          "count": 20,
+          "mean": 8043.7,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 71,
+        "vusers.created": 71,
+        "socketio.emit": 590,
+        "vusers.failed": 0,
+        "vusers.completed": 20
+      },
+      "rates": {
+        "socketio.emit_rate": 93
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772718000761,
+      "firstHistogramAt": 1772718000779,
+      "lastCounterAt": 1772718009986,
+      "lastHistogramAt": 1772718009958,
+      "firstMetricAt": 1772718000761,
+      "lastMetricAt": 1772718009986,
+      "period": "1772718000000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 5.4,
+          "count": 590,
+          "mean": 0.2,
+          "p50": 0.1,
+          "median": 0.1,
+          "p75": 0.2,
+          "p90": 0.4,
+          "p95": 0.7,
+          "p99": 3.4,
+          "p999": 4.7
+        },
+        "vusers.session_length": {
+          "min": 8023.7,
+          "max": 8063.5,
+          "count": 20,
+          "mean": 8043.2,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 5.4,
+          "count": 590,
+          "mean": 0.2,
+          "p50": 0.1,
+          "median": 0.1,
+          "p75": 0.2,
+          "p90": 0.4,
+          "p95": 0.7,
+          "p99": 3.4,
+          "p999": 4.7
+        },
+        "vusers.session_length": {
+          "min": 8023.7,
+          "max": 8063.5,
+          "count": 20,
+          "mean": 8043.2,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 100,
+        "vusers.created": 100,
+        "socketio.emit": 1300,
+        "vusers.failed": 0,
+        "vusers.completed": 86
+      },
+      "rates": {
+        "socketio.emit_rate": 140
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772718010000,
+      "firstHistogramAt": 1772718010001,
+      "lastCounterAt": 1772718019985,
+      "lastHistogramAt": 1772718019975,
+      "firstMetricAt": 1772718010000,
+      "lastMetricAt": 1772718019985,
+      "period": "1772718010000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 2,
+          "count": 1300,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.6,
+          "p999": 0.9
+        },
+        "vusers.session_length": {
+          "min": 8016.2,
+          "max": 8084.8,
+          "count": 86,
+          "mean": 8046.1,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 2,
+          "count": 1300,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.6,
+          "p999": 0.9
+        },
+        "vusers.session_length": {
+          "min": 8016.2,
+          "max": 8084.8,
+          "count": 86,
+          "mean": 8046.1,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 100,
+        "vusers.created": 100,
+        "socketio.emit": 1300,
+        "vusers.failed": 0,
+        "vusers.completed": 100
+      },
+      "rates": {
+        "socketio.emit_rate": 140
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772718020008,
+      "firstHistogramAt": 1772718020008,
+      "lastCounterAt": 1772718029987,
+      "lastHistogramAt": 1772718029969,
+      "firstMetricAt": 1772718020008,
+      "lastMetricAt": 1772718029987,
+      "period": "1772718020000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 1.1,
+          "count": 1300,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.6,
+          "p999": 0.9
+        },
+        "vusers.session_length": {
+          "min": 8014.2,
+          "max": 8075.8,
+          "count": 100,
+          "mean": 8047.5,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 1.1,
+          "count": 1300,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.6,
+          "p999": 0.9
+        },
+        "vusers.session_length": {
+          "min": 8014.2,
+          "max": 8075.8,
+          "count": 100,
+          "mean": 8047.5,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 233,
+        "vusers.created": 233,
+        "socketio.emit": 2221,
+        "vusers.failed": 0,
+        "vusers.completed": 100
+      },
+      "rates": {
+        "socketio.emit_rate": 264
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772718030009,
+      "firstHistogramAt": 1772718030009,
+      "lastCounterAt": 1772718039999,
+      "lastHistogramAt": 1772718039999,
+      "firstMetricAt": 1772718030009,
+      "lastMetricAt": 1772718039999,
+      "period": "1772718030000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 8.7,
+          "count": 2221,
+          "mean": 0.1,
+          "p50": 0.1,
+          "median": 0.1,
+          "p75": 0.2,
+          "p90": 0.3,
+          "p95": 0.5,
+          "p99": 0.8,
+          "p999": 5
+        },
+        "vusers.session_length": {
+          "min": 8014.6,
+          "max": 8075.5,
+          "count": 100,
+          "mean": 8041.7,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 8.7,
+          "count": 2221,
+          "mean": 0.1,
+          "p50": 0.1,
+          "median": 0.1,
+          "p75": 0.2,
+          "p90": 0.3,
+          "p95": 0.5,
+          "p99": 0.8,
+          "p999": 5
+        },
+        "vusers.session_length": {
+          "min": 8014.6,
+          "max": 8075.5,
+          "count": 100,
+          "mean": 8041.7,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 300,
+        "vusers.created": 300,
+        "socketio.emit": 3896,
+        "vusers.failed": 0,
+        "vusers.completed": 272
+      },
+      "rates": {
+        "socketio.emit_rate": 404
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772718040003,
+      "firstHistogramAt": 1772718040004,
+      "lastCounterAt": 1772718049998,
+      "lastHistogramAt": 1772718049999,
+      "firstMetricAt": 1772718040003,
+      "lastMetricAt": 1772718049999,
+      "period": "1772718040000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 5.1,
+          "count": 3896,
+          "mean": 0.1,
+          "p50": 0.1,
+          "median": 0.1,
+          "p75": 0.2,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.7,
+          "p999": 1.9
+        },
+        "vusers.session_length": {
+          "min": 8013.6,
+          "max": 8081,
+          "count": 272,
+          "mean": 8041.5,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 5.1,
+          "count": 3896,
+          "mean": 0.1,
+          "p50": 0.1,
+          "median": 0.1,
+          "p75": 0.2,
+          "p90": 0.3,
+          "p95": 0.4,
+          "p99": 0.7,
+          "p999": 1.9
+        },
+        "vusers.session_length": {
+          "min": 8013.6,
+          "max": 8081,
+          "count": 272,
+          "mean": 8041.5,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Partie PvP complète (3 tours)": 102,
+        "vusers.created": 102,
+        "socketio.emit": 2551,
+        "vusers.failed": 0,
+        "vusers.completed": 300
+      },
+      "rates": {
+        "socketio.emit_rate": 318
+      },
+      "socketio.emit_rate": null,
+      "firstCounterAt": 1772718050009,
+      "firstHistogramAt": 1772718050010,
+      "lastCounterAt": 1772718059966,
+      "lastHistogramAt": 1772718059966,
+      "firstMetricAt": 1772718050009,
+      "lastMetricAt": 1772718059966,
+      "period": "1772718050000",
+      "summaries": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 1.6,
+          "count": 2551,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.3,
+          "p99": 0.5,
+          "p999": 0.9
+        },
+        "vusers.session_length": {
+          "min": 8011.5,
+          "max": 8086.4,
+          "count": 300,
+          "mean": 8042.7,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "socketio.response_time": {
+          "min": 0,
+          "max": 1.6,
+          "count": 2551,
+          "mean": 0.1,
+          "p50": 0,
+          "median": 0,
+          "p75": 0.1,
+          "p90": 0.3,
+          "p95": 0.3,
+          "p99": 0.5,
+          "p999": 0.9
+        },
+        "vusers.session_length": {
+          "min": 8011.5,
+          "max": 8086.4,
+          "count": 300,
+          "mean": 8042.7,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.failed": 0,
+        "vusers.completed": 44
+      },
+      "rates": {},
+      "firstCounterAt": 1772718060027,
+      "firstHistogramAt": 1772718060027,
+      "lastCounterAt": 1772718061623,
+      "lastHistogramAt": 1772718061623,
+      "firstMetricAt": 1772718060027,
+      "lastMetricAt": 1772718061623,
+      "period": "1772718060000",
+      "summaries": {
+        "vusers.session_length": {
+          "min": 8032.4,
+          "max": 8079.1,
+          "count": 44,
+          "mean": 8051,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      },
+      "histograms": {
+        "vusers.session_length": {
+          "min": 8032.4,
+          "max": 8079.1,
+          "count": 44,
+          "mean": 8051,
+          "p50": 8024.5,
+          "median": 8024.5,
+          "p75": 8024.5,
+          "p90": 8024.5,
+          "p95": 8024.5,
+          "p99": 8024.5,
+          "p999": 8024.5
+        }
+      }
+    }
+  ]
+}
