@@ -41,39 +41,48 @@ export default function Leaderboard({ gameMode }: { gameMode: GameMode }) {
     }, [gameMode]);
     
     return (
-        <div className="glass-nav after:!rounded-2xl !rounded-2xl flex flex-col items-center justify-start w-full h-full p-6 overflow-auto">
-            <h2 className="text-4xl font-bold mb-6">🏆 Classement</h2>
-            
+        <div className="w-full h-full overflow-auto">
             {isLoading ? (
-                <p className="text-lg text-gray-400">Chargement du classement...</p>
+                <div className="flex items-center justify-center h-32">
+                    <p className="text-lg text-gray-400">Chargement du classement...</p>
+                </div>
             ) : players.length === 0 ? (
-                <p className="text-lg text-gray-400">Aucun joueur dans ce classement</p>
+                <div className="flex items-center justify-center h-32">
+                    <p className="text-lg text-gray-400">Aucun joueur dans ce classement</p>
+                </div>
             ) : (
-                <ul className="w-full px-4">
+                <div className="space-y-3">
                     {players.map((player, index) => (
-                        <li
+                        <div
                             key={player.id}
-                            className={`flex justify-between items-center bg-white/10 backdrop-blur-md rounded-xl p-3 mb-3 hover:bg-white/20 transition-all ${
-                                player.id === userId ? "border-2 border-yellow-400" : ""
+                            className={`relative p-3 rounded-xl transition-all hover:scale-[1.02] gradient-border ${
+                                player.id === userId 
+                                    ? "shadow-lg" 
+                                    : ""
                             }`}
+                            style={{
+                                background: player.id === userId ? 'rgba(142, 251, 123, 0.2)' : 'transparent',
+                            }}
                         >
-                            <div className="flex items-center gap-3">
-                                <span className="font-bold text-xl w-8">
-                                    {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
-                                </span>
-                                <div className="flex flex-col">
-                                    <span className="font-medium">{player.name}</span>
-                                    <span className="text-xs text-gray-400">
-                                        {player.victories}V - {player.defeats}D
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <span className="text-2xl w-10 text-center font-bold text-white">
+                                        {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
                                     </span>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm">
+                                            👤
+                                        </div>
+                                        <span className="font-medium text-lg text-green-400">{player.name}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-white font-bold text-lg">{player.victories} victoires</div>
                                 </div>
                             </div>
-                            <span className="font-semibold text-yellow-400">
-                                {player.points} pts
-                            </span>
-                        </li>
+                        </div>
                     ))}
-                </ul>
+                </div>
             )}
         </div>
     );

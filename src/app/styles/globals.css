@@ -8,6 +8,7 @@
     --color-foreground: var(--foreground);
     --font-sans: var(--font-geist-sans);
     --font-mono: var(--font-geist-mono);
+    --font-alfa-slab-one: var(--font-alfa-slab-one);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -205,4 +206,196 @@ button { cursor: pointer; }
 
 .animate-eye-shake {
   animation: eye-shake 0.15s infinite;
+}
+
+/* Animation lueur verte */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.7;
+    }
+}
+
+@keyframes fadeInConcentrated {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.25;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 5s ease-in-out forwards;
+}
+
+/* 3D cartes */
+@layer utilities {
+    .rotate-y-12 {
+        transform: rotateY(12deg);
+    }
+    
+    .rotate-y-6 {
+        transform: rotateY(6deg);
+    }
+    
+    .translate-z-16 {
+        transform: translateZ(16px);
+    }
+    
+    .translate-z-20 {
+        transform: translateZ(20px);
+    }
+    
+    .translate-z-24 {
+        transform: translateZ(24px);
+    }
+    
+    .preserve-3d {
+        transform-style: preserve-3d;
+    }
+    
+    .perspective-1000 {
+        perspective: 1000px;
+    }
+    
+    .perspective-800 {
+        perspective: 800px;
+    }
+    
+    .backface-hidden {
+        backface-visibility: hidden;
+    }
+    
+    .drop-shadow-3xl {
+        filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.5));
+    }
+    
+    .drop-shadow-4xl {
+        filter: drop-shadow(0 35px 60px rgba(0, 0, 0, 0.6));
+    }
+}
+
+/* hover cartes */
+.card-3d-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.card-3d-hover:hover {
+    transform: perspective(1000px) rotateX(-5deg) rotateY(10deg) translateZ(20px) scale(1.05);
+    filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.4));
+}
+
+
+.atropos-card {
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.atropos-card:hover {
+    transform: scale(1.05) !important;
+}
+
+/* ombres en fonction de la profondeur Z */
+.atropos-card .atropos-shadow {
+    border-radius: 12px;
+    opacity: 0.4;
+}
+
+.atropos-card .atropos-highlight {
+    border-radius: 12px;
+    opacity: 0.15;
+}
+
+/* animation entrée des cartes */
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateZ(-100px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateZ(0px) scale(1);
+    }
+}
+
+.card-appear {
+    animation: cardAppear 0.7s ease-out forwards;
+}
+
+/* boutons de combat */
+.combat-button {
+    font-family: var(--font-alfa-slab-one), cursive !important;
+    font-weight: 400 !important;
+    font-size: 2rem !important;
+    color: #FFFFFF !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+    min-height: 80px !important;
+    padding: 20px 30px !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.combat-button:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)) !important;
+}
+
+.combat-button:active {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* police  */
+.font-alfa-slab {
+    font-family: var(--font-alfa-slab-one), cursive;
+}
+
+
+[data-radix-dialog-content] {
+    width: 95vw !important;
+    height: 90vh !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+
+.dialog-content-large {
+    width: 95vw !important;
+    height: 90vh !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+
+.gradient-border {
+    position: relative;
+}
+
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: linear-gradient(90deg, #8EFB7B 0%, #161616 50%, #8EFB7B 100%);
+    border-radius: 0.75rem;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
 }
