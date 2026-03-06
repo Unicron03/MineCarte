@@ -509,7 +509,7 @@ export default function GamePage() {
                     className={`absolute right-6 top-1/2 -translate-y-1/2 font-bold text-xl px-8 py-4 rounded-xl border-2 shadow-2xl transition-all z-50 ${
                         (selectionMode !== 'none' || selectionModalData?.show)
                             ? "bg-gray-600 border-gray-500 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white border-yellow-400 hover:scale-110"
+                            : "bg-linear-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white border-yellow-400 hover:scale-110"
                     }`}
                     onClick={(selectionMode !== 'none' || selectionModalData?.show) ? undefined : endTurn}
                     disabled={selectionMode !== 'none' || (selectionModalData?.show ?? false)}
