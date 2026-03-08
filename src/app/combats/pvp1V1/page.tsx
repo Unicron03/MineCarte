@@ -177,7 +177,7 @@ export default function GamePage() {
                 ];
 
                 // Mots-clés pour les messages d'information
-                const infoKeywords = ["reconnecté", "connecté", "déconnecté", "rejoint", "quitté"];
+                const infoKeywords = ["rejoint", "quitté"];
 
                 if (errorKeywords.some(keyword => lowerMsg.includes(keyword))) {
                     toast.error(message);
