@@ -1,0 +1,197 @@
+config:
+  target: "http://localhost:3002"
+  engines:
+    socketio: {}
+
+  phases:
+    # Phase 1 — Montée douce
+    - duration: 20
+      arrivalRate: 5
+      rampTo: 50
+      name: "Montée douce"
+
+    # Phase 2 — Charge soutenue
+    - duration: 40
+      arrivalRate: 50
+      name: "Charge soutenue"
+
+    # Phase 3 — Pic extrême
+    - duration: 30
+      arrivalRate: 100
+      name: "Pic extrême"
+
+    # Phase 4 — Tsunami final
+    - duration: 20
+      arrivalRate: 200
+      name: "Tsunami final"
+
+scenarios:
+  - name: "Combat PvP intensif"
+    engine: socketio
+    flow:
+
+      # ─── CONNEXION ────────────────────────────────────────────────────────
+      - emit:
+          channel: "registerUser"
+          data:
+            userId: "stress-{{ $randomNumber() }}"
+            dbUserId: "stress-{{ $randomNumber() }}"
+            deck:
+              - name: "Blaze"
+                imageName: "blaze.png"
+                cost: 2
+                category: "mob"
+                pv: 20
+                talent: null
+                attack1: "Boule de feu"
+                attack2: null
+              - name: "Zombie"
+                imageName: "zombie.png"
+                cost: 2
+                category: "mob"
+                pv: 30
+                talent: null
+                attack1: "Coup d'ombre"
+                attack2: null
+              - name: "Squelette"
+                imageName: "squelette.png"
+                cost: 2
+                category: "mob"
+                pv: 20
+                talent: null
+                attack1: "Coup d'ombre"
+                attack2: null
+          response:
+            channel: "roomInfo"
+            capture:
+              - json: "$.roomId"
+                as: "roomId"
+
+      - think: 1
+
+      # ─── TOUR 1 ───────────────────────────────────────────────────────────
+      - emit:
+          channel: "playCard"
+          data:
+            cardIndex: 0
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 0
+            attackName: "Boule de feu"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "endTurn"
+          data:
+            roomId: "{{ roomId }}"
+
+      - think: 1
+
+      # ─── TOUR 2 ───────────────────────────────────────────────────────────
+      - emit:
+          channel: "playCard"
+          data:
+            cardIndex: 1
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 0
+            attackName: "Boule de feu"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 1
+            attackName: "Coup d'ombre"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "endTurn"
+          data:
+            roomId: "{{ roomId }}"
+
+      - think: 1
+
+      # ─── TOUR 3 ───────────────────────────────────────────────────────────
+      - emit:
+          channel: "playCard"
+          data:
+            cardIndex: 2
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 0
+            attackName: "Boule de feu"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 1
+            attackName: "Coup d'ombre"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "requestAttack"
+          data:
+            roomId: "{{ roomId }}"
+            attackerIndex: 2
+            attackName: "Coup d'ombre"
+          response:
+            channel: "gameState"
+
+      - emit:
+          channel: "endTurn"
+          data:
+            roomId: "{{ roomId }}"
+
+      # ─── TOURS 4 à 10 — Spam d'actions pour saturer ───────────────────────
+      - loop:
+          - emit:
+              channel: "requestAttack"
+              data:
+                roomId: "{{ roomId }}"
+                attackerIndex: 0
+                attackName: "Boule de feu"
+              response:
+                channel: "gameState"
+
+          - emit:
+              channel: "requestAttack"
+              data:
+                roomId: "{{ roomId }}"
+                attackerIndex: 1
+                attackName: "Coup d'ombre"
+              response:
+                channel: "gameState"
+
+          - emit:
+              channel: "endTurn"
+              data:
+                roomId: "{{ roomId }}"
+
+          - think: 0.5
+        count: 7
+
+      - think: 2

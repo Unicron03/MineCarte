@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MineCarte — Rapport de Performance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --border: #1e2d40;
+      --green: #00ff88;
+      --red: #ff4444;
+      --yellow: #ffcc00;
+      --blue: #38bdf8;
+      --purple: #a78bfa;
+      --orange: #fb923c;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+    .wrapper { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 40px 24px; }
+
+    /* Header */
+    header { border-bottom: 2px solid var(--green); padding-bottom: 28px; margin-bottom: 48px; }
+    .header-tag { font-family: 'Press Start 2P', monospace; font-size: 10px; color: var(--green); letter-spacing: 4px; margin-bottom: 16px; opacity: 0.7; }
+    h1 { font-family: 'Press Start 2P', monospace; font-size: clamp(14px, 2.5vw, 24px); color: var(--green); line-height: 1.6; text-shadow: 0 0 30px rgba(0,255,136,0.3); }
+    .meta { margin-top: 12px; font-size: 12px; color: var(--muted); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 12px 24px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      color: var(--muted);
+      background: transparent;
+      transition: all 0.2s;
+      position: relative;
+      bottom: -1px;
+    }
+    .tab:hover { color: var(--text); border-color: var(--border); }
+    .tab.active { color: var(--green); border-color: var(--border); background: var(--surface); border-bottom-color: var(--surface); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* KPI Grid */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-bottom: 40px; }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 22px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+      animation: fadeUp 0.4s ease both;
+    }
+    .kpi:hover { transform: translateY(-2px); border-color: var(--green); }
+    .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent, var(--green)); }
+    .kpi-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .kpi-value { font-family: 'Press Start 2P', monospace; font-size: clamp(16px, 2.5vw, 26px); color: var(--accent, var(--green)); line-height: 1; }
+    .kpi-unit { font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+    /* Charts */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+    @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    canvas { max-height: 250px; }
+
+    /* Table */
+    .section-title { font-family: 'Press Start 2P', monospace; font-size: 11px; color: var(--green); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    td { padding: 12px; border-bottom: 1px solid rgba(30,45,64,0.5); }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 11px; font-weight: 600; }
+    .badge-green { background: rgba(0,255,136,0.1); color: var(--green); }
+    .badge-red { background: rgba(255,68,68,0.1); color: var(--red); }
+    .badge-yellow { background: rgba(255,204,0,0.1); color: var(--yellow); }
+
+    /* Comparaison */
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+    @media (max-width: 768px) { .compare-grid { grid-template-columns: 1fr; } }
+    .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
+    .compare-card-title { font-family: 'Press Start 2P', monospace; font-size: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .compare-card-title.pvp { color: var(--blue); }
+    .compare-card-title.reconnect { color: var(--orange); }
+
+    /* Verdict */
+    .verdict { margin-top: 40px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--green); padding: 24px 28px; border-radius: 4px; margin-bottom: 40px; }
+    .verdict-title { font-family: 'Press Start 2P', monospace; font-size: 11px; color: var(--green); margin-bottom: 16px; }
+    .verdict p { font-size: 13px; color: var(--text); line-height: 1.8; }
+
+    footer { padding-top: 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); text-align: center; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .kpi:nth-child(1){animation-delay:.05s} .kpi:nth-child(2){animation-delay:.1s}
+    .kpi:nth-child(3){animation-delay:.15s} .kpi:nth-child(4){animation-delay:.2s}
+    .kpi:nth-child(5){animation-delay:.25s} .kpi:nth-child(6){animation-delay:.3s}
+    .kpi:nth-child(7){animation-delay:.35s} .kpi:nth-child(8){animation-delay:.4s}
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="header-tag">⚔ MineCarte · Performance Report</div>
+    <h1>TABLEAU DE BORD — TESTS DE PERFORMANCE</h1>
+    <div class="meta">Généré le 05/03/2026 14:41:30 · Artillery v2 · Socket.io · Node.js</div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('pvp', this)">⚔ STRESS PvP</button>
+    <button class="tab" onclick="showTab('reconnect', this)">🔌 RECONNEXION</button>
+    <button class="tab" onclick="showTab('compare', this)"> COMPARAISON</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TAB PVP                                                         -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="tab-pvp" class="tab-content active">
+
+    <div class="kpi-grid">
+      <div class="kpi" style="--accent:var(--green)">
+        <div class="kpi-label">Parties créées</div>
+        <div class="kpi-value">960</div>
+        <div class="kpi-unit">virtual users</div>
+      </div>
+      <div class="kpi" style="--accent:var(--green)">
+        <div class="kpi-label">Parties complétées</div>
+        <div class="kpi-value">960</div>
+        <div class="kpi-unit">taux : 100.0%</div>
+      </div>
+      <div class="kpi" style="--accent:var(--green)">
+        <div class="kpi-label">Échecs</div>
+        <div class="kpi-value" style="color:var(--green)">0</div>
+        <div class="kpi-unit">aucun ✓</div>
+      </div>
+      <div class="kpi" style="--accent:var(--blue)">
+        <div class="kpi-label">Latence moyenne</div>
+        <div class="kpi-value">0.1</div>
+        <div class="kpi-unit">ms</div>
+      </div>
+      <div class="kpi" style="--accent:var(--blue)">
+        <div class="kpi-label">Latence P95</div>
+        <div class="kpi-value">0.4</div>
+        <div class="kpi-unit">ms</div>
+      </div>
+      <div class="kpi" style="--accent:var(--yellow)">
+        <div class="kpi-label">Latence max</div>
+        <div class="kpi-value">8.7</div>
+        <div class="kpi-unit">ms</div>
+      </div>
+      <div class="kpi" style="--accent:var(--purple)">
+        <div class="kpi-label">Events émis</div>
+        <div class="kpi-value">12 480</div>
+        <div class="kpi-unit">socket.io emit</div>
+      </div>
+      <div class="kpi" style="--accent:var(--purple)">
+        <div class="kpi-label">Durée session</div>
+        <div class="kpi-value">8.0</div>
+        <div class="kpi-unit">secondes (moy.)</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title"> Latence Socket.io dans le temps (ms)</div>
+        <canvas id="pvpLatency"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">👥 Joueurs créés vs complétés</div>
+        <canvas id="pvpUsers"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">⚡ Volume d'events émis</div>
+        <canvas id="pvpEmits"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="section-title">Détail des métriques — Stress PvP</div>
+      <table>
+        <thead><tr><th>Métrique</th><th>Valeur</th><th>Seuil</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>Latence moyenne</td><td>0.10 ms</td><td>&lt; 100ms</td><td><span class="badge badge-green">✓ Excellent</span></td></tr>
+          <tr><td>Latence P95</td><td>0.40 ms</td><td>&lt; 200ms</td><td><span class="badge badge-green">✓ Excellent</span></td></tr>
+          <tr><td>Latence P99</td><td>0.70 ms</td><td>&lt; 500ms</td><td><span class="badge badge-green">✓ Excellent</span></td></tr>
+          <tr><td>Latence max</td><td>8.70 ms</td><td>&lt; 1000ms</td><td><span class="badge badge-green">✓ OK</span></td></tr>
+          <tr><td>Taux de succès</td><td>100.0%</td><td>&gt; 98%</td><td><span class="badge badge-green">✓ Excellent</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TAB RECONNEXION                                                  -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="tab-reconnect" class="tab-content">
+
+    <div class="kpi-grid">
+      <div class="kpi" style="--accent:var(--orange)">
+        <div class="kpi-label">Sessions créées</div>
+        <div class="kpi-value">760</div>
+        <div class="kpi-unit">virtual users</div>
+      </div>
+      <div class="kpi" style="--accent:var(--orange)">
+        <div class="kpi-label">Sessions complétées</div>
+        <div class="kpi-value">760</div>
+        <div class="kpi-unit">taux : 100.0%</div>
+      </div>
+      <div class="kpi" style="--accent:var(--green)">
+        <div class="kpi-label">Échecs</div>
+        <div class="kpi-value" style="color:var(--green)">0</div>
+        <div class="kpi-unit">aucun ✓</div>
+      </div>
+      <div class="kpi" style="--accent:var(--blue)">
+        <div class="kpi-label">Latence moyenne</div>
+        <div class="kpi-value">0.2</div>
+        <div class="kpi-unit">ms</div>
+      </div>
+      <div class="kpi" style="--accent:var(--blue)">
+        <div class="kpi-label">Latence P95</div>
+        <div class="kpi-value">0.6</div>
+        <div class="kpi-unit">ms</div>
+      </div>
+      <div class="kpi" style="--accent:var(--yellow)">
+        <div class="kpi-label">Latence max</div>
+        <div class="kpi-value">5.6</div>
+        <div class="kpi-unit">ms</div>
+      </div>
+      <div class="kpi" style="--accent:var(--purple)">
+        <div class="kpi-label">Events émis</div>
+        <div class="kpi-value">3 372</div>
+        <div class="kpi-unit">socket.io emit</div>
+      </div>
+      <div class="kpi" style="--accent:var(--purple)">
+        <div class="kpi-label">Durée session</div>
+        <div class="kpi-value">6.6</div>
+        <div class="kpi-unit">secondes (moy.)</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title"> Latence reconnexion dans le temps (ms)</div>
+        <canvas id="recLatency"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">👥 Sessions créées vs complétées</div>
+        <canvas id="recUsers"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">⚡ Volume d'events émis</div>
+        <canvas id="recEmits"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="section-title">Détail des métriques — Reconnexion</div>
+      <table>
+        <thead><tr><th>Métrique</th><th>Valeur</th><th>Seuil</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>Latence moyenne</td><td>0.20 ms</td><td>&lt; 100ms</td><td><span class="badge badge-green">✓ Excellent</span></td></tr>
+          <tr><td>Latence P95</td><td>0.60 ms</td><td>&lt; 200ms</td><td><span class="badge badge-green">✓ Excellent</span></td></tr>
+          <tr><td>Latence P99</td><td>1.00 ms</td><td>&lt; 500ms</td><td><span class="badge badge-green">✓ OK</span></td></tr>
+          <tr><td>Latence max</td><td>5.60 ms</td><td>&lt; 1000ms</td><td><span class="badge badge-green">✓ OK</span></td></tr>
+          <tr><td>Taux de succès</td><td>100.0%</td><td>&gt; 98%</td><td><span class="badge badge-green">✓ Excellent</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TAB COMPARAISON                                                  -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="tab-compare" class="tab-content">
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-card-title pvp">⚔ STRESS PvP</div>
+        <table>
+          <tbody>
+            <tr><td>Parties</td><td>960 créées / 960 complétées</td></tr>
+            <tr><td>Taux succès</td><td>100.0%</td></tr>
+            <tr><td>Latence moy.</td><td>0.10 ms</td></tr>
+            <tr><td>Latence P95</td><td>0.40 ms</td></tr>
+            <tr><td>Latence max</td><td>8.70 ms</td></tr>
+            <tr><td>Events émis</td><td>12 480</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="compare-card">
+        <div class="compare-card-title reconnect">🔌 RECONNEXION</div>
+        <table>
+          <tbody>
+            <tr><td>Sessions</td><td>760 créées / 760 complétées</td></tr>
+            <tr><td>Taux succès</td><td>100.0%</td></tr>
+            <tr><td>Latence moy.</td><td>0.20 ms</td></tr>
+            <tr><td>Latence P95</td><td>0.60 ms</td></tr>
+            <tr><td>Latence max</td><td>5.60 ms</td></tr>
+            <tr><td>Events émis</td><td>3 372</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chart-card full" style="margin-bottom:24px">
+      <div class="chart-title"> Latence moyenne — PvP vs Reconnexion (ms)</div>
+      <canvas id="compareLatency"></canvas>
+    </div>
+
+    <div class="chart-card full" style="margin-bottom:24px">
+      <div class="chart-title">👥 Taux de complétion — PvP vs Reconnexion</div>
+      <canvas id="compareUsers"></canvas>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-title">// VERDICT FINAL</div>
+      <p>
+        <strong style="color:var(--blue)">Stress PvP :</strong>
+        960/960 parties complétées (100.0%) —
+        latence moyenne 0.10ms sur 12 480 events.
+        ✓ Aucun échec.
+        <br/><br/>
+        <strong style="color:var(--orange)">Reconnexion :</strong>
+        760/760 sessions complétées (100.0%) —
+        latence moyenne 0.20ms.
+        ✓ Aucun échec.
+      </p>
+    </div>
+  </div>
+
+  <footer>MineCarte Performance Report · Artillery v2 · Socket.io · 05/03/2026 14:41:30</footer>
+</div>
+
+<script>
+const chartOpts = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'IBM Plex Mono', size: 11 } } } },
+  scales: {
+    x: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: '#1e2d40' } },
+    y: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: '#1e2d40' } }
+  }
+};
+
+// PvP charts
+const pvpLabels = ["T+0s","T+10s","T+20s","T+30s","T+40s","T+50s","T+60s","T+70s","T+80s","T+90s"];
+new Chart(document.getElementById('pvpLatency'), { type: 'line', data: { labels: pvpLabels, datasets: [
+  { label: 'Moyenne', data: [0.3,0.1,0.1,0.2,0.1,0.1,0.1,0.1,0.1,0], borderColor: '#38bdf8', tension: 0.4, borderWidth: 2, pointRadius: 2 },
+  { label: 'P95', data: [0.8,0.4,0.4,0.7,0.4,0.4,0.5,0.4,0.3,0], borderColor: '#a78bfa', tension: 0.4, borderWidth: 2, pointRadius: 2 },
+  { label: 'P99', data: [1.1,0.6,0.6,3.4,0.6,0.6,0.8,0.7,0.5,0], borderColor: '#ffcc00', tension: 0.4, borderWidth: 2, pointRadius: 2 },
+  { label: 'Max', data: [3.7,0.9,0.7,5.4,2,1.1,8.7,5.1,1.6,0], borderColor: '#ff4444', borderDash: [4,4], tension: 0.4, borderWidth: 1, pointRadius: 2 },
+]}, options: chartOpts });
+
+new Chart(document.getElementById('pvpUsers'), { type: 'bar', data: { labels: pvpLabels, datasets: [
+  { label: 'Créés', data: [14,20,20,71,100,100,233,300,102,0], backgroundColor: 'rgba(56,189,248,0.4)', borderColor: '#38bdf8', borderWidth: 1 },
+  { label: 'Complétés', data: [0,18,20,20,86,100,100,272,300,44], backgroundColor: 'rgba(0,255,136,0.4)', borderColor: '#00ff88', borderWidth: 1 },
+  { label: 'Échecs', data: [0,0,0,0,0,0,0,0,0,0], backgroundColor: 'rgba(255,68,68,0.4)', borderColor: '#ff4444', borderWidth: 1 },
+]}, options: chartOpts });
+
+new Chart(document.getElementById('pvpEmits'), { type: 'line', data: { labels: pvpLabels, datasets: [
+  { label: 'Events émis', data: [102,260,260,590,1300,1300,2221,3896,2551,0], borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2 },
+]}, options: chartOpts });
+
+// Reconnexion charts
+const recLabels = ["T+0s","T+10s","T+20s","T+30s","T+40s","T+50s","T+60s","T+70s","T+80s","T+90s"];
+new Chart(document.getElementById('recLatency'), { type: 'line', data: { labels: recLabels, datasets: [
+  { label: 'Moyenne', data: [0.4,0.2,0.2,0.3,0.2,0.2,0.2,0.2,0.2,0.5], borderColor: '#fb923c', tension: 0.4, borderWidth: 2, pointRadius: 2 },
+  { label: 'P95', data: [1,0.6,0.5,0.9,0.6,0.6,0.6,0.6,0.6,0.6], borderColor: '#a78bfa', tension: 0.4, borderWidth: 2, pointRadius: 2 },
+  { label: 'P99', data: [3.4,0.8,0.7,3.7,0.8,0.7,13.1,0.8,0.7,0.6], borderColor: '#ffcc00', tension: 0.4, borderWidth: 2, pointRadius: 2 },
+  { label: 'Max', data: [5.6,1,1.6,4.3,1.6,1.8,4.4,1.3,1.1,0.6], borderColor: '#ff4444', borderDash: [4,4], tension: 0.4, borderWidth: 1, pointRadius: 2 },
+]}, options: chartOpts });
+
+new Chart(document.getElementById('recUsers'), { type: 'bar', data: { labels: recLabels, datasets: [
+  { label: 'Créées', data: [13,20,20,68,100,100,165,200,74,0], backgroundColor: 'rgba(251,146,60,0.4)', borderColor: '#fb923c', borderWidth: 1 },
+  { label: 'Complétées', data: [2,20,22,24,87,97,112,188,181,27], backgroundColor: 'rgba(0,255,136,0.4)', borderColor: '#00ff88', borderWidth: 1 },
+  { label: 'Échecs', data: [0,0,0,0,0,0,0,0,0,0], backgroundColor: 'rgba(255,68,68,0.4)', borderColor: '#ff4444', borderWidth: 1 },
+]}, options: chartOpts });
+
+new Chart(document.getElementById('recEmits'), { type: 'line', data: { labels: recLabels, datasets: [
+  { label: 'Events émis', data: [48,90,101,265,427,418,674,914,429,6], borderColor: '#fb923c', backgroundColor: 'rgba(251,146,60,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 2 },
+]}, options: chartOpts });
+
+// Comparaison charts
+new Chart(document.getElementById('compareLatency'), { type: 'bar', data: {
+  labels: ['Moyenne', 'P95', 'P99', 'Max'],
+  datasets: [
+    { label: '⚔ Stress PvP', data: [0.10, 0.40, 0.70, 8.70], backgroundColor: 'rgba(56,189,248,0.5)', borderColor: '#38bdf8', borderWidth: 2 },
+    { label: '🔌 Reconnexion', data: [0.20, 0.60, 1.00, 5.60], backgroundColor: 'rgba(251,146,60,0.5)', borderColor: '#fb923c', borderWidth: 2 },
+  ]
+}, options: {...chartOpts, scales: {...chartOpts.scales, y: {...chartOpts.scales.y, title:{display:true,text:'ms',color:'#475569'}}}} });
+
+new Chart(document.getElementById('compareUsers'), { type: 'bar', data: {
+  labels: ['Créés', 'Complétés', 'Échecs'],
+  datasets: [
+    { label: '⚔ Stress PvP', data: [960, 960, 0], backgroundColor: 'rgba(56,189,248,0.5)', borderColor: '#38bdf8', borderWidth: 2 },
+    { label: '🔌 Reconnexion', data: [760, 760, 0], backgroundColor: 'rgba(251,146,60,0.5)', borderColor: '#fb923c', borderWidth: 2 },
+  ]
+}, options: chartOpts });
+
+// Tab system
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
