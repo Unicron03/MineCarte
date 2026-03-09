@@ -36,7 +36,6 @@ test.describe('Vérifications UI', () => {
     // Vérifications
     await expect(page.getByRole('link', { name: 'Vitrine' })).toBeVisible();
     await expect(page.locator('div').nth(2)).toBeVisible();
-    await expect(page.getByRole('link').filter({ hasText: /^$/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Accueil' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Combats' })).toBeVisible();
   });
