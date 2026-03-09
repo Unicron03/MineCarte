@@ -43,13 +43,6 @@ export interface CardPVPProps {
     onEquipmentClick?: (equipment: InGameCard) => void;
 }
 
-// Props pour le composant AlertPopup
-export interface AlertPopupProps {
-  message: string | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
 // Props pour le composant CardPVPHand
 export interface CardPVPHandProps {
   card: InGameCard;

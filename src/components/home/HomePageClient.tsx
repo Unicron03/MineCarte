@@ -67,7 +67,7 @@ export default function HomePageClient({
     return (
         <main className="flex flex-col h-screen p-4 tsparticles">
             <header className="flex">
-                <div className="glass-nav">
+                <div className="glass-nav hidden">
                     <Smile className="m-2"/>
                 </div>
 
@@ -105,11 +105,11 @@ export default function HomePageClient({
             </div>
 
             {!isCardOpening && <Footer left={
-                <Link href="/decks" className="glass-nav">
+                <Link href="/" className="glass-nav hidden">
                     <UserStar className="m-2"/>
                 </Link>
             } right={
-                <Link href="/decks" className="glass-nav">
+                <Link href="/decks" className="glass-nav hidden">
                     <Store className="m-2" color="white"/>
                 </Link>
             } />}

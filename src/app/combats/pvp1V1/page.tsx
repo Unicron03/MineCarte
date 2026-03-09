@@ -1,23 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 // --- Composants ---
 import Deck from "@/components/PVP/Deck";
 import CardPVP from "@/components/PVP/CardPVP";
 import LeftPanel from "@/components/PVP/LeftPanel";
-import GameLogs from "@/components/PVP/GameLogs";
+//import GameLogs from "@/components/PVP/GameLogs";
 import EndGameScreen from "@/components/PVP/EndGameScreen";
 import LoadingScreen from "@/components/PVP/LoadingScreen";
 import PlayerHand from "@/components/PVP/PlayerHand";
-import AlertPopup from "@/components/PVP/AlertPopup";
 import EffectDetailsModal from "@/components/PVP/EffectDetailsModal";
 import TurnIndicator from "@/components/PVP/TurnIndicator";
 
 // --- Lib ---
 import { getSocket, closeSocket } from "@/client/sockets/socket"; 
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 // --- Hooks ---
 import { useGameLogic } from "@/client/functions/useGameLogic";
@@ -39,6 +40,9 @@ export default function GamePage() {
     // On récupère les infos de base, mais on va surcharger la logique d'attaque
     const { endGameResult, endGameData, gameState, logs, yourTurn, me, opponent, playCard, endTurn, quitHandler } = useGameLogic(formattedDeck);
     
+    // Ref pour suivre la longueur des logs et ne toaster que les nouveaux
+    const prevLogsLength = useRef(logs.length);
+
     const router = useRouter(); 
     const socket = getSocket();
 
@@ -54,9 +58,6 @@ export default function GamePage() {
         message: string;
         targets: (InGameCard & { boardIndex: number })[] 
     } | null>(null);
-
-    // --- État pour les alertes ---
-    const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
      // --- État pour la modale de détails (Effets/Equipements) ---
     const [detailsModal, setDetailsModal] = useState<{
@@ -148,27 +149,7 @@ export default function GamePage() {
         // --- Écoute des erreurs serveur ---
         socket.on("error", (data: { message: string } | string) => {
             const msg = typeof data === 'string' ? data : data.message;
-            setAlertMessage(msg || "Une erreur est survenue.");
-        });
-
-        // --- Écoute des logs pour afficher les alertes (ex: Pas assez d'énergie) ---
-        socket.on("log", (message: string) => {
-            // On filtre les messages qui semblent être des erreurs ou des avertissements
-            const lowerMsg = message.toLowerCase();
-            if (
-                lowerMsg.includes("Pas assez d'énergie") ||
-                lowerMsg.includes("pas assez") ||
-                lowerMsg.includes("Pas assez") ||
-                lowerMsg.includes("plus assez") ||
-                lowerMsg.includes("énergie insuffisante") ||
-                lowerMsg.includes("energie insuffisante") ||
-                lowerMsg.includes("impossible") ||
-                lowerMsg.includes("erreur") ||
-                lowerMsg.includes("ne pouvez pas") ||
-                lowerMsg.includes("doit avoir")
-            ) {
-                setAlertMessage(message);
-            }
+            toast.error(msg || "Une erreur est survenue.");
         });
 
         return () => {
@@ -176,9 +157,38 @@ export default function GamePage() {
             socket.off("selectAllyTarget");
             socket.off("selectEnemyTarget");
             socket.off("error");
-            socket.off("log");
         };
     }, [socket]);
+
+    // --- Effet pour afficher les toasts basés sur les logs (Server + Local) ---
+    useEffect(() => {
+        if (logs.length > prevLogsLength.current) {
+            // On récupère uniquement les nouveaux messages
+            const newMessages = logs.slice(prevLogsLength.current);
+            
+            newMessages.forEach((message) => {
+                const lowerMsg = message.toLowerCase();
+
+                // Mots-clés pour les messages d'erreur
+                const errorKeywords = [
+                    "pas assez", "plus assez", "énergie insuffisante", "energie insuffisante", 
+                    "impossible", "erreur", "ne pouvez pas", "doit avoir", "déjà attaqué", 
+                    "aucune cible", "devez avoir"
+                ];
+
+                // Mots-clés pour les messages d'information
+                const infoKeywords = ["rejoint", "quitté"];
+
+                if (errorKeywords.some(keyword => lowerMsg.includes(keyword))) {
+                    toast.error(message);
+                } else if (infoKeywords.some(keyword => lowerMsg.includes(keyword))) {
+                    toast.info(message);
+                }
+            });
+        }
+        // Mise à jour de la référence
+        prevLogsLength.current = logs.length;
+    }, [logs]);
 
     // --- Sécurité : Réinitialiser la sélection si le tour se termine (ex: timeout) ---
     useEffect(() => {
@@ -346,6 +356,9 @@ export default function GamePage() {
 
     return (
         <div style={{ backgroundImage: "url('/img/backgroundPVP.jpg')" }} className="relative h-screen w-full bg-cover bg-center bg-no-repeat overflow-hidden flex flex-row justify-between p-4" > 
+            {/* Conteneur pour les notifications (react-toastify) */}
+            <ToastContainer position="top-center" theme="dark" autoClose={4000} />
+
             {/* --- INDICATEUR DE TOUR --- */}
             <TurnIndicator isMyTurn={yourTurn} />
 
@@ -361,7 +374,7 @@ export default function GamePage() {
             <div className="flex-1 flex flex-col items-center justify-between">
 
                 {/* Logs en haut à droite */}
-                <GameLogs logs={logs} />
+                {/* <GameLogs logs={logs} /> */} {/* Affichage des logs*/}
             
                 {/* Zone adversaire */}
                 <div className="w-full flex flex-col items-center ">
@@ -496,7 +509,7 @@ export default function GamePage() {
                     className={`absolute right-6 top-1/2 -translate-y-1/2 font-bold text-xl px-8 py-4 rounded-xl border-2 shadow-2xl transition-all z-50 ${
                         (selectionMode !== 'none' || selectionModalData?.show)
                             ? "bg-gray-600 border-gray-500 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white border-yellow-400 hover:scale-110"
+                            : "bg-linear-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white border-yellow-400 hover:scale-110"
                     }`}
                     onClick={(selectionMode !== 'none' || selectionModalData?.show) ? undefined : endTurn}
                     disabled={selectionMode !== 'none' || (selectionModalData?.show ?? false)}
@@ -521,13 +534,6 @@ export default function GamePage() {
                     }
                 />
             )}
-
-            {/* --- POPUP D'ALERTE --- */}
-            <AlertPopup
-                isOpen={!!alertMessage}
-                message={alertMessage}
-                onClose={() => setAlertMessage(null)}
-            />
 
             {/* --- MODALE DÉTAILS EFFET/EQUIPEMENT --- */}
             {detailsModal && (

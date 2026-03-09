@@ -1,7 +1,7 @@
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import InfoPanel from "@/components/InfoPanel";
 import Footer from "@/components/Footer";
-import { Store } from "lucide-react";
+// import { Store } from "lucide-react";
 import CardPopupDetails from "@/components/cards/card-popup-details";
 import { Star } from "lucide-react";
 import Link from "next/link";
@@ -53,11 +53,13 @@ export default async function Collection() {
                 </HorizontalScroll>
             </div>
 
-            <Footer right={
-                <Link href="/decks" className="glass-nav">
-                    <Store className="m-2" color="white"/>
-                </Link>
-            } />
+            <Footer
+                // right={
+                //     <Link href="/decks" className="glass-nav">
+                //         <Store className="m-2" color="white"/>
+                //     </Link>
+                // }
+            />
         </main>
     );
 }

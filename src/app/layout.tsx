@@ -5,6 +5,13 @@ import "atropos/css";
 import '@smastrom/react-rating/style.css'
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ToastContainer } from "react-toastify";
+import { Alfa_Slab_One } from "next/font/google";
+
+const alfaSlabOne = Alfa_Slab_One({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-alfa-slab-one",
+});
 
 export default function RootLayout({
     children,
@@ -12,7 +19,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="fr" suppressHydrationWarning>
+        <html lang="fr" suppressHydrationWarning className={alfaSlabOne.variable}>
             <body>
                 <ThemeProvider
                     attribute="class"

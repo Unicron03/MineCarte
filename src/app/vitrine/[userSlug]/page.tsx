@@ -25,7 +25,7 @@ export default async function ShowcasePage({ params }: { params: Promise<{ userS
                 <div className="flex gap-4 justify-center">
                     <span className="text-3xl font-medium">Vitrine de {stats?.name}</span>
 
-                    <div className="glass-nav flex items-center gap-2 cursor-pointer">
+                    <div className="glass-nav flex items-center gap-2 cursor-pointer hidden">
                         <Heart />
                         <span>J&apos;aime</span>
                     </div>

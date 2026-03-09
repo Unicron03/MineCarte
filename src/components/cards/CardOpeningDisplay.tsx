@@ -82,6 +82,29 @@ export default function CardOpeningDisplay({ drawnCards, onClose }: CardOpeningD
                                 transform: `translate(-51.5%, -50%)${index > currentCardIndex ? ` translateY(${10 * (index - currentCardIndex)}px)` : ''}${index === currentCardIndex ? ' scale(1.25)' : ' scale(1)'}`
                             }}
                         >
+                            {/* Nom de la carte qui apparaît au-dessus quand elle est retournée */}
+                            <div 
+                                className={`
+                                    absolute -top-16 left-1/2 -translate-x-1/2 
+                                    px-4 py-2 rounded-lg
+                                    bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-sm
+                                    border-2 ${
+                                        card.rarity === 3 ? 'border-yellow-500' : 
+                                        card.rarity === 2 ? 'border-purple-500' : 
+                                        card.rarity === 1 ? 'border-blue-500' : 
+                                        'border-gray-500'
+                                    }
+                                    text-white text-lg font-bold whitespace-nowrap
+                                    shadow-lg shadow-black/50
+                                    transition-all duration-500 ease-out
+                                    ${flipped[index] && index === currentCardIndex 
+                                        ? 'opacity-100 translate-y-0 scale-100' 
+                                        : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'}
+                                `}
+                            >
+                                {card.name}
+                            </div>
+
                             <div
                                 className={`flip-card ${flipped[index] ? 'is-flipped' : ''}`}
                                 onClick={() => !flipped[index] && handleFlip(index)}

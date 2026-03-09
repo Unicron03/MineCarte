@@ -4,6 +4,7 @@ import Atropos from "atropos/react";
 import Image from "next/image";
 import { Card } from "@/components/utils/types";
 import { useEffect, useState, forwardRef, HTMLAttributes } from "react";
+import GoldenParticles from "../particles/golden-particles";
 
 interface AtroposCardProps extends HTMLAttributes<HTMLDivElement> {
     card: Card;
@@ -34,6 +35,7 @@ const AtroposCard = forwardRef<HTMLDivElement, AtroposCardProps>(({ card, isPuls
                         className="absolute pulsate-gold top-0 left-0 z-30 w-full h-full"
                     />
                 )}
+                { card.rarity === 3 && <GoldenParticles className="absolute inset-0 w-full h-full z-20" />}
 
                 <Image
                     className="atropos-banner-spacer"

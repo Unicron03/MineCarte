@@ -76,13 +76,13 @@ export default async function Profile() {
 
                 <div className="flex flex-col gap-4">
                     <span className="font-medium text-2xl">Compte</span>
-                    <button className="glass-nav w-120 !py-4 !px-6 after:!rounded-lg !rounded-lg flex flex-col items-start">
+                    <button className="glass-nav w-120 !py-4 !px-6 after:!rounded-lg !rounded-lg flex flex-col items-start hidden">
                         <span className="font-medium">Modifier le mot de passe</span>
                     </button>
                     <DeleteUserDialog userId={userId} />
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 hidden">
                     <span className="font-medium text-2xl">Amis</span>
                     <button className="glass-nav w-120 !py-4 !px-6 after:!rounded-lg !rounded-lg flex flex-col items-start">
                         <span className="font-medium">Demandes en cours</span>
