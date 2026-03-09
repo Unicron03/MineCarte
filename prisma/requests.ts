@@ -138,10 +138,10 @@ export async function getUserFavoriteCards(userId?: string) {
 // Fonction pour tirer une carte selon les probabilités de rareté
 function getRandomRarity(): number {
     const random = Math.random() * 100;
-    
+
     if (random < 85) {
         return 1; // Commune (85%)
-    } else if (random < 97) { // 85 + 12
+    } else if (random < 97) {
         return 2; // Rare (12%)
     } else {
         return 3; // Légendaire (3%)
@@ -154,52 +154,65 @@ type DrawnCard = Prisma.cardsGetPayload<Record<string, never>> & {
     favorite: boolean;
 };
 
-// Version optimisée - charge toutes les cartes une seule fois
 export async function drawCards(userId: string, amount: number): Promise<DrawnCard[]> {
-    // Récupérer toutes les cartes par rareté en une seule fois
+    // Permet d'obtenir toujours une gold et une légendaire dans chaque coffre
+    const cheat: boolean = false;
+
     const allCards = await prisma.cards.findMany({
         orderBy: { id: 'asc' }
     });
-    
-    // Grouper par rareté
+
     const cardsByRarity = {
         1: allCards.filter(c => c.rarity === 1),
         2: allCards.filter(c => c.rarity === 2),
         3: allCards.filter(c => c.rarity === 3)
     };
-    
+
     const drawnCards: DrawnCard[] = [];
-    
+
+    let forcedRareUsed = false;
+    let forcedLegendaryUsed = false;
+
     for (let i = 0; i < amount; i++) {
-        const rarity = getRandomRarity();
+
+        let rarity = getRandomRarity();
+
+        if (cheat) {
+            if (!forcedRareUsed && i === amount - 2) {
+                rarity = 2;
+                forcedRareUsed = true;
+            }
+
+            if (!forcedLegendaryUsed && i === amount - 1) {
+                rarity = 3;
+                forcedLegendaryUsed = true;
+            }
+        }
+
         const cardsOfRarity = cardsByRarity[rarity as 1 | 2 | 3];
-        
+
         if (cardsOfRarity.length === 0) {
             throw new Error(`No cards found with rarity ${rarity}`);
         }
-        
-        // Sélectionner une carte au hasard
+
         const randomCard = cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)];
-        
-        // Vérifier si l'utilisateur possède déjà cette carte
+
         const existingCard = await prisma.collection.findFirst({
             where: {
                 user_id: userId,
                 card_id: randomCard.id
             }
         });
-        
+
         let newQuantity: number;
-        
+
         if (existingCard) {
-            // Incrémenter la quantité
             const updated = await prisma.collection.update({
                 where: { id: existingCard.id },
                 data: { quantity: existingCard.quantity + 1 }
             });
             newQuantity = updated.quantity;
         } else {
-            // Ajouter la carte à la collection
             await prisma.collection.create({
                 data: {
                     user_id: userId,
@@ -210,7 +223,7 @@ export async function drawCards(userId: string, amount: number): Promise<DrawnCa
             });
             newQuantity = 1;
         }
-        
+
         drawnCards.push({
             ...randomCard,
             isNew: !existingCard,
@@ -218,7 +231,7 @@ export async function drawCards(userId: string, amount: number): Promise<DrawnCa
             favorite: existingCard ? existingCard.favorite : false
         });
     }
-    
+
     return drawnCards;
 }
 
