@@ -18,16 +18,10 @@ import { Eye, EyeOff } from "lucide-react"
 import { toast } from "react-toastify"
 import { useRouter } from "next/navigation"
 import { ConnexionForm, connexionSchema } from "@/components/utils/schema"
-import { createAuthClient } from "better-auth/react";
+import { signIn } from "@/lib/auth-client";
 import { useState } from "react"
 import { useAuthPanel } from "./AuthPanelContext"
 import Image from "next/image";
-
-const authClient = createAuthClient({
-    baseURL: typeof window !== "undefined" && window.location.hostname !== "localhost"
-        ? "https://www.minecarte.fr"
-        : "http://localhost:3000",
-});
 
 export function ConnectionPanel() {
     const router = useRouter()
@@ -47,7 +41,7 @@ export function ConnectionPanel() {
         setIsLoading(true)
 
         try {
-            const { error } = await authClient.signIn.email({
+            const { error } = await signIn.email({
                 email: values.email,
                 password: values.password,
             })
