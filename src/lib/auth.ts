@@ -9,7 +9,9 @@ export const auth = betterAuth({
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
     trustedOrigins: [
         process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "http://localhost:3000", // Garde localhost pour le dev local
+        "https://www.minecarte.fr",  // Votre domaine production
+        "https://minecarte.fr",       // Sans www
+        "http://localhost:3000",      // Dev local
     ],
     
     emailAndPassword: { 
