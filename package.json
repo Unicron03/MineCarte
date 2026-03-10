@@ -6,6 +6,7 @@
     "dev": "concurrently -k -n NEXT,WS -c blue,magenta \"next dev\" \"ts-node --project tsconfig.server.json server.ts\"",
     "build": "next build",
     "start": "next start",
+    "start:websocket": "npx tsx server.ts",
     "test:setup": "npx tsx scripts/test-setup.ts",
     "test:teardown": "npx tsx scripts/test-teardown.ts",
     "test:e2e": "npm run test:setup && npx playwright test && npm run test:teardown",

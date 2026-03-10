@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+
+# Installer TOUTES les dépendances (y compris devDependencies pour tsx)
+RUN npm install
+
+# Copier le reste du code source
+COPY . .
+
+# Générer le client Prisma
+RUN npx prisma generate
+
+# Démarrer le serveur WebSocket avec tsx (exécution TypeScript native)
+CMD ["npx", "tsx", "server.ts"]
