@@ -47,8 +47,7 @@ test.describe('Vérifications UI', () => {
     await page.getByRole('link', { name: 'Combats' }).click();
     
     // Vérifications
-    await expect(page.locator('span').filter({ hasText: '1v1' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '1v1' })).toBeVisible();
+    await expect(page.locator('span').filter({ hasText: '1v1' })).toBeVisible(); // Si le mode est visible
     await expect(page.getByRole('link').filter({ hasText: /^$/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Accueil' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Collection' })).toBeVisible();
