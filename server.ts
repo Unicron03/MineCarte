@@ -26,18 +26,29 @@ type EnhancedDeck = EnhancedInGameCard[];
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
-  cors: { origin: "*" },
+  cors: { 
+    origin: [
+      "http://localhost:3000",
+      "https://www.minecarte.fr",
+      "https://minecarte.fr",
+      process.env.NEXT_PUBLIC_APP_URL || "*"
+    ].filter(Boolean),
+    credentials: true
+  },
+  transports: ["websocket", "polling"], // polling en fallback
 });
 
 // --- Configuration ---
 const CHECK_INTERVAL_MS = 3000;
 const GRACE_MS = 5000;
+const ACTION_RETRY_INTERVAL_MS = 15000;
 let waitingPlayer: { socketId: string; token: string; userId?: string; deck: InGameCard[] } | null = null;
 const rooms: Map<string, GameState> = new Map();
 const userToRoom: Map<string, { roomId: string; playerIndex: number }> = new Map();
 
 // --- Actions globales (chargées depuis Prisma) ---
 let actionList: Action[] = [];
+let isReloadingActions = false;
 
 // --- Fonction pour charger les actions depuis l'API interne (Prisma) ---
 async function loadActionsFromAPI(): Promise<Action[]> {
@@ -72,6 +83,33 @@ async function loadActionsFromAPI(): Promise<Action[]> {
   }
 }
 
+// Recharge la liste des actions quand elle est vide (ex: app pas encore prête au boot)
+async function refreshActions(reason: string, broadcastToClients: boolean = false): Promise<void> {
+  if (isReloadingActions || actionList.length > 0) {
+    return;
+  }
+
+  isReloadingActions = true;
+  try {
+    console.log(`[Server] Tentative de rechargement des actions (${reason})...`);
+    const actions = await loadActionsFromAPI();
+
+    if (actions.length === 0) {
+      console.warn("[Server] Rechargement des actions échoué, nouvelle tentative plus tard.");
+      return;
+    }
+
+    actionList = actions;
+    console.log(`[Server] Actions rechargées avec succès: ${actionList.length}`);
+
+    if (broadcastToClients) {
+      io.emit("actionList", actionList);
+    }
+  } finally {
+    isReloadingActions = false;
+  }
+}
+
 // --- Initialisation des actions au démarrage ---
 async function initializeServer() {
   console.log('[Server] Initialisation du serveur WebSocket...');
@@ -87,12 +125,23 @@ async function initializeServer() {
     console.warn('[Server]     3. L\'API /api/actions fonctionne');
   }
 
+  // Tant que la liste est vide, on réessaie périodiquement.
+  setInterval(() => {
+    if (actionList.length === 0) {
+      void refreshActions("interval", true);
+    }
+  }, ACTION_RETRY_INTERVAL_MS);
+
   // --- Gestion des connexions ---
   io.on("connection", (socket: Socket) => {
     console.log("CONNECT:", socket.id);
 
     // ENVOI DES ACTIONS AU CLIENT À LA CONNEXION
     socket.emit("actionList", actionList);
+
+    if (actionList.length === 0) {
+      void refreshActions(`connexion ${socket.id}`, true);
+    }
 
     // --- Quand un joueur s'enregistre ---
     socket.on("registerUser", ({ userId, dbUserId, deck }: { userId: string, dbUserId?: string, deck?: EnhancedDeck }) => {
@@ -217,8 +266,9 @@ async function initializeServer() {
   }, CHECK_INTERVAL_MS);
 
   // --- Lancement du serveur WebSocket ---
-  httpServer.listen(3002, () => {
-    console.log("Serveur WebSocket prêt sur http://localhost:3002");
+  const websocketPort = Number(process.env.PORT || 3002);
+  httpServer.listen(websocketPort, () => {
+    console.log(`Serveur WebSocket prêt sur http://localhost:${websocketPort}`);
     console.log(`${actionList.length} actions disponibles (depuis Prisma)`);
   });
 }
