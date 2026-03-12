@@ -58,3 +58,13 @@ docker compose up --build -d
 ```
 ./init-build-test.bat
 ```
+
+## Compte de tests (nécessite le ./init-build-test)
+
+1. Compte ayant toutes les cartes du jeu
+Identifiant : enzo@gmail.com
+MDP : azertyuiop
+
+2. Compte ayant quelques cartes du jeu
+Identifiant : john.doe@prisma.io
+MDP : azertyuiop
