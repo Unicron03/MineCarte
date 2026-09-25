@@ -7,7 +7,7 @@
 
 ## 📊 Coverage
 
-Consulte la couverture de code sur [Codecov](https://codecov.io/gh/Unicron03/MineCarte)
+Consulte la couverture de code sur [Codecov](https://codecov.io/gh/Unicron03/MineCarte).
 
 ## 🧪 Tests
 
